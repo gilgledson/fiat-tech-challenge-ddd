@@ -1,0 +1,36 @@
+quarkus:
+  # Configurações do Servidor Web
+  swagger-ui:
+    always-include: true
+  http:
+    port: 8080
+
+  # Configurações do Banco de Dados (PostgreSQL)
+  datasource:
+    db-kind: postgresql
+    username: postgres
+    password: postgres
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/oficina
+
+  # Configurações do Hibernate (Desligado para o Flyway assumir)
+  hibernate-orm:
+    database:
+      generation: none
+
+  # Configurações do Flyway (Migrations)
+  flyway:
+    migrate-at-start: true
+
+  # Configuração da extensão de Segurança (SmallRye JWT)
+  smallrye-jwt:
+    enabled: true
+
+# Configurações do MicroProfile JWT (Padrão de mercado)
+mp:
+  jwt:
+    verify:
+      # Quem está emitindo esse token? (Isso será validado nas requisições)
+      issuer: "https://oficina.fiap.com.br"
+      # Onde fica a chave pública para validar a assinatura do token
+      # publickey-location: "publicKey.pem"
