@@ -122,32 +122,30 @@ O schema é versionado via **Flyway** com migrations incrementais:
 
 - Java 17+
 - Maven 3.8+
-- Docker (para o PostgreSQL)
+- Docker & Docker Compose
 
-### 1. Suba o banco de dados com Docker
+### 1. Build do Pacote
 
-```bash
-docker run --name oficina-db \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=oficina \
-  -p 5432:5432 \
-  -d postgres:15
-```
-
-### 2. Execute a aplicação em modo desenvolvimento
+Gere o artefato da aplicação ignorando os testes unitários:
 
 ```bash
-./mvnw quarkus:dev
+./mvnw clean package -DskipTests
 ```
 
-> A aplicação estará disponível em: `http://localhost:8080`
+### 2. Subir o ambiente com Docker Compose
+
+Com o pacote gerado, inicie os containers do banco de dados e da API:
+
+```bash
+docker-compose up -d
+```
+
+> A aplicação estará disponível em: `http://localhost:8383`
 
 ### 3. Acesse o Swagger UI
 
-```
-http://localhost:8080/q/swagger-ui
-```
+A documentação completa da API pode ser acessada em:
+[http://localhost:8383/q/swagger-ui/#/](http://localhost:8383/q/swagger-ui/#/)
 
 ---
 
