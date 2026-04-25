@@ -1,8 +1,10 @@
+![Coverage](.github/badges/jacoco.svg)
+
 # 🔧 Oficina API
 
 > API RESTful para gestão de uma **Oficina Mecânica**, desenvolvida como parte do **Tech Challenge da FIAP**, aplicando os princípios de **Domain-Driven Design (DDD)** e **Clean Architecture**.
 
-![Coverage](.github/badges/jacoco.svg)
+
 
 ---
 
