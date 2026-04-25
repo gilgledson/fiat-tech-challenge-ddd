@@ -1,0 +1,44 @@
+name: CI - Testes e Cobertura
+
+# A pipeline vai rodar sempre que houver um Push na branch main
+# ou quando alguém abrir um Pull Request
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-and-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 1. Baixar o código do repositório
+      uses: actions/checkout@v4
+
+    - name: 2. Configurar o Java (JDK 21)
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17' 
+        distribution: 'temurin'
+        cache: maven
+
+    - name: 3. Rodar Testes e Gerar Relatório JaCoCo
+      run: mvn clean test
+
+    - name: 4. Ler o JaCoCo e Gerar a Medalha (Badge)
+      id: jacoco
+      uses: cicirello/jacoco-badge-generator@v2
+      with:
+        generate-branches-badge: false
+        jacoco-csv-file: target/site/jacoco/jacoco.csv
+        badges-directory: .github/badges
+
+    - name: 5. Salvar a Medalha no Repositório
+      if: github.event_name == 'push'
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add .github/badges/jacoco.svg
+        git commit -m "chore: Atualizando badge de cobertura de testes [skip ci]" || echo "Nenhuma mudança na cobertura"
+        git push
