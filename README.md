@@ -223,19 +223,19 @@ O projeto conta com testes **unitários puros** (sem dependência do container Q
 
 ### Suites de teste
 
-| Suite | Cenários | Descrição |
-|---|---|---|
-| `ProdutoTest` | 10 | Validações do domínio da entidade Produto |
-| `CadastrarProdutoUseCaseTest` | 2 | Cadastro de produto (sucesso e duplicidade) |
-| `EditarProdutoUseCaseTest` | 2 | Edição de produto (sucesso e not found) |
-| `AtivarInativarProdutoUseCaseTest` | 6 | Ciclo de vida do produto |
-| `CadastrarServicoUseCaseTest` | 2 | Cadastro de serviço com e sem produtos sugeridos |
-| `CadastrarClienteUseCaseTest` | 3 | Cadastro de cliente (sucesso, CPF duplicado, usuário duplicado) |
-| `EditarClienteUseCaseTest` | 2 | Edição de cliente |
-| `AtivarInativarClienteUseCaseTest` | 5 | Ciclo de vida do cliente |
-| `VeiculoTest` | 9 | Validações do domínio da entidade Veículo |
-| `CadastrarVeiculoUseCaseTest` | 2 | Cadastro de veículo (sucesso e placa duplicada) |
-| **Total** | **43** | |
+| Módulo | Suite | Cenários | Descrição |
+|---|---|---|---|
+| **Produtos** | `ProdutoTest` | 10 | Regras de domínio e validações |
+| | `UseCaseTests` | 11 | Cadastrar, Editar, Deletar, Ativar, Listar |
+| **Serviços** | `ServicoTest` | 9 | Regras de domínio e validações |
+| | `UseCaseTests` | 9 | Cadastrar, Editar, Deletar, Ativar, Listar |
+| | `Mappers/Validators` | 7 | Mapeamento DTO e validação de insumos |
+| **Clientes** | `EnderecoTest` | 2 | Value Object de Endereço |
+| | `UseCaseTests` | 13 | Cadastrar, Editar, Deletar, Ativar, Listar |
+| **Veículos** | `VeiculoTest` | 9 | Regras de domínio e validações |
+| | `UseCaseTests` | 9 | Cadastrar, Editar, Deletar, Ativar, Listar |
+| **Shared** | `PaginaTest` | 1 | Utilitário de paginação |
+| **Total** | | **80** | |
 
 ---
 
