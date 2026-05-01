@@ -33,7 +33,7 @@ public class ConcluirExecucaoOrdemDeServicoUseCaseImpl implements ConcluirExecuc
 
         // Valida se todos os serviços foram concluídos
         boolean todosServicosFinalizados = ordem.getServicos().stream()
-                .allMatch(s -> s.getStatus() == OrdemDeServicoServicoStatus.FINALIZADA);
+                .allMatch(s -> s.getStatus() == OrdemDeServicoServicoStatus.FINALIZADO);
 
         if (!todosServicosFinalizados) {
             throw new IllegalArgumentException(

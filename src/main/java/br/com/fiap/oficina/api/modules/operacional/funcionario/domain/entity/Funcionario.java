@@ -38,6 +38,9 @@ public class Funcionario {
     }
 
     public void atualizar(Funcionario funcionario) {
+        if (!this.ativo) {
+            throw new IllegalArgumentException("Não é possível atualizar um funcionário inativo");
+        }
         if (funcionario.getNome() != null) {
             this.nome = funcionario.getNome();
         }

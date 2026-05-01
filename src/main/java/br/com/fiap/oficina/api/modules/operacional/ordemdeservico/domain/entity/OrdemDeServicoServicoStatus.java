@@ -2,20 +2,20 @@ package br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity
 
 public enum OrdemDeServicoServicoStatus {
 
-    ABERTA,
     PENDENTE,
-    ORCAMENTO,
-    AGUARDANDO_APROVACAO,
     APROVADO,
-    REPROVADO,
     EM_EXECUCAO,
-    FINALIZADA,
-    CANCELADO;
+    REJEITADO,
+    FINALIZADO;
 
     public static OrdemDeServicoServicoStatus fromString(String status) {
         if (status == null || status.isBlank()) {
             return null;
         }
-        return OrdemDeServicoServicoStatus.valueOf(status.toUpperCase());
+        try {
+            return OrdemDeServicoServicoStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }

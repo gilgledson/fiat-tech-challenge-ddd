@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.TipoServico;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -18,7 +19,9 @@ public record ServicoOrcamentoRequest(
 
                 @Min(value = 1, message = "A quantidade deve ser maior que zero") @Schema(description = "Quantidade de vezes que o serviço será executado", defaultValue = "1") int quantidade,
 
-                @NotNull(message = "O valor unitário é obrigatório") @DecimalMin(value = "0.01", message = "O valor unitário deve ser maior que zero") @Schema(description = "Valor cobrado por cada execução do serviço", defaultValue = "150.00") @JsonProperty("valor_unitario") BigDecimal valorUnitario) {
+                @NotNull(message = "O valor unitário é obrigatório") @DecimalMin(value = "0.01", message = "O valor unitário deve ser maior que zero") @Schema(description = "Valor cobrado por cada execução do serviço", defaultValue = "150.00") @JsonProperty("valor_unitario") BigDecimal valorUnitario,
+                
+                @NotNull(message = "O tipo de serviço é obrigatório") @Schema(description = "Tipo de serviço (CORRETIVO ou PREVENTIVO)", defaultValue = "PREVENTIVO") TipoServico tipo) {
         public BigDecimal calcularTotal() {
                 return valorUnitario.multiply(BigDecimal.valueOf(quantidade));
         }

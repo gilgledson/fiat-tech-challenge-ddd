@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.Duration;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.TipoServico;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,13 +20,14 @@ public class OrdemDeServicoServicos {
     private BigDecimal precoUnitario;
     private BigDecimal total;
     private OrdemDeServicoServicoStatus status;
+    private TipoServico tipo;
     private LocalDateTime dataInicioExecucao;
     private LocalDateTime dataFimExecucao;
     private UUID usuarioExecutorId;
 
     public OrdemDeServicoServicos() {}
 
-    public OrdemDeServicoServicos(UUID ordemDeServicoId, UUID servicoId, String nome, int quantidade, BigDecimal precoUnitario, BigDecimal total, OrdemDeServicoServicoStatus status) {
+    public OrdemDeServicoServicos(UUID ordemDeServicoId, UUID servicoId, String nome, int quantidade, BigDecimal precoUnitario, BigDecimal total, OrdemDeServicoServicoStatus status, TipoServico tipo) {
         this.ordemDeServicoId = ordemDeServicoId;
         this.servicoId = servicoId;
         this.nome = nome;
@@ -33,9 +35,10 @@ public class OrdemDeServicoServicos {
         this.precoUnitario = precoUnitario;
         this.total = total;
         this.status = status;
+        this.tipo = tipo;
     }
 
-    public OrdemDeServicoServicos(UUID ordemDeServicoId, UUID servicoId, String nome, int quantidade, BigDecimal precoUnitario, BigDecimal total, OrdemDeServicoServicoStatus status, LocalDateTime dataInicioExecucao, LocalDateTime dataFimExecucao, UUID usuarioExecutorId) {
+    public OrdemDeServicoServicos(UUID ordemDeServicoId, UUID servicoId, String nome, int quantidade, BigDecimal precoUnitario, BigDecimal total, OrdemDeServicoServicoStatus status, TipoServico tipo, LocalDateTime dataInicioExecucao, LocalDateTime dataFimExecucao, UUID usuarioExecutorId) {
         this.ordemDeServicoId = ordemDeServicoId;
         this.servicoId = servicoId;
         this.nome = nome;
@@ -43,6 +46,7 @@ public class OrdemDeServicoServicos {
         this.precoUnitario = precoUnitario;
         this.total = total;
         this.status = status;
+        this.tipo = tipo;
         this.dataInicioExecucao = dataInicioExecucao;
         this.dataFimExecucao = dataFimExecucao;
         this.usuarioExecutorId = usuarioExecutorId;

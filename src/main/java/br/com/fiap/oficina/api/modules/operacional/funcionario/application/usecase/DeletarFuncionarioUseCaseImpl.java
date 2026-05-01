@@ -14,9 +14,10 @@ public class DeletarFuncionarioUseCaseImpl implements DeletarFuncionarioUseCase 
 
     @Override
     public void executar(UUID id) {
-        repository.buscarPorId(id)
+        var funcionario = repository.buscarPorId(id)
                 .orElseThrow(() -> new NotFoundException("Funcionário não encontrado"));
 
-        repository.deletar(id);
+        funcionario.desativar();
+        repository.atualizar(funcionario);
     }
 }

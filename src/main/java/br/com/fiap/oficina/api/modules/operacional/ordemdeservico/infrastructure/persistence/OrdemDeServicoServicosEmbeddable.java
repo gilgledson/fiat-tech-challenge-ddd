@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicos;
+import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.TipoServico;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,9 @@ public class OrdemDeServicoServicosEmbeddable {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "tipo")
+    private String tipo;
+
     @Column(name = "data_inicio_execucao")
     private java.time.LocalDateTime dataInicioExecucao;
 
@@ -57,6 +61,7 @@ public class OrdemDeServicoServicosEmbeddable {
         servicoJpa.setQuantidade(servico.getQuantidade());
         servicoJpa.setValorTotal(servico.getTotal());
         servicoJpa.setStatus(servico.getStatus().name());
+        servicoJpa.setTipo(servico.getTipo().name());
         servicoJpa.setDataInicioExecucao(servico.getDataInicioExecucao());
         servicoJpa.setDataFimExecucao(servico.getDataFimExecucao());
         servicoJpa.setUsuarioExecutorId(servico.getUsuarioExecutorId());
@@ -72,6 +77,7 @@ public class OrdemDeServicoServicosEmbeddable {
         servico.setPrecoUnitario(this.valorUnitario);
         servico.setTotal(this.valorTotal);
         servico.setStatus(OrdemDeServicoServicoStatus.fromString(this.status));
+        servico.setTipo(TipoServico.valueOf(this.tipo));
         servico.setDataInicioExecucao(this.dataInicioExecucao);
         servico.setDataFimExecucao(this.dataFimExecucao);
         servico.setUsuarioExecutorId(this.usuarioExecutorId);

@@ -29,14 +29,16 @@ class DeletarFuncionarioUseCaseTest {
     }
 
     @Test
-    @DisplayName("Deve deletar funcionário permanentemente")
-    void deveDeletarPermanente() {
+    @DisplayName("Deve desativar funcionário")
+    void deveDesativarFuncionario() {
         UUID id = UUID.randomUUID();
-        when(repository.buscarPorId(id)).thenReturn(Optional.of(Mockito.mock(Funcionario.class)));
+        Funcionario funcionario = Mockito.mock(Funcionario.class);
+        when(repository.buscarPorId(id)).thenReturn(Optional.of(funcionario));
 
         useCase.executar(id);
 
-        verify(repository, times(1)).deletar(id);
+        verify(funcionario, times(1)).desativar();
+        verify(repository, times(1)).atualizar(funcionario);
     }
 
     @Test

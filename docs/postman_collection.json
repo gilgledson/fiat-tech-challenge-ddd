@@ -312,6 +312,45 @@
 							]
 						}
 					}
+				},
+				{
+					"name": "5.1. Criar Serviço Corretivo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"serv_corretivo_id\", res.id);",
+									"pm.test(\"Serviço Corretivo Criado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Reparo de Freios\",\n    \"tipo\": \"CORRETIVO\",\n    \"preco_base\": 450.0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/servicos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"servicos"
+							]
+						}
+					}
 				}
 			]
 		},
@@ -520,6 +559,45 @@
 					}
 				},
 				{
+					"name": "8.1. Adicionar Serviço Corretivo à OS",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Serviço Corretivo Adicionado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"servico_id\": \"{{serv_corretivo_id}}\",\n    \"quantidade\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"servicos"
+							]
+						}
+					}
+				},
+				{
 					"name": "9. Concluir Diagnóstico",
 					"request": {
 						"method": "POST",
@@ -539,10 +617,70 @@
 					}
 				},
 				{
-					"name": "10. Aprovar OS",
+					"name": "10. Validar Bloqueio Rejeição Corretivo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Deve retornar erro ao rejeitar corretivo\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Mensagem de erro contém 'corretivo'\", () => pm.expect(pm.response.json().mensagem).to.include('corretivo'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"servicosAprovados\": [\"{{serv_id}}\"],\n    \"servicosRejeitados\": [\"{{serv_corretivo_id}}\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/aprovar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"aprovar"
+							]
+						}
+					}
+				},
+				{
+					"name": "10.1. Aprovar OS Corretamente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Aprovação com corretivo sucesso\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"servicosAprovados\": [\"{{serv_id}}\", \"{{serv_corretivo_id}}\"],\n    \"servicosRejeitados\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/aprovar",
 							"host": [

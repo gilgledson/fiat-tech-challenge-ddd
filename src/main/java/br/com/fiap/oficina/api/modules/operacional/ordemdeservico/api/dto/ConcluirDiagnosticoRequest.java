@@ -22,7 +22,8 @@ public record ConcluirDiagnosticoRequest(
                         s.quantidade(),
                         s.valorUnitario(),
                         s.calcularTotal(),
-                        OrdemDeServicoServicoStatus.AGUARDANDO_APROVACAO))
+                        OrdemDeServicoServicoStatus.PENDENTE,
+                        s.tipo()))
                 .toList();
     }
 }

@@ -45,6 +45,7 @@ CREATE TABLE ORDEM_DE_SERVICO_SERVICOS (
     quantidade DECIMAL(10, 2) NOT NULL DEFAULT 1,
     valor_unitario DECIMAL(10, 2) NOT NULL,
     valor_total DECIMAL(10, 2) NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
     status VARCHAR(20) NOT NULL,
     data_inicio_execucao TIMESTAMP,
     data_fim_execucao TIMESTAMP,
@@ -52,6 +53,10 @@ CREATE TABLE ORDEM_DE_SERVICO_SERVICOS (
         'ABERTA',
         'EM_EXECUCAO',
         'FINALIZADA'
+    )),
+    CONSTRAINT chk_os_servico_tipo CHECK (tipo IN (
+        'PREVENTIVO',
+        'CORRETIVO'
     )),
 
     CONSTRAINT fk_os_servico_os FOREIGN KEY (ordem_de_servico_id) REFERENCES ORDEM_DE_SERVICO(id),

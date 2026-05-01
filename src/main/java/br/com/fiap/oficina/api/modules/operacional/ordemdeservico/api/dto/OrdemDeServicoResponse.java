@@ -68,6 +68,7 @@ public record OrdemDeServicoResponse(
                 s.getPrecoUnitario(),
                 s.getTotal(),
                 s.getStatus().name(),
+                s.getTipo(),
                 s.getDataInicioExecucao(),
                 s.getDataFimExecucao(),
                 s.getUsuarioExecutorId(),

@@ -2,6 +2,7 @@ package br.com.fiap.oficina.api.modules.operacional.ordemdeservico.infrastructur
 
 import br.com.fiap.oficina.api.modules.catalogo.produto.domain.entity.Produto;
 import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.Servico;
+import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.TipoServico;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.datafaker.Faker;
@@ -37,7 +38,8 @@ public class OrdemServicoFactory {
                 1,
                 s.getPrecoBase(),
                 s.getPrecoBase(),
-                OrdemDeServicoServicoStatus.FINALIZADA
+                OrdemDeServicoServicoStatus.FINALIZADO,
+                TipoServico.PREVENTIVO
             );
             oss.setDataInicioExecucao(os.getDataAbertura().plusHours(1));
             oss.setDataFimExecucao(oss.getDataInicioExecucao().plusHours(2));

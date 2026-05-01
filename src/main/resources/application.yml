@@ -1,6 +1,4 @@
 quarkus:
-  # Configurações do Servidor Web
-  profile: dev
   swagger-ui:
     always-include: true
   http:

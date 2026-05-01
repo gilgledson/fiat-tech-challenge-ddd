@@ -204,11 +204,14 @@ public class OrdemDeServicoController {
     @POST
     @Path("/{id}/aprovar")
     @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE, PerfilUsuario.Constants.CLIENTE })
-    @Operation(summary = "Registrar aprovação do cliente e liberar execução")
-    public Response aprovar(@PathParam("id") UUID id) {
-        aprovarOrdemDeServicoUseCase.executar(id);
+    @Operation(summary = "Aprovar Orçamento (Cliente aprovou serviços)")
+    public Response aprovar(
+            @PathParam("id") UUID id,
+            @Valid AprovarServicoRequest request) {
+        aprovarOrdemDeServicoUseCase.executar(id, request);
         return Response.noContent().build();
     }
+
 
     @POST
     @Path("/{id}/iniciar-execucao")

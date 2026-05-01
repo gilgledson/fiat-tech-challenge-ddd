@@ -18,6 +18,6 @@ public class CatalogoServicoGatewayImpl implements CatalogoServicoGateway {
     @Override
     public Optional<ServicoSnapshotDTO> buscarPorId(UUID id) {
         return servicoRepository.buscarPorId(id)
-                .map(s -> new ServicoSnapshotDTO(s.getId(), s.getNome(), s.getPrecoBase()));
+                .map(s -> new ServicoSnapshotDTO(s.getId(), s.getNome(), s.getPrecoBase(), s.getTipo()));
     }
 }

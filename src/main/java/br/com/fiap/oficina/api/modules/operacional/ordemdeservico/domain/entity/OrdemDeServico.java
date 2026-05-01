@@ -1,6 +1,7 @@
 package br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,17 +26,22 @@ public class OrdemDeServico {
     private LocalDateTime dataFimExecucao;
     private String motivoCancelamento;
     private OrdemDeServicoStatus status;
-    private List<OrdemDeServicoProdutos> produtos;
-    private List<OrdemDeServicoServicos> servicos;
+    private List<OrdemDeServicoProdutos> produtos = new ArrayList<>();
+    private List<OrdemDeServicoServicos> servicos = new ArrayList<>();
     private LocalDateTime deletadoEm;
 
     public java.math.BigDecimal calcularValorTotal() {
-        java.math.BigDecimal totalProdutos = produtos.stream()
+        java.math.BigDecimal totalProdutos = (produtos == null ? new ArrayList<OrdemDeServicoProdutos>() : produtos).stream()
                 .map(OrdemDeServicoProdutos::getTotal)
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-        java.math.BigDecimal totalServicos = servicos.stream()
+                
+        java.math.BigDecimal totalServicos = (servicos == null ? new ArrayList<OrdemDeServicoServicos>() : servicos).stream()
+                .filter(s -> s.getStatus() == OrdemDeServicoServicoStatus.APROVADO || 
+                             s.getStatus() == OrdemDeServicoServicoStatus.EM_EXECUCAO || 
+                             s.getStatus() == OrdemDeServicoServicoStatus.FINALIZADO)
                 .map(OrdemDeServicoServicos::getTotal)
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                
         return totalProdutos.add(totalServicos);
     }
 }

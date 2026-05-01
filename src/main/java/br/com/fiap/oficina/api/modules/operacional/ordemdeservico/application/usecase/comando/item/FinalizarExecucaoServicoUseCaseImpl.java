@@ -33,7 +33,7 @@ public class FinalizarExecucaoServicoUseCaseImpl implements FinalizarExecucaoSer
             throw new IllegalArgumentException("O serviço deve estar EM_EXECUCAO para ser finalizado.");
         }
 
-        servico.setStatus(OrdemDeServicoServicoStatus.FINALIZADA);
+        servico.setStatus(OrdemDeServicoServicoStatus.FINALIZADO);
         servico.setDataFimExecucao(LocalDateTime.now());
 
         repository.atualizar(ordem);

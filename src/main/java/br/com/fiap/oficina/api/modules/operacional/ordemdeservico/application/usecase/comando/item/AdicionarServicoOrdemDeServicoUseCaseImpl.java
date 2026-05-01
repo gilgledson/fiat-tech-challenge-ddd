@@ -34,11 +34,13 @@ public class AdicionarServicoOrdemDeServicoUseCaseImpl implements AdicionarServi
                 .orElseThrow(() -> new NotFoundException("Serviço não encontrado no catálogo"));
 
         OrdemDeServicoServicos item = new OrdemDeServicoServicos();
+        item.setOrdemDeServicoId(ordemDeServicoId);
         item.setServicoId(servicoId);
         item.setNome(servicoCatalogo.nome());
         item.setQuantidade(quantidade);
         item.setPrecoUnitario(servicoCatalogo.precoBase());
-        item.setStatus(OrdemDeServicoServicoStatus.ABERTA);
+        item.setStatus(OrdemDeServicoServicoStatus.PENDENTE);
+        item.setTipo(servicoCatalogo.tipo());
         item.calcularTotal();
 
         ordem.getServicos().add(item);
