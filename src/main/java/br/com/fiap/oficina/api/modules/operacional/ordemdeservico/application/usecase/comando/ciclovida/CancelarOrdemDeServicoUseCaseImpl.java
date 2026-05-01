@@ -28,9 +28,11 @@ public class CancelarOrdemDeServicoUseCaseImpl implements CancelarOrdemDeServico
             throw new IllegalArgumentException("Não é possível cancelar uma ordem de serviço já finalizada.");
         }
 
-        // Libera o estoque reservado de todos os produtos
-        ordem.getProdutos().forEach(item -> {
-            produtoGateway.liberarEstoqueReservado(item.getProdutoId(), item.getQuantidade());
+        // Libera o estoque reservado de todos os produtos associados aos serviços
+        ordem.getServicos().forEach(servico -> {
+            servico.getProdutos().forEach(item -> {
+                produtoGateway.liberarEstoqueReservado(item.getProdutoId(), item.getQuantidade());
+            });
         });
 
         ordem.setStatus(OrdemDeServicoStatus.CANCELADA);

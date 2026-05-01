@@ -16,7 +16,7 @@ public class FinalizarExecucaoServicoUseCaseImpl implements FinalizarExecucaoSer
     private final OrdemDeServicoRepository repository;
 
     @Override
-    public void executar(UUID ordemId, UUID servicoId) {
+    public void executar(UUID ordemId, UUID id) {
         OrdemDeServico ordem = repository.buscarPorId(ordemId)
                 .orElseThrow(() -> new NotFoundException("Ordem de serviço não encontrada"));
 
@@ -25,7 +25,7 @@ public class FinalizarExecucaoServicoUseCaseImpl implements FinalizarExecucaoSer
         }
 
         var servico = ordem.getServicos().stream()
-                .filter(s -> s.getServicoId().equals(servicoId))
+                .filter(s -> s.getId().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("Serviço não encontrado nesta ordem"));
 

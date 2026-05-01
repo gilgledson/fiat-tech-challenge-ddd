@@ -19,17 +19,9 @@ public record OrdemDeServicoResponse(
         @JsonProperty("data_abertura") LocalDateTime dataAbertura,
         @JsonProperty("data_inicio_execucao") LocalDateTime dataInicioExecucao,
         @JsonProperty("data_fim_execucao") LocalDateTime dataFimExecucao,
-        List<OrdemDeServicoProdutoResponse> produtos,
         List<OrdemDeServicoServicoResponse> servicos) {
 
     public static OrdemDeServicoResponse fromOutput(OrdemDeServicoOutput output) {
-
-        List<OrdemDeServicoProdutoResponse> produtosDto = List.of();
-        if (output.produtos() != null) {
-            produtosDto = output.produtos().stream()
-                    .map(OrdemDeServicoResponse::mapProduto)
-                    .toList();
-        }
 
         List<OrdemDeServicoServicoResponse> servicosDto = List.of();
         if (output.servicos() != null) {
@@ -47,7 +39,6 @@ public record OrdemDeServicoResponse(
                 output.dataAbertura(),
                 output.dataInicioExecucao(),
                 output.dataFimExecucao(),
-                produtosDto,
                 servicosDto);
     }
 
@@ -62,6 +53,7 @@ public record OrdemDeServicoResponse(
 
     private static OrdemDeServicoServicoResponse mapServico(OrdemDeServicoServicos s) {
         return new OrdemDeServicoServicoResponse(
+                s.getId(),
                 s.getServicoId(),
                 s.getNome(),
                 s.getQuantidade(),
@@ -72,6 +64,7 @@ public record OrdemDeServicoResponse(
                 s.getDataInicioExecucao(),
                 s.getDataFimExecucao(),
                 s.getUsuarioExecutorId(),
-                s.getDuracao());
+                s.getDuracao(),
+                s.getProdutos().stream().map(OrdemDeServicoResponse::mapProduto).toList());
     }
 }

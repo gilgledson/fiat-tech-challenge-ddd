@@ -35,51 +35,18 @@ public class ServicoJpaEntity {
     @CollectionTable(name = "SERVICO_PRODUTO_SUGERIDO", joinColumns = @JoinColumn(name = "servico_id"))
     private List<ProdutoSugeridoEmbeddable> produtosSugeridos = new ArrayList<>();
 
-    public UUID getId() {
-        return id;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof ServicoJpaEntity))
+            return false;
+        ServicoJpaEntity that = (ServicoJpaEntity) o;
+        return id != null && id.equals(that.id);
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public TipoServico getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(TipoServico tipo) {
-        this.tipo = tipo;
-    }
-
-    public BigDecimal getPrecoBase() {
-        return precoBase;
-    }
-
-    public void setPrecoBase(BigDecimal precoBase) {
-        this.precoBase = precoBase;
-    }
-
-    public LocalDateTime getDeletadoEm() {
-        return deletadoEm;
-    }
-
-    public void setDeletadoEm(LocalDateTime deletadoEm) {
-        this.deletadoEm = deletadoEm;
-    }
-
-    public List<ProdutoSugeridoEmbeddable> getProdutosSugeridos() {
-        return produtosSugeridos;
-    }
-
-    public void setProdutosSugeridos(List<ProdutoSugeridoEmbeddable> produtosSugeridos) {
-        this.produtosSugeridos = produtosSugeridos;
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

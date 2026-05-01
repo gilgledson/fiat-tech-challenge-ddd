@@ -3,5 +3,5 @@ package br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.u
 import java.util.UUID;
 
 public interface IniciarExecucaoServicoUseCase {
-    void executar(UUID ordemId, UUID servicoId, UUID usuarioExecutorId);
+    void executar(UUID ordemId, UUID id, UUID usuarioExecutorId);
 }

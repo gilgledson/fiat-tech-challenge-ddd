@@ -48,7 +48,6 @@ class ConcluirExecucaoOrdemDeServicoUseCaseTest {
         os.setId(osId);
         os.setClienteId(UUID.randomUUID());
         os.setStatus(OrdemDeServicoStatus.EM_EXECUCAO);
-        os.setProdutos(new ArrayList<>());
         
         List<OrdemDeServicoServicos> servicos = new ArrayList<>();
         servicos.add(new OrdemDeServicoServicos(osId, UUID.randomUUID(), "Servico 1", 1, BigDecimal.TEN, BigDecimal.TEN, OrdemDeServicoServicoStatus.FINALIZADO, TipoServico.PREVENTIVO));

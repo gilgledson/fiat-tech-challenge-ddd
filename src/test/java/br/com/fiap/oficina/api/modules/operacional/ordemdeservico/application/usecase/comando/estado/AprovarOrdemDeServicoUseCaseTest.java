@@ -66,4 +66,38 @@ class AprovarOrdemDeServicoUseCaseTest {
 
         assertTrue(exception.getMessage().contains("não pode ser rejeitado"));
     }
+
+    @Test
+    @DisplayName("Deve permitir aprovação de serviço extra quando a OS já está em execução")
+    void devePermitirAprovacaoDeServicoExtraEmExecucao() {
+        // Arrange
+        UUID osId = UUID.randomUUID();
+        UUID servicoExtraId = UUID.randomUUID();
+        
+        OrdemDeServico os = new OrdemDeServico();
+        os.setId(osId);
+        os.setStatus(OrdemDeServicoStatus.EM_EXECUCAO);
+        
+        List<OrdemDeServicoServicos> servicos = new ArrayList<>();
+        // Serviço já aprovado e em execução
+        servicos.add(new OrdemDeServicoServicos(osId, UUID.randomUUID(), "Serviço 1", 1, BigDecimal.TEN, BigDecimal.TEN, OrdemDeServicoServicoStatus.EM_EXECUCAO, TipoServico.PREVENTIVO));
+        // Serviço extra pendente
+        OrdemDeServicoServicos servicoExtra = new OrdemDeServicoServicos(osId, servicoExtraId, "Serviço Extra", 1, BigDecimal.TEN, BigDecimal.TEN, OrdemDeServicoServicoStatus.PENDENTE, TipoServico.PREVENTIVO);
+        servicos.add(servicoExtra);
+        os.setServicos(servicos);
+
+        when(repository.buscarPorId(osId)).thenReturn(Optional.of(os));
+
+        AprovarServicoRequest request = new AprovarServicoRequest(
+                List.of(servicoExtraId),
+                List.of()
+        );
+
+        // Act
+        useCase.executar(osId, request);
+
+        // Assert
+        assertTrue(servicoExtra.getStatus() == OrdemDeServicoServicoStatus.APROVADO);
+        assertTrue(os.getStatus() == OrdemDeServicoStatus.EM_EXECUCAO);
+    }
 }

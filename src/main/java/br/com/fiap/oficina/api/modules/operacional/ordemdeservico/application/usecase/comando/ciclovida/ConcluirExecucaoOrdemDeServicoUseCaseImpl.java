@@ -31,18 +31,21 @@ public class ConcluirExecucaoOrdemDeServicoUseCaseImpl implements ConcluirExecuc
             throw new IllegalArgumentException("Apenas ordens EM_EXECUCAO podem ser finalizadas.");
         }
 
-        // Valida se todos os serviços foram concluídos
-        boolean todosServicosFinalizados = ordem.getServicos().stream()
-                .allMatch(s -> s.getStatus() == OrdemDeServicoServicoStatus.FINALIZADO);
+        // Valida se todos os serviços (que não foram rejeitados) foram concluídos
+        boolean temServicoPendente = ordem.getServicos().stream()
+                .filter(s -> s.getStatus() != OrdemDeServicoServicoStatus.REJEITADO)
+                .anyMatch(s -> s.getStatus() != OrdemDeServicoServicoStatus.FINALIZADO);
 
-        if (!todosServicosFinalizados) {
+        if (temServicoPendente) {
             throw new IllegalArgumentException(
                     "A ordem não pode ser finalizada enquanto houver serviços pendentes ou em execução.");
         }
 
-        // Confirma a venda de todos os produtos reservados
-        ordem.getProdutos().forEach(item -> {
-            produtoGateway.confirmarVenda(item.getProdutoId(), item.getQuantidade());
+        // Confirma a venda de todos os produtos reservados em cada serviço
+        ordem.getServicos().forEach(servico -> {
+            servico.getProdutos().forEach(item -> {
+                produtoGateway.confirmarVenda(item.getProdutoId(), item.getQuantidade());
+            });
         });
 
         ordem.setStatus(OrdemDeServicoStatus.AGUARDANDO_PAGAMENTO);

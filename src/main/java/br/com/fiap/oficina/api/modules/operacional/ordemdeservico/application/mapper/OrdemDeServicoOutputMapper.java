@@ -18,7 +18,6 @@ public class OrdemDeServicoOutputMapper {
                 ordem.getDataAbertura(),
                 ordem.getDataInicioExecucao(),
                 ordem.getDataFimExecucao(),
-                ordem.getProdutos(),
                 ordem.getServicos());
     }
 }

@@ -231,20 +231,24 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th>Descrição</th>
+                    <th>Serviço Relacionado</th>
+                    <th>Descrição do Produto</th>
                     <th class="text-right">Qtd</th>
                     <th class="text-right">Vlr. Unitário</th>
                     <th class="text-right">Total</th>
                 </tr>
             </thead>
             <tbody>
-                {#for item in os.produtos}
-                <tr>
-                    <td>{item.nome}</td>
-                    <td class="text-right">{item.quantidade}</td>
-                    <td class="text-right">R$ {item.precoUnitario}</td>
-                    <td class="text-right">R$ {item.total}</td>
-                </tr>
+                {#for servico in os.servicos}
+                    {#for item in servico.produtos}
+                    <tr>
+                        <td>{servico.nome}</td>
+                        <td>{item.nome}</td>
+                        <td class="text-right">{item.quantidade}</td>
+                        <td class="text-right">R$ {item.precoUnitario}</td>
+                        <td class="text-right">R$ {item.total}</td>
+                    </tr>
+                    {/for}
                 {/for}
             </tbody>
         </table>

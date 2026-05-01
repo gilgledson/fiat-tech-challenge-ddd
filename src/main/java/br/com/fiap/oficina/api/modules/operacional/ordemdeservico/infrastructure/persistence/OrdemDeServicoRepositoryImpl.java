@@ -13,8 +13,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class OrdemDeServicoRepositoryImpl
@@ -67,24 +69,57 @@ public class OrdemDeServicoRepositoryImpl
     @Transactional
     public void atualizar(OrdemDeServico ordem) {
         OrdemDeServicoJpaEntity entity = findById(ordem.getId());
-
         if (entity != null) {
             entity.setStatus(ordem.getStatus().name());
             entity.setDataInicioExecucao(ordem.getDataInicioExecucao());
             entity.setDataFimExecucao(ordem.getDataFimExecucao());
-            entity.getProdutos().clear();
-            entity.getServicos().clear();
 
-            List<OrdemDeServicoProdutosEmbeddable> novosProdutos = ordem.getProdutos().stream()
-                    .map(OrdemDeServicoProdutosEmbeddable::fromDomain)
-                    .toList();
+            java.util.Set<UUID> idsServicosDomain = ordem.getServicos().stream()
+                    .map(servico -> servico.getId())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
 
-            List<OrdemDeServicoServicosEmbeddable> novosServicos = ordem.getServicos().stream()
-                    .map(OrdemDeServicoServicosEmbeddable::fromDomain)
-                    .toList();
+            entity.getServicos().removeIf(
+                    servicoJpa -> servicoJpa.getId() != null && !idsServicosDomain.contains(servicoJpa.getId()));
 
-            entity.getProdutos().addAll(novosProdutos);
-            entity.getServicos().addAll(novosServicos);
+            for (var servicoDomain : ordem.getServicos()) {
+                Optional<OrdemDeServicoServicosJpaEntity> servicoOpt = entity.getServicos().stream()
+                        .filter(s -> s.getId() != null && s.getId().equals(servicoDomain.getId()))
+                        .findFirst();
+
+                if (servicoOpt.isEmpty()) {
+                    entity.getServicos().add(OrdemDeServicoServicosJpaEntity.fromDomain(servicoDomain));
+                } else {
+                    OrdemDeServicoServicosJpaEntity servicoEntity = servicoOpt.get();
+                    servicoEntity.setStatus(servicoDomain.getStatus().name());
+                    servicoEntity.setDataInicioExecucao(servicoDomain.getDataInicioExecucao());
+                    servicoEntity.setDataFimExecucao(servicoDomain.getDataFimExecucao());
+                    servicoEntity.setUsuarioExecutorId(servicoDomain.getUsuarioExecutorId());
+
+                    java.util.Set<UUID> idsProdutosDomain = servicoDomain.getProdutos().stream()
+                            .map(produto -> produto.getProdutoId())
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+                    servicoEntity.getProdutos().removeIf(produtoJpa -> produtoJpa.getProdutoId() != null
+                            && !idsProdutosDomain.contains(produtoJpa.getProdutoId()));
+
+                    for (var produtoDomain : servicoDomain.getProdutos()) {
+                        Optional<OrdemDeServicoProdutosJpaEntity> produtoOpt = servicoEntity.getProdutos().stream()
+                                .filter(p -> p.getProdutoId() != null
+                                        && p.getProdutoId().equals(produtoDomain.getProdutoId()))
+                                .findFirst();
+
+                        if (produtoOpt.isEmpty()) {
+                            servicoEntity.getProdutos().add(
+                                    OrdemDeServicoProdutosJpaEntity.fromDomain(produtoDomain, servicoEntity.getId()));
+                        } else {
+                            OrdemDeServicoProdutosJpaEntity produtoEntity = produtoOpt.get();
+                            produtoEntity.setQuantidade(produtoDomain.getQuantidade());
+                            produtoEntity.setValorTotal(produtoDomain.getTotal());
+                        }
+                    }
+                }
+            }
         }
     }
 

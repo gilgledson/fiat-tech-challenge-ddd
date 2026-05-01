@@ -38,18 +38,11 @@ public class OrdemDeServicoBeanConfig {
 
     @Produces
     @ApplicationScoped
-    public AdicionarProdutoOrdemDeServicoUseCase adicionarProdutoOrdemDeServicoUseCase(
-            OrdemDeServicoRepository osRepository,
-            CatalogoProdutoGateway produtoGateway) {
-        return new AdicionarProdutoOrdemDeServicoUseCaseImpl(osRepository, produtoGateway);
-    }
-
-    @Produces
-    @ApplicationScoped
     public AdicionarServicoOrdemDeServicoUseCase adicionarServicoOrdemDeServicoUseCase(
             OrdemDeServicoRepository osRepository,
-            CatalogoServicoGateway servicoGateway) {
-        return new AdicionarServicoOrdemDeServicoUseCaseImpl(osRepository, servicoGateway);
+            CatalogoServicoGateway servicoGateway,
+            CatalogoProdutoGateway produtoGateway) {
+        return new AdicionarServicoOrdemDeServicoUseCaseImpl(osRepository, servicoGateway, produtoGateway);
     }
 
     @Produces
@@ -63,8 +56,9 @@ public class OrdemDeServicoBeanConfig {
     @Produces
     @ApplicationScoped
     public RemoverServicoOrdemDeServicoUseCase removerServicoOrdemDeServicoUseCase(
-            OrdemDeServicoRepository osRepository) {
-        return new RemoverServicoOrdemDeServicoUseCaseImpl(osRepository);
+            OrdemDeServicoRepository osRepository,
+            CatalogoProdutoGateway produtoGateway) {
+        return new RemoverServicoOrdemDeServicoUseCaseImpl(osRepository, produtoGateway);
     }
 
     @Produces

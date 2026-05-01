@@ -22,8 +22,8 @@ public class IniciarExecucaoOsUseCaseImpl implements IniciarExecucaoOsUseCase {
         OrdemDeServico ordem = repository.buscarPorId(id)
                 .orElseThrow(() -> new NotFoundException("Ordem de serviço não encontrada"));
 
-        if (ordem.getStatus() != OrdemDeServicoStatus.APROVADA) {
-            throw new IllegalArgumentException("Apenas ordens APROVADAS podem iniciar execução.");
+        if (ordem.getStatus() != OrdemDeServicoStatus.APROVADA ) {
+            throw new IllegalArgumentException("Apenas ordens APROVADAS ou EM_EXECUCAO podem iniciar execução.");
         }
 
         ordem.setStatus(OrdemDeServicoStatus.EM_EXECUCAO);

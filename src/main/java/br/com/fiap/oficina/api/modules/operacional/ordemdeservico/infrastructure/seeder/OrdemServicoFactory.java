@@ -41,26 +41,27 @@ public class OrdemServicoFactory {
                 OrdemDeServicoServicoStatus.FINALIZADO,
                 TipoServico.PREVENTIVO
             );
+            oss.setId(UUID.randomUUID());
             oss.setDataInicioExecucao(os.getDataAbertura().plusHours(1));
             oss.setDataFimExecucao(oss.getDataInicioExecucao().plusHours(2));
+            
+            // Adiciona produtos ao serviço
+            int numProdutos = faker.number().numberBetween(0, 3);
+            for (int j = 0; j < numProdutos; j++) {
+                Produto p = produtosDisponiveis.get(faker.number().numberBetween(0, produtosDisponiveis.size()));
+                OrdemDeServicoProdutos osp = new OrdemDeServicoProdutos();
+                osp.setOrdemDeServicoId(os.getId());
+                osp.setProdutoId(p.getId());
+                osp.setNomeDoProduto(p.getNome());
+                osp.setQuantidade(BigDecimal.valueOf(faker.number().numberBetween(1, 3)));
+                osp.setPrecoUnitario(p.getPrecoUnitario());
+                osp.setTotal(osp.getPrecoUnitario().multiply(osp.getQuantidade()));
+                oss.getProdutos().add(osp);
+            }
+            oss.calcularTotal();
             osServicos.add(oss);
         }
         os.setServicos(osServicos);
-
-        List<OrdemDeServicoProdutos> osProdutos = new ArrayList<>();
-        int numProdutos = faker.number().numberBetween(0, 4);
-        for (int i = 0; i < numProdutos; i++) {
-            Produto p = produtosDisponiveis.get(faker.number().numberBetween(0, produtosDisponiveis.size()));
-            OrdemDeServicoProdutos osp = new OrdemDeServicoProdutos();
-            osp.setOrdemDeServicoId(os.getId());
-            osp.setProdutoId(p.getId());
-            osp.setNomeDoProduto(p.getNome());
-            osp.setQuantidade(BigDecimal.valueOf(faker.number().numberBetween(1, 3)));
-            osp.setPrecoUnitario(p.getPrecoUnitario());
-            osp.setTotal(osp.getPrecoUnitario().multiply(osp.getQuantidade()));
-            osProdutos.add(osp);
-        }
-        os.setProdutos(osProdutos);
 
         os.setDataInicioExecucao(os.getDataAbertura().plusHours(1));
         os.setDataFimExecucao(os.getDataInicioExecucao().plusHours(5));

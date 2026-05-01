@@ -5,19 +5,28 @@ import java.util.UUID;
 
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoProdutos;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Embeddable
+@Entity
+@Table(name = "ORDEM_DE_SERVICO_PRODUTOS")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class OrdemDeServicoProdutosEmbeddable {
-    @Column(name = "ordem_de_servico_id", insertable = false, updatable = false)
+public class OrdemDeServicoProdutosJpaEntity {
+    @Id
+    private UUID id;
+
+    @Column(name = "os_servico_id")
+    private UUID osServicoId;
+
+    @Column(name = "ordem_de_servico_id")
     private UUID ordemDeServicoId;
 
     @Column(name = "produto_id")
@@ -35,15 +44,17 @@ public class OrdemDeServicoProdutosEmbeddable {
     @Column(name = "valor_total")
     private BigDecimal valorTotal;
 
-    public static OrdemDeServicoProdutosEmbeddable fromDomain(OrdemDeServicoProdutos produto) {
-        OrdemDeServicoProdutosEmbeddable embeddable = new OrdemDeServicoProdutosEmbeddable();
-        embeddable.setOrdemDeServicoId(produto.getOrdemDeServicoId());
-        embeddable.setProdutoId(produto.getProdutoId());
-        embeddable.setNome(produto.getNomeDoProduto());
-        embeddable.setQuantidade(produto.getQuantidade());
-        embeddable.setPrecoUnitario(produto.getPrecoUnitario());
-        embeddable.setValorTotal(produto.getTotal());
-        return embeddable;
+    public static OrdemDeServicoProdutosJpaEntity fromDomain(OrdemDeServicoProdutos produto, UUID osServicoId) {
+        OrdemDeServicoProdutosJpaEntity entity = new OrdemDeServicoProdutosJpaEntity();
+        entity.setId(UUID.randomUUID()); // We need a primary key for the entity
+        entity.setOsServicoId(osServicoId);
+        entity.setOrdemDeServicoId(produto.getOrdemDeServicoId());
+        entity.setProdutoId(produto.getProdutoId());
+        entity.setNome(produto.getNomeDoProduto());
+        entity.setQuantidade(produto.getQuantidade());
+        entity.setPrecoUnitario(produto.getPrecoUnitario());
+        entity.setValorTotal(produto.getTotal());
+        return entity;
     }
 
     public OrdemDeServicoProdutos toDomain() {

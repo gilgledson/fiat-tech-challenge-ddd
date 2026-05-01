@@ -26,15 +26,10 @@ public class OrdemDeServico {
     private LocalDateTime dataFimExecucao;
     private String motivoCancelamento;
     private OrdemDeServicoStatus status;
-    private List<OrdemDeServicoProdutos> produtos = new ArrayList<>();
     private List<OrdemDeServicoServicos> servicos = new ArrayList<>();
     private LocalDateTime deletadoEm;
 
     public java.math.BigDecimal calcularValorTotal() {
-        java.math.BigDecimal totalProdutos = (produtos == null ? new ArrayList<OrdemDeServicoProdutos>() : produtos).stream()
-                .map(OrdemDeServicoProdutos::getTotal)
-                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-                
         java.math.BigDecimal totalServicos = (servicos == null ? new ArrayList<OrdemDeServicoServicos>() : servicos).stream()
                 .filter(s -> s.getStatus() == OrdemDeServicoServicoStatus.APROVADO || 
                              s.getStatus() == OrdemDeServicoServicoStatus.EM_EXECUCAO || 
@@ -42,6 +37,6 @@ public class OrdemDeServico {
                 .map(OrdemDeServicoServicos::getTotal)
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
                 
-        return totalProdutos.add(totalServicos);
+        return totalServicos;
     }
 }

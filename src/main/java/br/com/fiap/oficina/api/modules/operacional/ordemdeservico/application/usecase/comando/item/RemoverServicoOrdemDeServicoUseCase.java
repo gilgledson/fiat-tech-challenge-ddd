@@ -4,5 +4,5 @@ import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dt
 import java.util.UUID;
 
 public interface RemoverServicoOrdemDeServicoUseCase {
-    OrdemDeServicoOutput executar(UUID ordemDeServicoId, UUID servicoId);
+    OrdemDeServicoOutput executar(UUID ordemDeServicoId, UUID id);
 }

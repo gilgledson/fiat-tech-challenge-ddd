@@ -43,7 +43,6 @@ public class AbrirOrdemDeServicoUseCaseImpl implements AbrirOrdemDeServicoUseCas
         ordem.setDescricaoProblema(descricaoProblema);
         ordem.setStatus(OrdemDeServicoStatus.ABERTA);
         ordem.setDataAbertura(LocalDateTime.now());
-        ordem.setProdutos(new ArrayList<>());
         ordem.setServicos(new ArrayList<>());
 
         repository.salvar(ordem);

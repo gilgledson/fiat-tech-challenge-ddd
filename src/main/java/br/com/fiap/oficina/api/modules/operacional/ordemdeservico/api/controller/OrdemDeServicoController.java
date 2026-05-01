@@ -37,7 +37,6 @@ public class OrdemDeServicoController {
     private final IniciarDiagnosticoUseCase iniciarDiagnosticoUseCase;
     private final ConcluirDiagnosticoUseCase concluirDiagnosticoUseCase;
     private final RejeitarOrcamentoUseCase rejeitarOrcamentoUseCase;
-    private final AdicionarProdutoOrdemDeServicoUseCase adicionarProdutoUseCase;
     private final AdicionarServicoOrdemDeServicoUseCase adicionarServicoUseCase;
     private final RemoverProdutoOrdemDeServicoUseCase removerProdutoUseCase;
     private final RemoverServicoOrdemDeServicoUseCase removerServicoUseCase;
@@ -59,7 +58,6 @@ public class OrdemDeServicoController {
             IniciarDiagnosticoUseCase iniciarDiagnosticoUseCase,
             ConcluirDiagnosticoUseCase concluirDiagnosticoUseCase,
             RejeitarOrcamentoUseCase rejeitarOrcamentoUseCase,
-            AdicionarProdutoOrdemDeServicoUseCase adicionarProdutoUseCase,
             AdicionarServicoOrdemDeServicoUseCase adicionarServicoUseCase,
             RemoverProdutoOrdemDeServicoUseCase removerProdutoUseCase,
             RemoverServicoOrdemDeServicoUseCase removerServicoUseCase,
@@ -76,7 +74,6 @@ public class OrdemDeServicoController {
         this.iniciarDiagnosticoUseCase = iniciarDiagnosticoUseCase;
         this.concluirDiagnosticoUseCase = concluirDiagnosticoUseCase;
         this.rejeitarOrcamentoUseCase = rejeitarOrcamentoUseCase;
-        this.adicionarProdutoUseCase = adicionarProdutoUseCase;
         this.adicionarServicoUseCase = adicionarServicoUseCase;
         this.removerProdutoUseCase = removerProdutoUseCase;
         this.removerServicoUseCase = removerServicoUseCase;
@@ -126,17 +123,6 @@ public class OrdemDeServicoController {
         return Response.ok(response).build();
     }
 
-    @POST
-    @Path("/{id}/produtos")
-    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
-    @Operation(summary = "Adicionar produto à Ordem de Serviço")
-    public Response adicionarProduto(
-            @PathParam("id") UUID id,
-            @Valid AdicionarProdutoRequest request) {
-        var output = adicionarProdutoUseCase.executar(id, request.produtoId(), request.quantidade());
-        return Response.ok(OrdemDeServicoResponse.fromOutput(output)).build();
-    }
-
     @DELETE
     @Path("/{id}/produtos/{produtoId}")
     @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
@@ -155,7 +141,7 @@ public class OrdemDeServicoController {
     public Response adicionarServico(
             @PathParam("id") UUID id,
             @Valid AdicionarServicoRequest request) {
-        var output = adicionarServicoUseCase.executar(id, request.servicoId(), request.quantidade());
+        var output = adicionarServicoUseCase.executar(id, request);
         return Response.ok(OrdemDeServicoResponse.fromOutput(output)).build();
     }
 

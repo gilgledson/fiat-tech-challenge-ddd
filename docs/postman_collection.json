@@ -450,13 +450,35 @@
 					}
 				},
 				{
-					"name": "7. Adicionar Produto à OS (Reserva)",
+					"name": "6.1. Iniciar Diagnóstico",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/iniciar-diagnostico",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"iniciar-diagnostico"
+							]
+						}
+					}
+				},
+				{
+					"name": "8. Adicionar Serviço à OS",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Produto Adicionado\", () => pm.response.to.be.success);"
+									"var res = pm.response.json();",
+									"var s = res.servicos.find(x => x.nome === \"Troca de Óleo e Filtros\");",
+									"pm.collectionVariables.set(\"serv_instance_id\", s.id);",
+									"pm.test(\"Serviço Adicionado\", () => pm.response.to.be.success);"
 								],
 								"type": "text/javascript"
 							}
@@ -467,7 +489,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"produto_id\": \"{{prod_id}}\",\n    \"quantidade\": 1.0\n}",
+							"raw": "{\n    \"servico_id\": \"{{serv_id}}\",\n    \"quantidade\": 1,\n    \"produtos\": [\n        {\n            \"produto_id\": \"{{prod_id}}\",\n            \"quantidade\": 1.0\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -475,7 +497,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/produtos",
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -483,7 +505,7 @@
 								"api",
 								"ordens",
 								"{{os_id}}",
-								"produtos"
+								"servicos"
 							]
 						}
 					}
@@ -520,51 +542,15 @@
 					}
 				},
 				{
-					"name": "8. Adicionar Serviço à OS",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Serviço Adicionado\", () => pm.response.to.be.success);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"servico_id\": \"{{serv_id}}\",\n    \"quantidade\": 1\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"ordens",
-								"{{os_id}}",
-								"servicos"
-							]
-						}
-					}
-				},
-				{
 					"name": "8.1. Adicionar Serviço Corretivo à OS",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
+									"var res = pm.response.json();",
+									"var s = res.servicos.find(x => x.nome === \"Reparo de Freios\");",
+									"pm.collectionVariables.set(\"serv_corretivo_instance_id\", s.id);",
 									"pm.test(\"Serviço Corretivo Adicionado\", () => pm.response.to.be.success);"
 								],
 								"type": "text/javascript"
@@ -576,7 +562,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"servico_id\": \"{{serv_corretivo_id}}\",\n    \"quantidade\": 1\n}",
+							"raw": "{\n    \"servico_id\": \"{{serv_corretivo_id}}\",\n    \"quantidade\": 1,\n    \"produtos\": []\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -635,7 +621,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"servicosAprovados\": [\"{{serv_id}}\"],\n    \"servicosRejeitados\": [\"{{serv_corretivo_id}}\"]\n}",
+							"raw": "{\n    \"servicosAprovados\": [\"{{serv_instance_id}}\"],\n    \"servicosRejeitados\": [\"{{serv_corretivo_instance_id}}\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -674,7 +660,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"servicosAprovados\": [\"{{serv_id}}\", \"{{serv_corretivo_id}}\"],\n    \"servicosRejeitados\": []\n}",
+							"raw": "{\n    \"servicosAprovados\": [\"{{serv_instance_id}}\", \"{{serv_corretivo_instance_id}}\"],\n    \"servicosRejeitados\": []\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -720,7 +706,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_id}}/iniciar-execucao",
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_instance_id}}/iniciar-execucao",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -729,7 +715,7 @@
 								"ordens",
 								"{{os_id}}",
 								"servicos",
-								"{{serv_id}}",
+								"{{serv_instance_id}}",
 								"iniciar-execucao"
 							]
 						}
@@ -741,7 +727,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_id}}/finalizar-execucao",
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_instance_id}}/finalizar-execucao",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -750,7 +736,205 @@
 								"ordens",
 								"{{os_id}}",
 								"servicos",
-								"{{serv_id}}",
+								"{{serv_instance_id}}",
+								"finalizar-execucao"
+							]
+						}
+					}
+				},
+				{
+					"name": "13.1. Iniciar Execução do Serviço Corretivo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_corretivo_instance_id}}/iniciar-execucao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"servicos",
+								"{{serv_corretivo_instance_id}}",
+								"iniciar-execucao"
+							]
+						}
+					}
+				},
+				{
+					"name": "13.2. Finalizar Execução do Serviço Corretivo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_corretivo_instance_id}}/finalizar-execucao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"servicos",
+								"{{serv_corretivo_instance_id}}",
+								"finalizar-execucao"
+							]
+						}
+					}
+				},
+				{
+					"name": "13.3. Adicionar Serviço Extra (Em Execução)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"var extraServ = res.servicos.find(s => s.nome === \"Troca de Óleo e Filtros\" && s.status === \"PENDENTE\");",
+									"pm.collectionVariables.set(\"serv_extra_instance_id\", extraServ.id);",
+									"pm.test(\"Serviço Extra Adicionado com Sucesso\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"servico_id\": \"{{serv_id}}\",\n    \"quantidade\": 1,\n    \"produtos\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"servicos"
+							]
+						}
+					}
+				},
+				{
+					"name": "13.4. Validar Bloqueio Início Sem Aprovação",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Deve bloquear início de serviço extra sem aprovação\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Mensagem de erro contém 'status APROVADO'\", () => pm.expect(pm.response.json().mensagem).to.include('APROVADO'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_extra_instance_id}}/iniciar-execucao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"servicos",
+								"{{serv_extra_instance_id}}",
+								"iniciar-execucao"
+							]
+						}
+					}
+				},
+				{
+					"name": "13.5. Aprovar Serviço Extra",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Aprovação de serviço extra sucesso\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"servicosAprovados\": [\"{{serv_extra_instance_id}}\"],\n    \"servicosRejeitados\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/aprovar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"aprovar"
+							]
+						}
+					}
+				},
+				{
+					"name": "13.6. Iniciar Execução do Serviço Extra",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_extra_instance_id}}/iniciar-execucao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"servicos",
+								"{{serv_extra_instance_id}}",
+								"iniciar-execucao"
+							]
+						}
+					}
+				},
+				{
+					"name": "13.7. Finalizar Execução do Serviço Extra",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_extra_instance_id}}/finalizar-execucao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"servicos",
+								"{{serv_extra_instance_id}}",
 								"finalizar-execucao"
 							]
 						}
@@ -837,6 +1021,9 @@
 									"    pm.collectionVariables.set(\"fatura_retry_count\", 0);",
 									"    pm.collectionVariables.set(\"fatura_id\", res.id);",
 									"    pm.test(\"Fatura Encontrada\", () => pm.response.to.be.success);",
+									"    pm.test(\"Valor da fatura deve considerar apenas itens aprovados\", () => {",
+									"        pm.expect(res.valorTotal).to.equal(755.0);",
+									"    });",
 									"}"
 								],
 								"type": "text/javascript"
@@ -964,6 +1151,10 @@
 			"value": ""
 		},
 		{
+			"key": "serv_corretivo_id",
+			"value": ""
+		},
+		{
 			"key": "os_id",
 			"value": ""
 		},
@@ -974,6 +1165,18 @@
 		{
 			"key": "fatura_retry_count",
 			"value": "0"
+		},
+		{
+			"key": "serv_extra_instance_id",
+			"value": ""
+		},
+		{
+			"key": "serv_instance_id",
+			"value": ""
+		},
+		{
+			"key": "serv_corretivo_instance_id",
+			"value": ""
 		}
 	]
 }

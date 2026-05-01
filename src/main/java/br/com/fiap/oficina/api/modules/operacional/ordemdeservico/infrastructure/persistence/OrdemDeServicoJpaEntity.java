@@ -1,8 +1,6 @@
 package br.com.fiap.oficina.api.modules.operacional.ordemdeservico.infrastructure.persistence;
 
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -42,13 +40,9 @@ public class OrdemDeServicoJpaEntity {
     @Column(name = "motivo_cancelamento")
     private String motivoCancelamento;
 
-    @ElementCollection
-    @CollectionTable(name = "ORDEM_DE_SERVICO_PRODUTOS", joinColumns = @JoinColumn(name = "ordem_de_servico_id"))
-    private List<OrdemDeServicoProdutosEmbeddable> produtos = new ArrayList<>();
-
-    @ElementCollection
-    @CollectionTable(name = "ORDEM_DE_SERVICO_SERVICOS", joinColumns = @JoinColumn(name = "ordem_de_servico_id"))
-    private List<OrdemDeServicoServicosEmbeddable> servicos = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "ordem_de_servico_id")
+    private List<OrdemDeServicoServicosJpaEntity> servicos = new ArrayList<>();
 
     public OrdemDeServico toDomain() {
         OrdemDeServico entity = new OrdemDeServico();
@@ -61,12 +55,9 @@ public class OrdemDeServicoJpaEntity {
         entity.setDataFimExecucao(dataFimExecucao);
         entity.setMotivoCancelamento(motivoCancelamento);
         entity.setDeletadoEm(deletadoEm);
-        if (produtos != null) {
-            entity.setProdutos(new ArrayList<>(produtos.stream()
-                    .map(OrdemDeServicoProdutosEmbeddable::toDomain).toList()));
-        }
         if (servicos != null) {
-            entity.setServicos(new ArrayList<>(servicos.stream().map(OrdemDeServicoServicosEmbeddable::toDomain).toList()));
+            entity.setServicos(
+                    new ArrayList<>(servicos.stream().map(OrdemDeServicoServicosJpaEntity::toDomain).toList()));
         }
         return entity;
     }
@@ -82,13 +73,9 @@ public class OrdemDeServicoJpaEntity {
         entity.setDataFimExecucao(domain.getDataFimExecucao());
         entity.setMotivoCancelamento(domain.getMotivoCancelamento());
         entity.setDeletadoEm(domain.getDeletadoEm());
-        if (domain.getProdutos() != null) {
-            entity.setProdutos(
-                    domain.getProdutos().stream().map(OrdemDeServicoProdutosEmbeddable::fromDomain).toList());
-        }
         if (domain.getServicos() != null) {
-            entity.setServicos(
-                    domain.getServicos().stream().map(OrdemDeServicoServicosEmbeddable::fromDomain).toList());
+            entity.setServicos(new ArrayList<>(
+                    domain.getServicos().stream().map(OrdemDeServicoServicosJpaEntity::fromDomain).toList()));
         }
         return entity;
     }

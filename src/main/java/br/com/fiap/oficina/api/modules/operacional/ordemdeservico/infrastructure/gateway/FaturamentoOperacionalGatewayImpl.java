@@ -28,18 +28,21 @@ public class FaturamentoOperacionalGatewayImpl implements OperacionalGateway {
                                                 os.getClienteId(),
                                                 os.getVeiculoId(),
                                                 os.getServicos().stream()
+                                                                .filter(s -> s.getStatus() == br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus.APROVADO ||
+                                                                             s.getStatus() == br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus.EM_EXECUCAO ||
+                                                                             s.getStatus() == br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus.FINALIZADO)
                                                                 .map(s -> new OrdemServicoFaturamentoDTO.ItemServicoDTO(
                                                                                 s.getNome(),
                                                                                 s.getQuantidade(),
                                                                                 s.getPrecoUnitario(),
-                                                                                s.getTotal()))
-                                                                .collect(Collectors.toList()),
-                                                os.getProdutos().stream()
-                                                                .map(p -> new OrdemServicoFaturamentoDTO.ItemProdutoDTO(
-                                                                                p.getNomeDoProduto(),
-                                                                                p.getQuantidade(),
-                                                                                p.getPrecoUnitario(),
-                                                                                p.getTotal()))
+                                                                                s.getTotal(),
+                                                                                s.getProdutos().stream()
+                                                                                                .map(p -> new OrdemServicoFaturamentoDTO.ItemProdutoDTO(
+                                                                                                                p.getNomeDoProduto(),
+                                                                                                                p.getQuantidade(),
+                                                                                                                p.getPrecoUnitario(),
+                                                                                                                p.getTotal()))
+                                                                                                .collect(Collectors.toList())))
                                                                 .collect(Collectors.toList()),
                                                 os.calcularValorTotal()));
         }

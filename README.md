@@ -160,6 +160,19 @@ Implementamos uma lógica de reserva de estoque robusta para evitar vendas de pr
 - **Finalização da OS**: O sistema decrementa tanto a `Quantidade Física` quanto a `Reservada`.
 - **Cancelamento da OS**: O sistema decrementa a `Quantidade Reservada`, tornando o item disponível novamente.
 
+### ⚙️ Ciclo de Vida da Ordem de Serviço (Máquina de Estados)
+A Ordem de Serviço (OS) segue uma transição estrita de estados para garantir consistência operacional:
+- **AGUARDANDO_APROVACAO**: Permite adição de serviços, produtos e envio de orçamentos para o cliente. Serviços corretivos **não** podem ser rejeitados nesta etapa.
+- **APROVADA**: Indica que o orçamento foi aceito. Apenas serviços com status `APROVADO` podem ter sua execução iniciada pelos mecânicos.
+- **EM_EXECUCAO**: Fase onde os mecânicos iniciam e finalizam tarefas em tempo real, acompanhando a duração exata de cada intervenção.
+- **CONCLUIDA**: Encerra a OS. Aciona eventos no EventBus que disparam a baixa de estoque e preparam os dados para faturamento automático.
+
+### 📄 Faturamento e Geração de Documentos
+O módulo de faturamento é totalmente assíncrono e dissociado:
+- **Separação de Módulos**: Ele coleta dados via "Gateways" (Padrão Adapter), sem referenciar diretamente as tabelas de outros contextos.
+- **Geração PDF (Qute + Flying Saucer)**: O Quarkus utiliza sua engine de templates HTML estáticos (Qute) para renderizar layouts premium de nota fiscal (fatura) injetando produtos aninhados em serviços.
+- **Baixa Financeira**: Permite confirmar pagamento para liberação e entrega definitiva do veículo ao cliente.
+
 ---
 
 ## ▶️ Como Executar

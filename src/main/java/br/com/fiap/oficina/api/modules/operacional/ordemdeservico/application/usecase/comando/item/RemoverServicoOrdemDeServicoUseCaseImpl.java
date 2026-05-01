@@ -2,6 +2,7 @@ package br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.u
 
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dto.OrdemDeServicoOutput;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.mapper.OrdemDeServicoOutputMapper;
+import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.gateway.CatalogoProdutoGateway;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.repository.OrdemDeServicoRepository;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServico;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicos;
@@ -14,9 +15,10 @@ import java.util.UUID;
 public class RemoverServicoOrdemDeServicoUseCaseImpl implements RemoverServicoOrdemDeServicoUseCase {
 
     private final OrdemDeServicoRepository osRepository;
+    private final CatalogoProdutoGateway produtoGateway;
 
     @Override
-    public OrdemDeServicoOutput executar(UUID ordemDeServicoId, UUID servicoId) {
+    public OrdemDeServicoOutput executar(UUID ordemDeServicoId, UUID id) {
         OrdemDeServico ordem = osRepository.buscarPorId(ordemDeServicoId)
                 .orElseThrow(() -> new NotFoundException("Ordem de serviço não encontrada"));
 
@@ -25,9 +27,14 @@ public class RemoverServicoOrdemDeServicoUseCaseImpl implements RemoverServicoOr
         }
 
         OrdemDeServicoServicos itemARemover = ordem.getServicos().stream()
-                .filter(s -> s.getServicoId().equals(servicoId))
+                .filter(s -> s.getId().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("Serviço não encontrado nesta ordem de serviço"));
+
+        // Libera o estoque de todos os produtos associados a este serviço
+        itemARemover.getProdutos().forEach(produto -> {
+            produtoGateway.liberarEstoqueReservado(produto.getProdutoId(), produto.getQuantidade());
+        });
 
         ordem.getServicos().remove(itemARemover);
         osRepository.atualizar(ordem);

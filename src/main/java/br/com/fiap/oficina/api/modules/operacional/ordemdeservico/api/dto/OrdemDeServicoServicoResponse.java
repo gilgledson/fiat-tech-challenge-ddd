@@ -5,9 +5,11 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.TipoServico;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 public record OrdemDeServicoServicoResponse(
+        UUID id,
         @JsonProperty("servico_id") UUID servicoId,
         @Schema(description = "Nome do serviço executado") String nome,
         @Schema(description = "Quantidade executada") int quantidade,
@@ -18,5 +20,6 @@ public record OrdemDeServicoServicoResponse(
         @JsonProperty("data_inicio_execucao") java.time.LocalDateTime dataInicioExecucao,
         @JsonProperty("data_fim_execucao") java.time.LocalDateTime dataFimExecucao,
         @JsonProperty("usuario_executor_id") UUID usuarioExecutorId,
-        String duracao
+        String duracao,
+        List<OrdemDeServicoProdutoResponse> produtos
 ) {}

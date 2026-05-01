@@ -14,31 +14,33 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class OrdemDeServicoTest {
 
     @Test
-    @DisplayName("Deve calcular o valor total da OS incluindo apenas serviços aprovados, em execução ou finalizados")
+    @DisplayName("Deve calcular o valor total da OS incluindo apenas serviços aprovados (com seus produtos), em execução ou finalizados")
     void deveCalcularValorTotalCorretamente() {
         // Arrange
         OrdemDeServico os = new OrdemDeServico();
-        
-        List<OrdemDeServicoProdutos> produtos = new ArrayList<>();
-        produtos.add(new OrdemDeServicoProdutos(UUID.randomUUID(), UUID.randomUUID(), new BigDecimal("2"), new BigDecimal("50.00"), new BigDecimal("100.00"), "Produto 1"));
-        os.setProdutos(produtos);
-
         List<OrdemDeServicoServicos> servicos = new ArrayList<>();
         
-        // Serviço Aprovado - Deve somar
-        servicos.add(new OrdemDeServicoServicos(UUID.randomUUID(), UUID.randomUUID(), "Servico 1", 1, new BigDecimal("100.00"), new BigDecimal("100.00"), OrdemDeServicoServicoStatus.APROVADO, TipoServico.PREVENTIVO));
+        // Serviço Aprovado (100) + Produto (50) - Deve somar 150
+        OrdemDeServicoServicos s1 = new OrdemDeServicoServicos(UUID.randomUUID(), UUID.randomUUID(), "Servico 1", 1, new BigDecimal("100.00"), null, OrdemDeServicoServicoStatus.APROVADO, TipoServico.PREVENTIVO);
+        s1.getProdutos().add(new OrdemDeServicoProdutos(UUID.randomUUID(), UUID.randomUUID(), new BigDecimal("1"), new BigDecimal("50.00"), new BigDecimal("50.00"), "Produto 1"));
+        s1.calcularTotal();
+        servicos.add(s1);
         
-        // Serviço Em Execução - Deve somar
-        servicos.add(new OrdemDeServicoServicos(UUID.randomUUID(), UUID.randomUUID(), "Servico 2", 1, new BigDecimal("150.00"), new BigDecimal("150.00"), OrdemDeServicoServicoStatus.EM_EXECUCAO, TipoServico.CORRETIVO));
+        // Serviço Em Execução (150) - Deve somar 150
+        OrdemDeServicoServicos s2 = new OrdemDeServicoServicos(UUID.randomUUID(), UUID.randomUUID(), "Servico 2", 1, new BigDecimal("150.00"), new BigDecimal("150.00"), OrdemDeServicoServicoStatus.EM_EXECUCAO, TipoServico.CORRETIVO);
+        servicos.add(s2);
         
-        // Serviço Finalizado - Deve somar
-        servicos.add(new OrdemDeServicoServicos(UUID.randomUUID(), UUID.randomUUID(), "Servico 3", 1, new BigDecimal("200.00"), new BigDecimal("200.00"), OrdemDeServicoServicoStatus.FINALIZADO, TipoServico.PREVENTIVO));
+        // Serviço Finalizado (200) - Deve somar 200
+        OrdemDeServicoServicos s3 = new OrdemDeServicoServicos(UUID.randomUUID(), UUID.randomUUID(), "Servico 3", 1, new BigDecimal("200.00"), new BigDecimal("200.00"), OrdemDeServicoServicoStatus.FINALIZADO, TipoServico.PREVENTIVO);
+        servicos.add(s3);
         
-        // Serviço Pendente - NÃO deve somar
-        servicos.add(new OrdemDeServicoServicos(UUID.randomUUID(), UUID.randomUUID(), "Servico 4", 1, new BigDecimal("300.00"), new BigDecimal("300.00"), OrdemDeServicoServicoStatus.PENDENTE, TipoServico.CORRETIVO));
+        // Serviço Pendente (300) - NÃO deve somar
+        OrdemDeServicoServicos s4 = new OrdemDeServicoServicos(UUID.randomUUID(), UUID.randomUUID(), "Servico 4", 1, new BigDecimal("300.00"), new BigDecimal("300.00"), OrdemDeServicoServicoStatus.PENDENTE, TipoServico.CORRETIVO);
+        servicos.add(s4);
         
-        // Serviço Rejeitado - NÃO deve somar
-        servicos.add(new OrdemDeServicoServicos(UUID.randomUUID(), UUID.randomUUID(), "Servico 5", 1, new BigDecimal("500.00"), new BigDecimal("500.00"), OrdemDeServicoServicoStatus.REJEITADO, TipoServico.PREVENTIVO));
+        // Serviço Rejeitado (500) - NÃO deve somar
+        OrdemDeServicoServicos s5 = new OrdemDeServicoServicos(UUID.randomUUID(), UUID.randomUUID(), "Servico 5", 1, new BigDecimal("500.00"), new BigDecimal("500.00"), OrdemDeServicoServicoStatus.REJEITADO, TipoServico.PREVENTIVO);
+        servicos.add(s5);
         
         os.setServicos(servicos);
 
@@ -46,15 +48,14 @@ class OrdemDeServicoTest {
         BigDecimal valorTotal = os.calcularValorTotal();
 
         // Assert
-        // Produtos (100) + Servicos (100 + 150 + 200) = 550
-        assertEquals(new BigDecimal("550.00"), valorTotal);
+        // Aprovado (150) + Em Execução (150) + Finalizado (200) = 500
+        assertEquals(new BigDecimal("500.00"), valorTotal);
     }
 
     @Test
     @DisplayName("Deve calcular valor total como zero quando não houver itens")
     void deveCalcularValorTotalComoZero() {
         OrdemDeServico os = new OrdemDeServico();
-        os.setProdutos(List.of());
         os.setServicos(List.of());
 
         assertEquals(BigDecimal.ZERO, os.calcularValorTotal());

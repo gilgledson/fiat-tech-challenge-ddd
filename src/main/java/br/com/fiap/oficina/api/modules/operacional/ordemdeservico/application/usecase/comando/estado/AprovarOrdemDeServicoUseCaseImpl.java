@@ -25,54 +25,68 @@ public class AprovarOrdemDeServicoUseCaseImpl implements AprovarOrdemDeServicoUs
         OrdemDeServico ordem = repository.buscarPorId(id)
                 .orElseThrow(() -> new NotFoundException("Ordem de serviço não encontrada"));
 
-        if (ordem.getStatus() != OrdemDeServicoStatus.AGUARDANDO_APROVACAO) {
-            throw new IllegalArgumentException("Apenas ordens AGUARDANDO_APROVACAO podem ser aprovadas.");
+        if (ordem.getStatus() != OrdemDeServicoStatus.AGUARDANDO_APROVACAO &&
+                ordem.getStatus() != OrdemDeServicoStatus.APROVADA &&
+                ordem.getStatus() != OrdemDeServicoStatus.EM_EXECUCAO) {
+            throw new IllegalArgumentException(
+                    "Apenas ordens AGUARDANDO_APROVACAO, APROVADA ou EM_EXECUCAO podem ser aprovadas.");
         }
 
         // Valida se algum serviço corretivo está sendo rejeitado
         if (request.servicosRejeitados() != null) {
-            for (UUID servicoId : request.servicosRejeitados()) {
+            for (UUID idInstancia : request.servicosRejeitados()) {
                 ordem.getServicos().stream()
-                    .filter(s -> s.getServicoId().equals(servicoId))
-                    .findFirst()
-                    .ifPresent(s -> {
-                        if (s.getTipo() == TipoServico.CORRETIVO) {
-                            throw new IllegalArgumentException("Serviço corretivo '" + s.getNome() + "' não pode ser rejeitado.");
-                        }
-                    });
+                        .filter(s -> s.getId().equals(idInstancia))
+                        .findFirst()
+                        .ifPresent(s -> {
+                            if (s.getTipo() == TipoServico.CORRETIVO) {
+                                throw new IllegalArgumentException(
+                                        "Serviço corretivo '" + s.getNome() + "' não pode ser rejeitado.");
+                            }
+                        });
             }
         }
 
         // Atualiza status dos serviços aprovados
         if (request.servicosAprovados() != null) {
             ordem.getServicos().stream()
-                .filter(s -> request.servicosAprovados().contains(s.getServicoId()))
-                .forEach(s -> s.setStatus(OrdemDeServicoServicoStatus.APROVADO));
+                    .filter(s -> request.servicosAprovados().contains(s.getId()))
+                    .forEach(s -> s.setStatus(OrdemDeServicoServicoStatus.APROVADO));
         }
 
         // Atualiza status dos serviços rejeitados
         if (request.servicosRejeitados() != null) {
             ordem.getServicos().stream()
-                .filter(s -> request.servicosRejeitados().contains(s.getServicoId()))
-                .forEach(s -> s.setStatus(OrdemDeServicoServicoStatus.REJEITADO));
+                    .filter(s -> request.servicosRejeitados().contains(s.getId()))
+                    .forEach(s -> s.setStatus(OrdemDeServicoServicoStatus.REJEITADO));
         }
 
         // Decide status final da OS
         boolean temAprovado = ordem.getServicos().stream()
-            .anyMatch(s -> s.getStatus() == OrdemDeServicoServicoStatus.APROVADO);
+                .anyMatch(s -> s.getStatus() == OrdemDeServicoServicoStatus.APROVADO);
 
         if (temAprovado) {
-            ordem.setStatus(OrdemDeServicoStatus.APROVADA);
+            // Se já estava EM_EXECUCAO, mantém. Se não, vai para APROVADA.
+            if (ordem.getStatus() != OrdemDeServicoStatus.EM_EXECUCAO) {
+                ordem.setStatus(OrdemDeServicoStatus.APROVADA);
+            }
             repository.atualizar(ordem);
-            
+
             OrdemServicoAprovada event = new OrdemServicoAprovada(ordem.getId());
             eventBus.publish(OrdemServicoAprovada.TOPICO, event.toJson());
         } else {
-            ordem.setStatus(OrdemDeServicoStatus.REJEITADA);
-            repository.atualizar(ordem);
+            // Se já estava APROVADA ou EM_EXECUCAO, não muda para REJEITADA (pois há itens
+            // aprovados anteriormente)
+            if (ordem.getStatus() == OrdemDeServicoStatus.AGUARDANDO_APROVACAO) {
+                ordem.setStatus(OrdemDeServicoStatus.REJEITADA);
+                repository.atualizar(ordem);
 
-            OrdemServicoRejeitada event = new OrdemServicoRejeitada(ordem.getId());
-            eventBus.publish(OrdemServicoRejeitada.TOPICO, event.toJson());
+                OrdemServicoRejeitada event = new OrdemServicoRejeitada(ordem.getId());
+                eventBus.publish(OrdemServicoRejeitada.TOPICO, event.toJson());
+            } else {
+                // Apenas salva as alterações nos itens (rejeições de novos itens)
+                repository.atualizar(ordem);
+            }
         }
     }
 }
