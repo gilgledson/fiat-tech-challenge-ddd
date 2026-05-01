@@ -1,10 +1,12 @@
 package br.com.fiap.oficina.api.modules.atendimento.veiculo.api.controller;
 
+import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuario;
 import br.com.fiap.oficina.api.modules.atendimento.veiculo.api.dto.VeiculoRequest;
 import br.com.fiap.oficina.api.modules.atendimento.veiculo.api.dto.VeiculoResponse;
 import br.com.fiap.oficina.api.modules.atendimento.veiculo.application.dto.VeiculoOutput;
 import br.com.fiap.oficina.api.modules.atendimento.veiculo.application.usecase.*;
 import br.com.fiap.oficina.api.shared.api.dto.PaginaResponse;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -24,6 +26,7 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Veículos", description = "Endpoints para gestão de veículos")
+@jakarta.transaction.Transactional
 public class VeiculoController {
 
     private final CadastrarVeiculoUseCase cadastrarVeiculoUseCase;
@@ -51,6 +54,7 @@ public class VeiculoController {
     }
 
     @POST
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE})
     @Operation(summary = "Cadastrar um novo veículo")
     public Response cadastrarVeiculo(@Valid VeiculoRequest request) {
         VeiculoOutput output = cadastrarVeiculoUseCase.executar(
@@ -68,6 +72,7 @@ public class VeiculoController {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE})
     @Operation(summary = "Editar um veículo", description = "Atualiza os dados de um veículo existente.")
     public Response editarVeiculo(
             @Parameter(description = "ID do Veículo", example = "e0281660-5826-4c1f-8cab-238cdb1ac328")
@@ -89,6 +94,7 @@ public class VeiculoController {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE})
     @Operation(summary = "Inativar / Deletar um veículo", description = "Oculta o veículo das listagens. Use ?permanente=true para exclusão permanente.")
     public Response inativarVeiculo(
             @Parameter(description = "ID do Veículo", example = "e0281660-5826-4c1f-8cab-238cdb1ac328")
@@ -107,6 +113,7 @@ public class VeiculoController {
 
     @POST
     @Path("/{id}/ativacao")
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE})
     @Transactional
     @Operation(summary = "Reativar um veículo", description = "Remove o carimbo de data da exclusão lógica, tornando o veículo visível novamente.")
     @APIResponse(responseCode = "200", description = "Veículo reativado com sucesso")
@@ -119,6 +126,7 @@ public class VeiculoController {
     }
 
     @GET
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO, PerfilUsuario.Constants.ATENDENTE})
     @Operation(summary = "Listar veículos", description = "Retorna uma lista paginada de veículos.")
     public Response listarVeiculos(
             @Parameter(description = "Número da página (começa em 0)", example = "0")

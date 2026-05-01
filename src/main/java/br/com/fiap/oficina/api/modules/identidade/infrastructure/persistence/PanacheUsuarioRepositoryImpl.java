@@ -15,13 +15,37 @@ public class PanacheUsuarioRepositoryImpl implements UsuarioRepository, PanacheR
         UsuarioJpaEntity usuarioJpa = new UsuarioJpaEntity();
         usuarioJpa.setId(usuario.getId());
         usuarioJpa.setAtivo(usuario.isAtivo());
-        usuarioJpa.setEmail(usuarioJpa.getEmail());
+        usuarioJpa.setEmail(usuario.getEmail());
         usuarioJpa.setSenhaHash(usuario.getSenhaHash());
-        persist(usuarioJpa);
+        usuarioJpa.setPerfil(usuario.getPerfil());
+        getEntityManager().merge(usuarioJpa);
     }
 
     @Override
     public Optional<Usuario> buscarPorEmail(String email) {
-        return Optional.empty();
+        return find("email", email).firstResultOptional()
+                .map(jpa -> {
+                    Usuario domain = new Usuario(
+                            jpa.getId(),
+                            jpa.getEmail(),
+                            jpa.getSenhaHash(),
+                            jpa.getPerfil(),
+                            jpa.isAtivo());
+                    return domain;
+                });
+    }
+
+    @Override
+    public Optional<Usuario> buscarPorId(UUID id) {
+        return find("id", id).firstResultOptional()
+                .map(jpa -> {
+                    Usuario domain = new Usuario(
+                            jpa.getId(),
+                            jpa.getEmail(),
+                            jpa.getSenhaHash(),
+                            jpa.getPerfil(),
+                            jpa.isAtivo());
+                    return domain;
+                });
     }
 }

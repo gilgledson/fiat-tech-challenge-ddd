@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public interface EditarProdutoUseCase {
-    public Produto executar(UUID id, String nome, String codigoBarras, BigDecimal precoUnitario, BigDecimal quantidade, UnidadeMedida unidadeMedida);
+    public Produto executar(UUID id, String nome, String codigoBarras, BigDecimal precoUnitario, BigDecimal quantidade,
+            UnidadeMedida unidadeMedida);
 
 }

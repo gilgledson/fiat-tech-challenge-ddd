@@ -20,8 +20,7 @@ public record ServicosRequest(
 
         @NotNull(message = "O preço base é obrigatório") @DecimalMin(value = "0.01", message = "O preço base da mão de obra deve ser maior que zero") @Schema(description = "Valor cobrado pela mão de obra", defaultValue = "150.00") @JsonProperty("preco_base") BigDecimal precoBase,
 
-        @Valid // Fundamental! Faz o Quarkus validar as regras dentro da lista também
-        @Schema(description = "Lista opcional de insumos/produtos necessários para este serviço") @JsonProperty("produtos_sugeridos") List<ProdutoSugeridoRequest> produtosSugeridos) {
+        @Schema(description = "Lista opcional de insumos/produtos necessários para este serviço") @JsonProperty("produtos_sugeridos") List<@Valid ProdutoSugeridoRequest> produtosSugeridos) {
     public List<ProdutoSugerido> mapearProdutosParaDominio() {
         if (this.produtosSugeridos == null || this.produtosSugeridos.isEmpty()) {
             return new ArrayList<>();

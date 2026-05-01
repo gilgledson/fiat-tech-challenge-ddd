@@ -14,7 +14,8 @@ public class EditarProdutoUseCaseImpl implements EditarProdutoUseCase {
     private final ProdutoRepository repository;
 
     @Override
-    public Produto executar(UUID id, String nome, String codigoBarras, BigDecimal precoUnitario, BigDecimal quantidade, UnidadeMedida unidadeMedida) {
+    public Produto executar(UUID id, String nome, String codigoBarras, BigDecimal precoUnitario, BigDecimal quantidade,
+            UnidadeMedida unidadeMedida) {
         Produto produto = repository.buscarPorId(id)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado."));
 
@@ -23,8 +24,9 @@ public class EditarProdutoUseCaseImpl implements EditarProdutoUseCase {
                 throw new IllegalArgumentException("Já existe outro produto cadastrado com este código de barras.");
             });
         }
-        produto.atualizarDados(nome, codigoBarras, precoUnitario, quantidade, unidadeMedida);
+        produto.atualizarDados(nome, codigoBarras, precoUnitario, quantidade, produto.getQuantidadeEstoqueReservado(),
+                unidadeMedida);
         repository.editar(produto);
-        return  produto;
+        return produto;
     }
 }

@@ -1,11 +1,13 @@
 package br.com.fiap.oficina.api.modules.catalogo.servico.api.controller;
 
+import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuario;
 import br.com.fiap.oficina.api.modules.catalogo.servico.api.dto.ServicoResponse;
 import br.com.fiap.oficina.api.modules.catalogo.servico.api.dto.ServicosRequest;
 import br.com.fiap.oficina.api.modules.catalogo.servico.application.usecase.*;
 import br.com.fiap.oficina.api.modules.catalogo.servico.application.usecase.dto.ServicoOutput;
 import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.ProdutoSugerido;
 import br.com.fiap.oficina.api.shared.api.dto.PaginaResponse;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -51,6 +53,7 @@ public class ServicoController {
     }
 
     @GET
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO, PerfilUsuario.Constants.ATENDENTE})
     @Operation(summary = "Listar serviços")
     public Response listar(
             @QueryParam("pagina") @Parameter(description = "Número da página (começando do 0)", example = "0") @DefaultValue("0") @Min(value = 0, message = "Página não deve ser negativa") int pagina,
@@ -65,6 +68,7 @@ public class ServicoController {
 
     @POST
     @Path("/{id}/ativacao")
+    @RolesAllowed(PerfilUsuario.Constants.ADMIN)
     @Operation(summary = "Ativar um serviço", description = "Ativa um serviço existente.")
     public Response ativar(
             @Parameter(description = "Id do produto", example = "e0281660-5826-4c1f-8cab-238cdb1ac328") @PathParam("id") UUID id) {
@@ -74,6 +78,7 @@ public class ServicoController {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed(PerfilUsuario.Constants.ADMIN)
     @Operation(summary = "Inativar um serviço", description = "Inativa um serviço existente.")
     public Response inativar(
             @QueryParam("permanente") @Parameter(description = "Se true, deleta o serviço permanentemente", example = "false") @DefaultValue("false") boolean permanente,
@@ -88,13 +93,13 @@ public class ServicoController {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed(PerfilUsuario.Constants.ADMIN)
     @Operation(summary = "Editar um serviço", description = "Atualiza os dados de um serviço existente.")
     public Response editar(
             @Parameter(description = "Id do produto", example = "e0281660-5826-4c1f-8cab-238cdb1ac328") @PathParam("id") UUID id,
             @Valid ServicosRequest request) {
 
-        List<ProdutoSugerido> produtoSugeridosEntity = request.produtosSugeridos().stream()
-                .map((produto) -> new ProdutoSugerido(produto.produtoId(), produto.quantidade())).toList();
+        List<ProdutoSugerido> produtoSugeridosEntity = request.mapearProdutosParaDominio();
 
         ServicoOutput servico = editarServicoUseCase.executar(id, request.nome(), request.tipo(), request.precoBase(),
                 produtoSugeridosEntity);
@@ -103,10 +108,10 @@ public class ServicoController {
     }
 
     @POST
+    @RolesAllowed("ADMIN")
     @Operation(summary = "Cadastrar novo serviço")
     public Response salvar(@Valid ServicosRequest request) {
-        List<ProdutoSugerido> produtoSugerido = request.produtosSugeridos().stream()
-                .map((produto) -> new ProdutoSugerido(produto.produtoId(), produto.quantidade())).toList();
+        List<ProdutoSugerido> produtoSugerido = request.mapearProdutosParaDominio();
 
         ServicoOutput servico = cadastrarServicoUseCase.execute(
                 request.nome(),

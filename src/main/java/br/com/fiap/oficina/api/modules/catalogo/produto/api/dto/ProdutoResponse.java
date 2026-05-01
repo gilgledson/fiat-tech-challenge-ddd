@@ -10,17 +10,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public record ProdutoResponse(UUID id,
-                              String nome,
-                              @JsonProperty("codigo_barras")
-                              String codigoBarras,
-                              @JsonProperty("preco_unitario")
-                              BigDecimal precoUnitario,
-                              @JsonProperty("quantidade_estoque")
-                              BigDecimal quantidadeEstoque,
-                              @JsonProperty("unidade_medida")
-                              UnidadeMedida unidadeMedida,
-                              @JsonProperty("deletado_em")
-                              Optional<LocalDateTime> deletadoEm) {
+        String nome,
+        @JsonProperty("codigo_barras") String codigoBarras,
+        @JsonProperty("preco_unitario") BigDecimal precoUnitario,
+        @JsonProperty("quantidade_estoque_fisico") BigDecimal quantidadeEstoqueFisico,
+        @JsonProperty("quantidade_estoque_reservado") BigDecimal quantidadeEstoqueReservado,
+        @JsonProperty("unidade_medida") UnidadeMedida unidadeMedida,
+        @JsonProperty("deletado_em") Optional<LocalDateTime> deletadoEm) {
 
     public static ProdutoResponse fromEntity(Produto produto) {
         return new ProdutoResponse(
@@ -28,10 +24,10 @@ public record ProdutoResponse(UUID id,
                 produto.getNome(),
                 produto.getCodigoBarras(),
                 produto.getPrecoUnitario(),
-                produto.getQuantidadeEstoque(),
+                produto.getQuantidadeEstoqueFisico(),
+                produto.getQuantidadeEstoqueReservado(),
                 produto.getUnidadeMedida(),
-                produto.getDeletadoEm()
-        );
+                produto.getDeletadoEm());
 
     }
 }

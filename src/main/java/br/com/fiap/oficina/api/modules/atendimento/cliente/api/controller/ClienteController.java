@@ -1,10 +1,12 @@
 package br.com.fiap.oficina.api.modules.atendimento.cliente.api.controller;
 
+import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuario;
 import br.com.fiap.oficina.api.modules.atendimento.cliente.api.dto.ClienteRequest;
 import br.com.fiap.oficina.api.modules.atendimento.cliente.api.dto.ClienteResponse;
 import br.com.fiap.oficina.api.modules.atendimento.cliente.application.dto.ClienteOutput;
 import br.com.fiap.oficina.api.modules.atendimento.cliente.application.usecase.*;
 import br.com.fiap.oficina.api.shared.api.dto.PaginaResponse;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -24,6 +26,7 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Clientes", description = "Endpoints para gestão de clientes")
+@jakarta.transaction.Transactional
 public class ClienteController {
     private final CadastrarClienteUseCase cadastrarClienteUseCase;
     private final ListarClientesUseCase listarClientesUseCase;
@@ -49,6 +52,7 @@ public class ClienteController {
     }
 
     @POST
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE})
     @Operation(summary = "Cadastrar um novo cliente")
     public Response cadastrarCliente(@Valid ClienteRequest request) {
 
@@ -67,6 +71,7 @@ public class ClienteController {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE})
     @Operation(summary = "Editar um cliente", description = "Atualiza os dados de um cliente existente.")
     public Response editarCliente(
             @Parameter(description = "ID do Cliente", example = "e0281660-5826-4c1f-8cab-238cdb1ac328") @PathParam("id") UUID id,
@@ -84,6 +89,7 @@ public class ClienteController {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE})
     @Operation(summary = "Inativar / Deletar um cliente", description = "Oculta o cliente das listagens. Use ?permanente=true para exclusão permanente.")
     public Response inativarCliente(
             @Parameter(description = "ID do Cliente", example = "e0281660-5826-4c1f-8cab-238cdb1ac328") @PathParam("id") UUID id,
@@ -99,6 +105,7 @@ public class ClienteController {
 
     @POST
     @Path("/{id}/ativacao")
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE})
     @Transactional
     @Operation(summary = "Reativar um cliente", description = "Remove o carimbo de data da exclusão lógica, tornando o cliente visível novamente.")
     @APIResponse(responseCode = "200", description = "Cliente reativado com sucesso")
@@ -109,6 +116,7 @@ public class ClienteController {
     }
 
     @GET
+    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO, PerfilUsuario.Constants.ATENDENTE})
     @Operation(summary = "Listar clientes", description = "Retorna uma lista paginada de clientes.")
     public Response listarClientes(
             @Parameter(description = "Número da página (começa em 0)", example = "0") @QueryParam("pagina") @DefaultValue("0") @Min(value = 0, message = "A página não pode ser negativa") int pagina,

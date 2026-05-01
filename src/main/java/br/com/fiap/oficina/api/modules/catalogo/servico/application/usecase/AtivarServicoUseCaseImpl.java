@@ -8,13 +8,13 @@ import lombok.RequiredArgsConstructor;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class AtivarServicoUseCaseImpl implements AtivarServicoUseCase{
+public class AtivarServicoUseCaseImpl implements AtivarServicoUseCase {
     private final ServicoRepository servicoRepository;
 
     @Override
     public void executar(UUID id) {
         Servico servico = servicoRepository.buscarPorId(id)
-                .orElseThrow(() -> new NotFoundException("Produto com o id "+ id.toString() + " não encontrado"));
+                .orElseThrow(() -> new NotFoundException("Produto com o id " + id.toString() + " não encontrado"));
 
         servico.ativar();
 

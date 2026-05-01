@@ -22,7 +22,7 @@ public class ProdutoSugeridoValidator {
         }
 
         Set<UUID> idsParaBuscar = produtosSugeridos.stream()
-                .map(ProdutoSugerido::produtoId)
+                .map(p -> p.produtoId())
                 .collect(Collectors.toSet());
 
         List<Produto> produtosEncontrados = produtoRepository.buscarPorIds(idsParaBuscar.stream().toList());

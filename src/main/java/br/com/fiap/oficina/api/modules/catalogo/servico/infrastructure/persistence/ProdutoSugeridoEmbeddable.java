@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Embeddable
 @Table(name = "SERVICO_PRODUTO_SUGERIDO")
-@NoArgsConstructor // O Hibernate exige um construtor vazio
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter

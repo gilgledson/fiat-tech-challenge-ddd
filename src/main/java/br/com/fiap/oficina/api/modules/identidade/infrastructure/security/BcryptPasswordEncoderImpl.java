@@ -10,4 +10,9 @@ public class BcryptPasswordEncoderImpl implements PasswordEncoder {
     public String criptografar(String senhaPura) {
         return BcryptUtil.bcryptHash(senhaPura);
     }
+
+    @Override
+    public boolean verificar(String senhaPura, String hashSenha) {
+        return BcryptUtil.matches(senhaPura, hashSenha);
+    }
 }

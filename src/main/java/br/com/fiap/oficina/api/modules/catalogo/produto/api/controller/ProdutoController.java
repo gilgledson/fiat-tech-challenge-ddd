@@ -4,7 +4,9 @@ import br.com.fiap.oficina.api.modules.catalogo.produto.api.dto.ProdutoRequest;
 import br.com.fiap.oficina.api.modules.catalogo.produto.api.dto.ProdutoResponse;
 import br.com.fiap.oficina.api.modules.catalogo.produto.application.usecase.*;
 import br.com.fiap.oficina.api.modules.catalogo.produto.domain.entity.Produto;
+import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuario;
 import br.com.fiap.oficina.api.shared.api.dto.PaginaResponse;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -49,13 +51,14 @@ public class ProdutoController {
     }
 
     @POST
+    @RolesAllowed(PerfilUsuario.Constants.ADMIN)
     @Operation(summary = "Cadastrar um novo produto")
     public Response cadastrarProduto(@Valid ProdutoRequest request) {
         Produto novoProduto = cadastrarProdutoUseCase.executar(
                 request.nome(),
                 request.codigoBarras(),
                 request.precoUnitario(),
-                request.quantidadeEstoque(),
+                request.quantidadeEstoqueFisico(),
                 request.unidadeMedida());
 
         ProdutoResponse responseDto = ProdutoResponse.fromEntity(novoProduto);
@@ -65,6 +68,7 @@ public class ProdutoController {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed(PerfilUsuario.Constants.ADMIN)
     @Operation(summary = "Editar um produto", description = "Atualiza os dados de um produto existente.")
     public Response editarProduto(
             @Parameter(description = "ID do Produto", example = "e0281660-5826-4c1f-8cab-238cdb1ac328") @PathParam("id") UUID id,
@@ -75,7 +79,7 @@ public class ProdutoController {
                 request.nome(),
                 request.codigoBarras(),
                 request.precoUnitario(),
-                request.quantidadeEstoque(),
+                request.quantidadeEstoqueFisico(),
                 request.unidadeMedida());
         ProdutoResponse responseDto = ProdutoResponse.fromEntity(produto);
 
@@ -84,6 +88,7 @@ public class ProdutoController {
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed(PerfilUsuario.Constants.ADMIN)
     @Operation(summary = "Inativar / Deletar um produto", description = "Oculta o produto das listagens. Use ?permanente=true para exclusão permanente.")
     public Response inativarProduto(
             @Parameter(description = "ID do Produto", example = "e0281660-5826-4c1f-8cab-238cdb1ac328") @PathParam("id") UUID id,
@@ -99,6 +104,7 @@ public class ProdutoController {
 
     @POST
     @Path("/{id}/ativacao")
+    @RolesAllowed("ADMIN")
     @Transactional
     @Operation(summary = "Reativar um produto", description = "Remove o carimbo de data da exclusão lógica, tornando o produto visível novamente.")
     @APIResponse(responseCode = "200", description = "Produto reativado com sucesso")
@@ -109,6 +115,21 @@ public class ProdutoController {
     }
 
     @GET
+    @Path("/{id}")
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO,
+            PerfilUsuario.Constants.ATENDENTE })
+    @Operation(summary = "Buscar produto por ID")
+    public Response buscarPorId(@PathParam("id") UUID id) {
+        var pagina = listarProdutosUseCase.executar(0, 1000, true);
+        var produto = pagina.itens().stream()
+                .filter(p -> p.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
+        return Response.ok(ProdutoResponse.fromEntity(produto)).build();
+    }
+
+    @GET
+    @RolesAllowed({ "ADMIN", "MECANICO", "ATENDENTE" })
     public Response listarProdutos(
             @Parameter(description = "Número da página (começa em 0)", example = "0") @QueryParam("pagina") @DefaultValue("0") @Min(value = 0, message = "A página não pode ser negativa") int pagina,
 

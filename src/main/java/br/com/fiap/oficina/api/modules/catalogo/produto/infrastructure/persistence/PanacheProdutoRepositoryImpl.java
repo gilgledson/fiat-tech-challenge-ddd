@@ -26,7 +26,8 @@ public class PanacheProdutoRepositoryImpl implements
         entity.setNome(produto.getNome());
         entity.setCodigoBarras(produto.getCodigoBarras());
         entity.setPrecoUnitario(produto.getPrecoUnitario());
-        entity.setQuantidadeEstoque(produto.getQuantidadeEstoque());
+        entity.setQuantidadeEstoqueFisico(produto.getQuantidadeEstoqueFisico());
+        entity.setQuantidadeEstoqueReservado(produto.getQuantidadeEstoqueReservado());
         entity.setUnidadeMedida(produto.getUnidadeMedida());
 
         persist(entity);
@@ -41,10 +42,13 @@ public class PanacheProdutoRepositoryImpl implements
         entity.setNome(produto.getNome());
         entity.setCodigoBarras(produto.getCodigoBarras());
         entity.setPrecoUnitario(produto.getPrecoUnitario());
-        entity.setQuantidadeEstoque(produto.getQuantidadeEstoque());
+        entity.setQuantidadeEstoqueFisico(produto.getQuantidadeEstoqueFisico());
+        entity.setQuantidadeEstoqueReservado(produto.getQuantidadeEstoqueReservado());
         entity.setUnidadeMedida(produto.getUnidadeMedida());
         entity.setDeletadoEm(
                 produto.getDeletadoEm().isPresent() ? produto.getDeletadoEm().get() : null);
+        
+        flush();
     }
 
     @Override
@@ -94,7 +98,8 @@ public class PanacheProdutoRepositoryImpl implements
                 entity.getNome(),
                 entity.getCodigoBarras(),
                 entity.getPrecoUnitario(),
-                entity.getQuantidadeEstoque(),
+                entity.getQuantidadeEstoqueFisico(),
+                entity.getQuantidadeEstoqueReservado(),
                 entity.getUnidadeMedida(),
                 Optional.ofNullable(entity.getDeletadoEm()));
     }

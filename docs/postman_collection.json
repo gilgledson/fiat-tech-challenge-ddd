@@ -1,0 +1,841 @@
+{
+	"info": {
+		"_postman_id": "e36a5d7d-c0bb-4cc7-b77d-ce7d16a33bb1",
+		"name": "Oficina API - Fluxo Completo OS",
+		"description": "Fluxo automatizado para teste do Monolito Modular e Reserva de Estoque organizado por módulos",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Identidade",
+			"item": [
+				{
+					"name": "0. Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"token\", res.access_token);",
+									"pm.test(\"Login Admin Sucesso\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@oficina.com.br\",\n    \"senha\": \"admin123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "1. Criar Usuário",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"var req = JSON.parse(pm.request.body.raw);",
+									"pm.collectionVariables.set(\"usr_id\", res.id);",
+									"pm.collectionVariables.set(\"user_email\", req.email);",
+									"pm.collectionVariables.set(\"user_pwd\", req.senha);",
+									"pm.test(\"Usuário Criado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"mecanico.{{$randomInt}}@oficina.com\",\n    \"senha\": \"senha123\",\n    \"perfil\": \"ADMIN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.1. Login Novo Usuário",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"token\", res.access_token);",
+									"pm.test(\"Login Novo Usuário Sucesso\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{user_email}}\",\n    \"senha\": \"{{user_pwd}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"login"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Atendimento",
+			"item": [
+				{
+					"name": "2. Criar Cliente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"cli_id\", res.id);",
+									"pm.test(\"Cliente Criado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Joaquim da Silva {{$randomInt}}\",\n    \"email\": \"joaquim.{{$randomInt}}@email.com\",\n    \"cpf_cnpj\": \"{{$randomInt}}{{$randomInt}}\",\n    \"telefone\": \"11999999999\",\n    \"usuario_id\": \"{{usr_id}}\",\n    \"endereco\": {\n        \"logradouro\": \"Rua das Oficinas\",\n        \"numero\": \"100\",\n        \"bairro\": \"Centro\",\n        \"cidade\": \"São Paulo\",\n        \"estado\": \"SP\",\n        \"cep\": \"01234567\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes"
+							]
+						}
+					}
+				},
+				{
+					"name": "3. Criar Veículo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"vei_id\", res.id);",
+									"pm.test(\"Veículo Criado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cliente_id\": \"{{cli_id}}\",\n    \"placa\": \"ABC{{$randomInt}}\",\n    \"marca\": \"Fiat\",\n    \"modelo\": \"Uno\",\n    \"ano\": 2020\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/veiculos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"veiculos"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Catálogo",
+			"item": [
+				{
+					"name": "4. Criar Produto (Estoque)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"prod_id\", res.id);",
+									"pm.test(\"Produto Criado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Óleo 5W30 Sintético {{$randomInt}}\",\n    \"codigo_barras\": \"CB-{{$randomInt}}\",\n    \"preco_unitario\": 65.0,\n    \"quantidade_estoque_fisico\": 10,\n    \"unidade_medida\": \"UN\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/produtos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produtos"
+							]
+						}
+					}
+				},
+				{
+					"name": "5. Criar Serviço",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"serv_id\", res.id);",
+									"pm.test(\"Serviço Criado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Troca de Óleo e Filtros\",\n    \"tipo\": \"PREVENTIVO\",\n    \"preco_base\": 120.0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/servicos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"servicos"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Operacional",
+			"item": [
+				{
+					"name": "1.2. Criar Funcionário",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function generateCPF() {",
+									"    const n = Array.from({length: 9}, () => Math.floor(Math.random() * 9));",
+									"    const d = Array.from({length: 2}, () => Math.floor(Math.random() * 9));",
+									"    return `${n[0]}${n[1]}${n[2]}.${n[3]}${n[4]}${n[5]}.${n[6]}${n[7]}${n[8]}-${d[0]}${d[1]}`;",
+									"}",
+									"pm.collectionVariables.set(\"random_cpf\", generateCPF());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"func_id\", res.id);",
+									"pm.test(\"Funcionário Criado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"usuario_id\": \"{{usr_id}}\",\n    \"nome\": \"Mecanico\",\n    \"sobrenome\": \"Silva\",\n    \"cpf\": \"{{random_cpf}}\",\n    \"telefone\": \"(11) 99999-9999\",\n    \"cargo\": \"MECANICO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/funcionarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"funcionarios"
+							]
+						}
+					}
+				},
+				{
+					"name": "6. Abrir Ordem de Serviço",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"os_id\", res.id);",
+									"pm.test(\"OS Aberta\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cliente_id\": \"{{cli_id}}\",\n    \"veiculo_id\": \"{{vei_id}}\",\n    \"descricao_problema\": \"Troca de óleo de rotina\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens"
+							]
+						}
+					}
+				},
+				{
+					"name": "7. Adicionar Produto à OS (Reserva)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Produto Adicionado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"produto_id\": \"{{prod_id}}\",\n    \"quantidade\": 1.0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/produtos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"produtos"
+							]
+						}
+					}
+				},
+				{
+					"name": "7.1. Verificar Reserva de Estoque",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.test(\"Estoque Reservado com Sucesso\", () => pm.expect(res.quantidade_estoque_reservado).to.equal(1));",
+									"pm.test(\"Estoque Físico Mantido\", () => pm.expect(res.quantidade_estoque_fisico).to.equal(10));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/produtos/{{prod_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produtos",
+								"{{prod_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "8. Adicionar Serviço à OS",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Serviço Adicionado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"servico_id\": \"{{serv_id}}\",\n    \"quantidade\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"servicos"
+							]
+						}
+					}
+				},
+				{
+					"name": "9. Concluir Diagnóstico",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/concluir-diagnostico",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"concluir-diagnostico"
+							]
+						}
+					}
+				},
+				{
+					"name": "10. Aprovar OS",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/aprovar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"aprovar"
+							]
+						}
+					}
+				},
+				{
+					"name": "11. Iniciar Execução OS",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/iniciar-execucao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"iniciar-execucao"
+							]
+						}
+					}
+				},
+				{
+					"name": "12. Iniciar Execução do Serviço",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_id}}/iniciar-execucao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"servicos",
+								"{{serv_id}}",
+								"iniciar-execucao"
+							]
+						}
+					}
+				},
+				{
+					"name": "13. Finalizar Execução do Serviço",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/servicos/{{serv_id}}/finalizar-execucao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"servicos",
+								"{{serv_id}}",
+								"finalizar-execucao"
+							]
+						}
+					}
+				},
+				{
+					"name": "14. Finalizar OS (Baixa Estoque)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/concluir-execucao",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id}}",
+								"concluir-execucao"
+							]
+						}
+					}
+				},
+				{
+					"name": "15. Verificar Estoque Final",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.test(\"Estoque Físico Baixado\", () => pm.expect(res.quantidade_estoque_fisico).to.equal(9));",
+									"pm.test(\"Reserva Zerada\", () => pm.expect(res.quantidade_estoque_reservado).to.equal(0));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/produtos/{{prod_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"produtos",
+								"{{prod_id}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Faturamento",
+			"item": [
+				{
+					"name": "16. Obter Fatura por OS ID (JSON)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 404 || pm.response.code === 500) {",
+									"    if (!pm.collectionVariables.get(\"fatura_retry_count\")) {",
+									"        pm.collectionVariables.set(\"fatura_retry_count\", 1);",
+									"    } else {",
+									"        var count = parseInt(pm.collectionVariables.get(\"fatura_retry_count\"));",
+									"        pm.collectionVariables.set(\"fatura_retry_count\", count + 1);",
+									"    }",
+									"    ",
+									"    if (parseInt(pm.collectionVariables.get(\"fatura_retry_count\")) <= 5) {",
+									"        console.log(\"Fatura não encontrada, tentando novamente em 1s... Tentativa \" + pm.collectionVariables.get(\"fatura_retry_count\"));",
+									"        postman.setNextRequest(pm.info.requestName);",
+									"    } else {",
+									"        pm.test(\"Fatura Encontrada após retentativas\", () => pm.response.to.be.success);",
+									"    }",
+									"} else {",
+									"    var res = pm.response.json();",
+									"    pm.collectionVariables.set(\"fatura_retry_count\", 0);",
+									"    pm.collectionVariables.set(\"fatura_id\", res.id);",
+									"    pm.test(\"Fatura Encontrada\", () => pm.response.to.be.success);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/faturas/ordem-servico/{{os_id}}/json",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"faturas",
+								"ordem-servico",
+								"{{os_id}}",
+								"json"
+							]
+						}
+					}
+				},
+				{
+					"name": "17. Confirmar Pagamento",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"metodoPagamento\": \"PIX\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/faturas/{{fatura_id}}/confirmar-pagamento",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"faturas",
+								"{{fatura_id}}",
+								"confirmar-pagamento"
+							]
+						}
+					}
+				},
+				{
+					"name": "18. Baixar PDF da Fatura",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"PDF Baixado com Sucesso\", () => pm.response.to.be.success);",
+									"pm.test(\"ContentType é PDF\", () => pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/faturas/{{fatura_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"faturas",
+								"{{fatura_id}}"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8383"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "usr_id",
+			"value": ""
+		},
+		{
+			"key": "user_email",
+			"value": ""
+		},
+		{
+			"key": "user_pwd",
+			"value": ""
+		},
+		{
+			"key": "func_id",
+			"value": ""
+		},
+		{
+			"key": "cli_id",
+			"value": ""
+		},
+		{
+			"key": "vei_id",
+			"value": ""
+		},
+		{
+			"key": "prod_id",
+			"value": ""
+		},
+		{
+			"key": "serv_id",
+			"value": ""
+		},
+		{
+			"key": "os_id",
+			"value": ""
+		},
+		{
+			"key": "fatura_id",
+			"value": ""
+		},
+		{
+			"key": "fatura_retry_count",
+			"value": "0"
+		}
+	]
+}

@@ -4,7 +4,6 @@ import br.com.fiap.oficina.api.modules.catalogo.produto.application.repository.P
 import br.com.fiap.oficina.api.modules.catalogo.produto.domain.entity.Produto;
 import br.com.fiap.oficina.api.modules.catalogo.servico.application.usecase.dto.ProdutoSugeridoOutput;
 import br.com.fiap.oficina.api.modules.catalogo.servico.application.usecase.dto.ServicoOutput;
-import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.ProdutoSugerido;
 import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.Servico;
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +25,7 @@ public class ServicoOutputMapper {
 
                 Set<UUID> todosIds = servicos.stream()
                                 .flatMap(s -> s.getProdutosSugeridos().stream())
-                                .map(ProdutoSugerido::produtoId)
+                                .map(p -> p.produtoId())
                                 .collect(Collectors.toSet());
 
                 Map<UUID, String> mapaNomes = buscarMapaDeNomes(todosIds);
@@ -38,7 +37,7 @@ public class ServicoOutputMapper {
 
         public ServicoOutput mapear(Servico servico) {
                 Set<UUID> ids = servico.getProdutosSugeridos().stream()
-                                .map(ProdutoSugerido::produtoId)
+                                .map(p -> p.produtoId())
                                 .collect(Collectors.toSet());
 
                 Map<UUID, String> mapaNomes = buscarMapaDeNomes(ids);

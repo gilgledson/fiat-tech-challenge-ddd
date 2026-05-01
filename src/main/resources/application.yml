@@ -1,5 +1,6 @@
 quarkus:
   # Configurações do Servidor Web
+  profile: dev
   swagger-ui:
     always-include: true
   http:
@@ -13,35 +14,28 @@ quarkus:
     jdbc:
       url: jdbc:postgresql://localhost:5432/oficina
 
-  # Configurações do Hibernate (Desligado para o Flyway assumir)
+  # Configurações do Hibernate (Desativado para o Flyway assumir o controle)
   hibernate-orm:
-    database:
-      generation: none
+    log:
+      sql: true
 
-  # Configurações do Flyway (Migrations)
+  # Configurações do Flyway (Migrações)
   flyway:
     migrate-at-start: true
-    locations: classpath:db/migration
-  
-  "%dev":
-    quarkus:
-      flyway:
-        locations: classpath:db/migration,classpath:db/testdata
-
-  "%test":
-    quarkus:
-      flyway:
-        locations: classpath:db/migration,classpath:db/testdata
-        
+    repair-at-start: true
+    baseline-on-migrate: true
+    out-of-order: true
+    ignore-missing-migrations: true
   # Configuração da extensão de Segurança (SmallRye JWT)
   smallrye-jwt:
     enabled: true
 
-# Configurações do MicroProfile JWT (Padrão de mercado)
-mp:
+smallrye:
   jwt:
+    sign:
+      key:
+        location: "privateKey.pem"
     verify:
-      # Quem está emitindo esse token? (Isso será validado nas requisições)
-      issuer: "https://oficina.fiap.com.br"
-      # Onde fica a chave pública para validar a assinatura do token
-      # publickey-location: "publicKey.pem"
+      issuer: "oficina-api-interna"
+      key:
+        location: "publicKey.pem"

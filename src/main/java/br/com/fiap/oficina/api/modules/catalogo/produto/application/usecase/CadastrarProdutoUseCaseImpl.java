@@ -8,18 +8,19 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 
 @RequiredArgsConstructor
-public class CadastrarProdutoUseCaseImpl implements CadastrarProdutoUseCase{
+public class CadastrarProdutoUseCaseImpl implements CadastrarProdutoUseCase {
     private final ProdutoRepository repository;
 
     @Override
-    public Produto executar(String nome, String codigoBarras, BigDecimal precoUnitario, BigDecimal quantidade, UnidadeMedida unidadeMedida) {
+    public Produto executar(String nome, String codigoBarras, BigDecimal precoUnitario, BigDecimal quantidade,
+            UnidadeMedida unidadeMedida) {
 
         if (repository.buscarPorCodigoBarras(codigoBarras).isPresent()) {
             throw new IllegalArgumentException("Já existe um produto com este código de barras.");
         }
 
-        Produto produto = new Produto(nome,codigoBarras,precoUnitario, quantidade, unidadeMedida);
+        Produto produto = new Produto(nome, codigoBarras, precoUnitario, quantidade, BigDecimal.ZERO, unidadeMedida);
         repository.salvar(produto);
-        return  produto;
+        return produto;
     }
 }

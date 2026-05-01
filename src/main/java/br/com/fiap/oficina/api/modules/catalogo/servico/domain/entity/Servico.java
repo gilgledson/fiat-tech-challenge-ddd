@@ -1,6 +1,5 @@
 package br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@AllArgsConstructor
 @Getter
 @Setter
 public class Servico {
@@ -21,6 +19,64 @@ public class Servico {
     private LocalDateTime deletadoEm;
 
     private List<ProdutoSugerido> produtosSugeridos;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public TipoServico getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(TipoServico tipo) {
+        this.tipo = tipo;
+    }
+
+    public BigDecimal getPrecoBase() {
+        return precoBase;
+    }
+
+    public void setPrecoBase(BigDecimal precoBase) {
+        this.precoBase = precoBase;
+    }
+
+    public LocalDateTime getDeletadoEm() {
+        return deletadoEm;
+    }
+
+    public void setDeletadoEm(LocalDateTime deletadoEm) {
+        this.deletadoEm = deletadoEm;
+    }
+
+    public List<ProdutoSugerido> getProdutosSugeridos() {
+        return produtosSugeridos;
+    }
+
+    public void setProdutosSugeridos(List<ProdutoSugerido> produtosSugeridos) {
+        this.produtosSugeridos = produtosSugeridos;
+    }
+
+    public Servico(UUID id, String nome, TipoServico tipo, BigDecimal precoBase, LocalDateTime deletadoEm,
+            List<ProdutoSugerido> produtosSugeridos) {
+        this.id = id;
+        this.nome = nome;
+        this.tipo = tipo;
+        this.precoBase = precoBase;
+        this.deletadoEm = deletadoEm;
+        this.produtosSugeridos = produtosSugeridos != null ? produtosSugeridos : new ArrayList<>();
+    }
 
     public Servico(String nome, TipoServico tipo, BigDecimal precoBase, List<ProdutoSugerido> produtosSugeridos) {
         this.id = UUID.randomUUID();
@@ -33,7 +89,8 @@ public class Servico {
         validarEstado();
     }
 
-    public void atualizar(String nome, TipoServico tipo, BigDecimal precoBase, List<ProdutoSugerido> produtosSugeridos){
+    public void atualizar(String nome, TipoServico tipo, BigDecimal precoBase,
+            List<ProdutoSugerido> produtosSugeridos) {
         this.nome = nome;
         this.tipo = tipo;
         this.precoBase = precoBase;
@@ -50,8 +107,8 @@ public class Servico {
         this.deletadoEm = LocalDateTime.now();
     }
 
-
-    public static Servico reconstituir(UUID id, String nome, TipoServico tipo, BigDecimal precoBase, LocalDateTime deletadoEm, List<ProdutoSugerido> produtosSugeridos) {
+    public static Servico reconstituir(UUID id, String nome, TipoServico tipo, BigDecimal precoBase,
+            LocalDateTime deletadoEm, List<ProdutoSugerido> produtosSugeridos) {
         return new Servico(id, nome, tipo, precoBase, deletadoEm, produtosSugeridos);
     }
 

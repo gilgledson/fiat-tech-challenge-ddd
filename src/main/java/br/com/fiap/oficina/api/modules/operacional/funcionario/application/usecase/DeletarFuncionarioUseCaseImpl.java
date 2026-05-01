@@ -1,0 +1,22 @@
+package br.com.fiap.oficina.api.modules.operacional.funcionario.application.usecase;
+
+import br.com.fiap.oficina.api.modules.operacional.funcionario.application.repository.FuncionarioRepository;
+import jakarta.ws.rs.NotFoundException;
+import java.util.UUID;
+
+public class DeletarFuncionarioUseCaseImpl implements DeletarFuncionarioUseCase {
+
+    private final FuncionarioRepository repository;
+
+    public DeletarFuncionarioUseCaseImpl(FuncionarioRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public void executar(UUID id) {
+        repository.buscarPorId(id)
+                .orElseThrow(() -> new NotFoundException("Funcionário não encontrado"));
+
+        repository.deletar(id);
+    }
+}

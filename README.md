@@ -92,14 +92,30 @@ src/main/java/.../modules/<contexto>/<agregado>/
 | [Hibernate ORM + Panache](https://quarkus.io/guides/hibernate-orm-panache) | — | Persistência e repositórios JPA |
 | [PostgreSQL](https://www.postgresql.org/) | — | Banco de dados relacional |
 | [Flyway](https://flywaydb.org/) | — | Versionamento e migração de banco de dados |
+| [DataFaker](https://www.datafaker.net/) | 2.2.2 | Geração de dados realistas para semeadura (Seeding) |
 | [SmallRye JWT](https://quarkus.io/guides/security-jwt) | — | Autenticação e autorização via tokens JWT |
 | [SmallRye OpenAPI](https://quarkus.io/guides/openapi-swaggerui) | — | Documentação automática da API (Swagger UI) |
 | [Hibernate Validator](https://hibernate.org/validator/) | — | Validação de dados de entrada (Bean Validation) |
-| [Lombok](https://projectlombok.org/) | 1.18.30 | Redução de boilerplate (getters, construtores) |
+| [Lombok](https://projectlombok.org/) | 1.18.34 | Redução de boilerplate (getters, construtores) |
 | [JUnit 5](https://junit.org/junit5/) | — | Framework de testes unitários |
 | [Mockito](https://site.mockito.org/) | 5.11.0 | Mock de dependências nos testes unitários |
 | [JaCoCo](https://www.jacoco.org/) | 0.8.12 | Cobertura de código dos testes |
 | [Maven](https://maven.apache.org/) | — | Gerenciamento de dependências e build |
+
+---
+
+## 🌱 Semeadura de Dados (Seeding)
+
+Para facilitar o desenvolvimento e testes, implementamos um sistema de **Semeadura Modular** que popula o banco de dados automaticamente ao iniciar a aplicação em ambiente de desenvolvimento.
+
+### Como funciona:
+- **Ativação Automática**: O sistema detecta o profile (`quarkus.profile`) e executa apenas se **não** for `prod`.
+- **Arquitetura Modular**: Cada módulo possui seu próprio `Seeder` e `Factory` utilizando a biblioteca **DataFaker**.
+- **Dados Gerados**:
+  - **Identidade**: Usuários administradores, mecânicos e atendentes.
+  - **Catálogo**: Produtos com estoque e serviços variados.
+  - **Atendimento**: Clientes com endereços brasileiros reais e veículos vinculados.
+  - **Operacional**: Ordens de Serviço em diversos estados (abertas, em execução, finalizadas) para alimentar relatórios.
 
 ---
 
@@ -116,7 +132,33 @@ O schema é versionado via **Flyway** com migrations incrementais:
 | `V1.0.4` | Criação das tabelas de itens da OS |
 | `V1.0.5` | Criação da tabela de fatura |
 | `V1.0.6` | Alterações nas tabelas de `CLIENTE` e `VEICULO` (exclusão lógica, email) |
+| `V1.0.9` | Criação da tabela de fatura |
+| `V1.1.0` | Adição de suporte a reserva de estoque no catálogo |
+| `V1.1.1` | Controle de concorrência otimista (Versioning) para produtos |
 | `V2` *(testdata)* | Seeds de produtos e serviços para ambiente de testes |
+
+---
+
+## 🏗️ Arquitetura de Monolito Modular
+
+O projeto foi refatorado para uma estrutura de **Monolito Modular**, garantindo o baixo acoplamento entre os contextos de negócio:
+
+### Comunicação entre Módulos
+- **Gateways**: O módulo `Operacional` (Ordens de Serviço) não conhece as entidades JPA de outros módulos. Ele utiliza interfaces de Gateway para consultar dados.
+- **SnapshotDTOs**: A troca de informações entre módulos é feita através de DTOs imutáveis, evitando o vazamento de entidades de domínio.
+- **Isolamento de Banco**: Cada módulo gerencia suas próprias tabelas, respeitando as fronteiras do contexto.
+
+### 📦 Gestão de Estoque
+Implementamos uma lógica de reserva de estoque robusta para evitar vendas de produtos inexistentes:
+
+1.  **Quantidade Física**: Representa o que realmente existe na prateleira.
+2.  **Quantidade Reservada**: Representa itens vinculados a Ordens de Serviço abertas/aprovadas.
+3.  **Quantidade Disponível**: Calculada dinamicamente (`Física - Reservada`).
+
+**Ciclo de Vida:**
+- **Inclusão na OS**: O sistema incrementa a `Quantidade Reservada`.
+- **Finalização da OS**: O sistema decrementa tanto a `Quantidade Física` quanto a `Reservada`.
+- **Cancelamento da OS**: O sistema decrementa a `Quantidade Reservada`, tornando o item disponível novamente.
 
 ---
 
@@ -236,6 +278,47 @@ O projeto conta com testes **unitários puros** (sem dependência do container Q
 | | `UseCaseTests` | 9 | Cadastrar, Editar, Deletar, Ativar, Listar |
 | **Shared** | `PaginaTest` | 1 | Utilitário de paginação |
 | **Total** | | **80** | |
+
+---
+
+### 🔄 Testes de Integração (E2E) com Newman
+
+Para validar o fluxo completo do Monolito Modular (Identidade -> Atendimento -> Catálogo -> Operacional), utilizamos o **Newman**, que é o executor de coleções do Postman via linha de comando.
+
+#### 📦 Instalação do Newman
+
+1.  **Node.js**: Certifique-se de ter o [Node.js](https://nodejs.org/) instalado em sua máquina.
+2.  **Instalação Global**: Abra o terminal e execute:
+    ```bash
+    npm install -g newman
+    ```
+3.  **Repórter HTML (Opcional)**: Para gerar relatórios visuais:
+    ```bash
+    npm install -g newman-reporter-htmlextra
+    ```
+
+#### 🚀 Executando os Testes
+
+Com a aplicação rodando (`docker-compose up` ou `mvn quarkus:dev`), execute o comando abaixo na raiz do projeto:
+
+```bash
+newman run docs/postman_collection.json --env-var "baseUrl=http://localhost:8383"
+```
+
+**Para gerar um relatório HTML detalhado:**
+```bash
+newman run docs/postman_collection.json --env-var "baseUrl=http://localhost:8383" -r htmlextra
+```
+*O relatório será gerado na pasta `newman/`.*
+
+#### 🧪 O que é testado?
+
+Nossa collection automatizada valida:
+1.  **Autenticação**: Fluxo de login e geração de tokens JWT para diferentes perfis.
+2.  **Segurança**: Validação de `@RolesAllowed` (ex: Cliente tentando acessar área administrativa).
+3.  **Fluxo de Negócio**: Abertura de OS -> Adição de Itens -> Aprovação -> Execução -> Finalização.
+4.  **Cálculos**: Verificação de preços totais, descontos e taxas.
+5.  **Estoque**: Validação de baixa física e reserva de estoque em tempo real.
 
 ---
 

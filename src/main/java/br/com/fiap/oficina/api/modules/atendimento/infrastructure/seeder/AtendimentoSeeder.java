@@ -1,0 +1,62 @@
+package br.com.fiap.oficina.api.modules.atendimento.infrastructure.seeder;
+
+import br.com.fiap.oficina.api.modules.atendimento.cliente.application.repository.ClienteRepository;
+import br.com.fiap.oficina.api.modules.atendimento.cliente.domain.entity.Cliente;
+import br.com.fiap.oficina.api.modules.atendimento.cliente.infrastructure.seeder.ClienteFactory;
+import br.com.fiap.oficina.api.modules.atendimento.veiculo.application.repository.VeiculoRepository;
+import br.com.fiap.oficina.api.modules.atendimento.veiculo.infrastructure.seeder.VeiculoFactory;
+import br.com.fiap.oficina.api.modules.identidade.application.repository.UsuarioRepository;
+import br.com.fiap.oficina.api.modules.identidade.domain.entity.Usuario;
+import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuario;
+import br.com.fiap.oficina.api.modules.identidade.infrastructure.seeder.UsuarioFactory;
+import br.com.fiap.oficina.api.shared.infrastructure.seeder.Seeder;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+@ApplicationScoped
+public class AtendimentoSeeder implements Seeder {
+
+    @ConfigProperty(name = "quarkus.profile")
+    private String ambiente;
+
+    @Inject
+    ClienteRepository clienteRepository;
+
+    @Inject
+    ClienteFactory clienteFactory;
+
+    @Inject
+    VeiculoRepository veiculoRepository;
+
+    @Inject
+    VeiculoFactory veiculoFactory;
+
+    @Inject
+    UsuarioRepository usuarioRepository;
+
+    @Inject
+    UsuarioFactory usuarioFactory;
+
+    @Override
+    public void execute() {
+        if ("prod".equals(ambiente)) {
+            return;
+        }
+
+        if (clienteRepository.listarTodos(0, 1, false).totalElementos() == 0) {
+            // Cria alguns clientes de teste
+            for (int i = 0; i < 5; i++) {
+                // Cada cliente precisa de um usuário com perfil CLIENTE
+                Usuario usuario = usuarioFactory.create(PerfilUsuario.CLIENTE);
+                usuarioRepository.salvar(usuario);
+                
+                Cliente cliente = clienteFactory.create(usuario.getId());
+                clienteRepository.salvar(cliente);
+
+                // Cria um veículo para cada cliente
+                veiculoRepository.salvar(veiculoFactory.create(cliente.getId()));
+            }
+        }
+    }
+}

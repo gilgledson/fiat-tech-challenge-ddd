@@ -48,7 +48,7 @@ class CadastrarProdutoUseCaseTest {
     @DisplayName("Deve lançar exceção quando código de barras já existir")
     void deveLancarExcecaoParaCodigoBarrasDuplicado() {
         Produto existente = new Produto("Produto Existente", "7891234567890",
-                new BigDecimal("10"), BigDecimal.ONE, UnidadeMedida.UN);
+                new BigDecimal("10"), BigDecimal.ONE, BigDecimal.ZERO, UnidadeMedida.UN);
         when(repository.buscarPorCodigoBarras("7891234567890")).thenReturn(Optional.of(existente));
 
         assertThrows(IllegalArgumentException.class, () ->

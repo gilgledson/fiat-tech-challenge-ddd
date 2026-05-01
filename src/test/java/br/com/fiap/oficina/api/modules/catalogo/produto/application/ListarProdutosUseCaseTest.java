@@ -32,7 +32,7 @@ class ListarProdutosUseCaseTest {
     @Test
     @DisplayName("Deve listar produtos paginados")
     void deveListarProdutos() {
-        Produto produto = new Produto("Oleo", "123456", BigDecimal.TEN, BigDecimal.TEN, UnidadeMedida.LT);
+        Produto produto = new Produto("Oleo", "123456", BigDecimal.TEN, BigDecimal.TEN, BigDecimal.ZERO, UnidadeMedida.LT);
         Pagina<Produto> paginaMock = new Pagina<>(List.of(produto), 0, 10, 1, 1);
         
         when(repository.listarTodos(anyInt(), anyInt(), anyBoolean())).thenReturn(paginaMock);

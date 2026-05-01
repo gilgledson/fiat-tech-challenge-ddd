@@ -38,7 +38,7 @@ class EditarProdutoUseCaseTest {
     void deveEditarComSucesso() {
         UUID id = UUID.randomUUID();
         Produto produto = Produto.reconstituir(id, "Óleo Antigo", "123",
-                new BigDecimal("40.00"), BigDecimal.TEN, UnidadeMedida.UN, Optional.empty());
+                new BigDecimal("40.00"), BigDecimal.TEN, BigDecimal.ZERO, UnidadeMedida.UN, Optional.empty());
         when(repository.buscarPorId(id)).thenReturn(Optional.of(produto));
 
         Produto resultado = useCase.executar(id, "Óleo Novo", "456",

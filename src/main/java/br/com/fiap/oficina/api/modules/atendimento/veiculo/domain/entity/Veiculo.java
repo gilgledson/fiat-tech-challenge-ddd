@@ -19,6 +19,14 @@ public class Veiculo {
     private int ano;
     private Optional<LocalDateTime> deletadoEm;
 
+    public UUID getId() { return id; }
+    public UUID getClienteId() { return clienteId; }
+    public String getPlaca() { return placa; }
+    public String getMarca() { return marca; }
+    public String getModelo() { return modelo; }
+    public int getAno() { return ano; }
+    public Optional<LocalDateTime> getDeletadoEm() { return deletadoEm; }
+
     public Veiculo(UUID clienteId, String placa, String marca, String modelo, int ano) {
         this.id = UUID.randomUUID();
         this.clienteId = clienteId;

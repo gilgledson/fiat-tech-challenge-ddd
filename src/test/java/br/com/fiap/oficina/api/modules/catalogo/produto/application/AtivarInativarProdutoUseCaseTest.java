@@ -44,7 +44,7 @@ class AtivarInativarProdutoUseCaseTest {
     void deveInativarComSucesso() {
         UUID id = UUID.randomUUID();
         Produto produto = Produto.reconstituir(id, "Produto", "123",
-                BigDecimal.TEN, BigDecimal.ONE, UnidadeMedida.UN, Optional.empty());
+                BigDecimal.TEN, BigDecimal.ONE, BigDecimal.ZERO, UnidadeMedida.UN, Optional.empty());
         when(repository.buscarPorId(id)).thenReturn(Optional.of(produto));
 
         inativarUseCase.executar(id);
@@ -68,7 +68,7 @@ class AtivarInativarProdutoUseCaseTest {
     void inativarProdutoJaInativoDeveLancarExcecao() {
         UUID id = UUID.randomUUID();
         Produto produto = Produto.reconstituir(id, "Produto", "123",
-                BigDecimal.TEN, BigDecimal.ONE, UnidadeMedida.UN, Optional.of(LocalDateTime.now()));
+                BigDecimal.TEN, BigDecimal.ONE, BigDecimal.ZERO, UnidadeMedida.UN, Optional.of(LocalDateTime.now()));
         when(repository.buscarPorId(id)).thenReturn(Optional.of(produto));
 
         assertThrows(IllegalArgumentException.class, () -> inativarUseCase.executar(id));
@@ -81,7 +81,7 @@ class AtivarInativarProdutoUseCaseTest {
     void deveAtivarComSucesso() {
         UUID id = UUID.randomUUID();
         Produto produto = Produto.reconstituir(id, "Produto", "123",
-                BigDecimal.TEN, BigDecimal.ONE, UnidadeMedida.UN, Optional.of(LocalDateTime.now()));
+                BigDecimal.TEN, BigDecimal.ONE, BigDecimal.ZERO, UnidadeMedida.UN, Optional.of(LocalDateTime.now()));
         when(repository.buscarPorId(id)).thenReturn(Optional.of(produto));
 
         ativarUseCase.executar(id);
@@ -104,7 +104,7 @@ class AtivarInativarProdutoUseCaseTest {
     void ativarProdutoJaAtivoDeveLancarExcecao() {
         UUID id = UUID.randomUUID();
         Produto produto = Produto.reconstituir(id, "Produto", "123",
-                BigDecimal.TEN, BigDecimal.ONE, UnidadeMedida.UN, Optional.empty());
+                BigDecimal.TEN, BigDecimal.ONE, BigDecimal.ZERO, UnidadeMedida.UN, Optional.empty());
         when(repository.buscarPorId(id)).thenReturn(Optional.of(produto));
 
         assertThrows(IllegalArgumentException.class, () -> ativarUseCase.executar(id));
