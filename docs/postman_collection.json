@@ -1107,6 +1107,75 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "Relatórios",
+			"item": [
+				{
+					"name": "19. Obter Esforço da OS",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Relatório de Esforço Encontrado\", () => pm.response.to.be.success);",
+									"var res = pm.response.json();",
+									"pm.test(\"OS ID está correto\", () => pm.expect(res.ordemDeServicoId).to.equal(pm.collectionVariables.get(\"os_id\")));",
+									"pm.test(\"Total de serviços realizados deve ser 3\", () => pm.expect(res.totalServicosRealizados).to.equal(3));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/relatorios/esforco-os/{{os_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"relatorios",
+								"esforco-os",
+								"{{os_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "20. Obter Tempo Médio dos Serviços",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Relatório de Tempos Médios Sucesso\", () => pm.response.to.be.success);",
+									"var res = pm.response.json();",
+									"pm.test(\"Deve retornar uma lista de serviços\", () => pm.expect(res).to.be.an('array'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/relatorios/tempo-medio-servicos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"relatorios",
+								"tempo-medio-servicos"
+							]
+						}
+					}
+				}
+			]
 		}
 	],
 	"variable": [

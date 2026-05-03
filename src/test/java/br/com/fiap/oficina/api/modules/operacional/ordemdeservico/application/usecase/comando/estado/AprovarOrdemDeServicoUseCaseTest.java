@@ -49,14 +49,15 @@ class AprovarOrdemDeServicoUseCaseTest {
         os.setStatus(OrdemDeServicoStatus.AGUARDANDO_APROVACAO);
         
         List<OrdemDeServicoServicos> servicos = new ArrayList<>();
-        servicos.add(new OrdemDeServicoServicos(osId, servicoCorretivoId, "Freio", 1, BigDecimal.TEN, BigDecimal.TEN, OrdemDeServicoServicoStatus.PENDENTE, TipoServico.CORRETIVO));
+        OrdemDeServicoServicos servicoCorretivo = new OrdemDeServicoServicos(osId, servicoCorretivoId, "Freio", 1, BigDecimal.TEN, BigDecimal.TEN, OrdemDeServicoServicoStatus.PENDENTE, TipoServico.CORRETIVO);
+        servicos.add(servicoCorretivo);
         os.setServicos(servicos);
 
         when(repository.buscarPorId(osId)).thenReturn(Optional.of(os));
 
         AprovarServicoRequest request = new AprovarServicoRequest(
                 List.of(), // aprovados
-                List.of(servicoCorretivoId) // rejeitados
+                List.of(servicoCorretivo.getId()) // rejeitados - ID da instância, não do catálogo
         );
 
         // Act & Assert
@@ -89,7 +90,7 @@ class AprovarOrdemDeServicoUseCaseTest {
         when(repository.buscarPorId(osId)).thenReturn(Optional.of(os));
 
         AprovarServicoRequest request = new AprovarServicoRequest(
-                List.of(servicoExtraId),
+                List.of(servicoExtra.getId()), // ID da instância, não do catálogo
                 List.of()
         );
 

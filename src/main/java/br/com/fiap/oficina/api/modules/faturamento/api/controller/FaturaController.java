@@ -2,11 +2,13 @@ package br.com.fiap.oficina.api.modules.faturamento.api.controller;
 
 import br.com.fiap.oficina.api.modules.faturamento.application.usecase.consultas.BaixarFaturaPorOrdemServicoUseCase;
 import br.com.fiap.oficina.api.modules.faturamento.application.usecase.consultas.BaixarFaturaUseCase;
+import br.com.fiap.oficina.api.modules.faturamento.api.dto.ConfirmarPagamentoRequest;
 import br.com.fiap.oficina.api.modules.faturamento.application.usecase.comandos.ConfirmarPagamentoFaturaUseCase;
 import br.com.fiap.oficina.api.modules.faturamento.domain.entity.Fatura;
 import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuario;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -17,7 +19,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import br.com.fiap.oficina.api.modules.faturamento.domain.valueObject.MetodoPagamento;
 import java.util.UUID;
 
 @Path("/api/faturas")
@@ -39,12 +40,9 @@ public class FaturaController {
     @Path("/{id}/confirmar-pagamento")
     @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE })
     @Operation(summary = "Confirmar pagamento de uma fatura")
-    public Response confirmarPagamento(@PathParam("id") UUID id, ConfirmarPagamentoRequest request) {
+    public Response confirmarPagamento(@PathParam("id") UUID id, @Valid ConfirmarPagamentoRequest request) {
         confirmarPagamentoFaturaUseCase.execute(id, request.metodoPagamento());
         return Response.noContent().build();
-    }
-
-    public record ConfirmarPagamentoRequest(MetodoPagamento metodoPagamento) {
     }
 
     @GET
