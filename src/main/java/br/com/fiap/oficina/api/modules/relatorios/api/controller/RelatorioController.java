@@ -3,7 +3,7 @@ package br.com.fiap.oficina.api.modules.relatorios.api.controller;
 import java.util.List;
 import java.util.UUID;
 
-import br.com.fiap.oficina.api.modules.relatorios.api.dto.RelatorioEsforcoOsResponse;
+import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuario;
 import br.com.fiap.oficina.api.modules.relatorios.api.dto.RelatorioTempoMedioServicoResponse;
 import br.com.fiap.oficina.api.modules.relatorios.application.usecase.consultas.ObterRelatorioEsforcoOsUseCase;
 import br.com.fiap.oficina.api.modules.relatorios.application.usecase.consultas.ObterRelatorioTempoMedioServicoUseCase;
@@ -38,7 +38,7 @@ public class RelatorioController {
 
     @GET
     @Path("/esforco-os/{osId}")
-    @RolesAllowed({"ADMIN", "MECANICO"})
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
     @Operation(summary = "Obter esforço total de uma OS", description = "Retorna o total de serviços realizados e o tempo total de esforço em minutos.")
     public Response obterEsforcoPorOs(@PathParam("osId") UUID osId) {
         return obterEsforcoOsUseCase.executar(osId)
@@ -48,7 +48,7 @@ public class RelatorioController {
 
     @GET
     @Path("/tempo-medio-servicos")
-    @RolesAllowed({"ADMIN"})
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN })
     @Operation(summary = "Obter tempo médio de execução por serviço", description = "Retorna a média histórica de tempo de execução para cada tipo de serviço do catálogo.")
     public List<RelatorioTempoMedioServicoResponse> obterTemposMedios() {
         return obterTempoMedioServicoUseCase.executar();

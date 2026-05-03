@@ -104,7 +104,7 @@ public class ProdutoController {
 
     @POST
     @Path("/{id}/ativacao")
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(PerfilUsuario.Constants.ADMIN)
     @Transactional
     @Operation(summary = "Reativar um produto", description = "Remove o carimbo de data da exclusão lógica, tornando o produto visível novamente.")
     @APIResponse(responseCode = "200", description = "Produto reativado com sucesso")
@@ -129,7 +129,8 @@ public class ProdutoController {
     }
 
     @GET
-    @RolesAllowed({ "ADMIN", "MECANICO", "ATENDENTE" })
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO,
+            PerfilUsuario.Constants.ATENDENTE })
     public Response listarProdutos(
             @Parameter(description = "Número da página (começa em 0)", example = "0") @QueryParam("pagina") @DefaultValue("0") @Min(value = 0, message = "A página não pode ser negativa") int pagina,
 

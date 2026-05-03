@@ -53,7 +53,8 @@ public class ServicoController {
     }
 
     @GET
-    @RolesAllowed({PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO, PerfilUsuario.Constants.ATENDENTE})
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO,
+            PerfilUsuario.Constants.ATENDENTE })
     @Operation(summary = "Listar serviços")
     public Response listar(
             @QueryParam("pagina") @Parameter(description = "Número da página (começando do 0)", example = "0") @DefaultValue("0") @Min(value = 0, message = "Página não deve ser negativa") int pagina,
@@ -108,7 +109,7 @@ public class ServicoController {
     }
 
     @POST
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(PerfilUsuario.Constants.ADMIN)
     @Operation(summary = "Cadastrar novo serviço")
     public Response salvar(@Valid ServicosRequest request) {
         List<ProdutoSugerido> produtoSugerido = request.mapearProdutosParaDominio();
