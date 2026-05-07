@@ -113,3 +113,12 @@ class RemoverProdutoOrdemDeServicoUseCaseTest {
         verify(osRepository, never()).atualizar(any());
     }
 }
+
+
+
+
+
+
+
+
+

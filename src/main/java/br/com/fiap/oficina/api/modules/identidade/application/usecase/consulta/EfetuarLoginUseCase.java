@@ -7,3 +7,9 @@ public interface EfetuarLoginUseCase {
     TokenResponse executar(String email, String senha);
 
 }
+
+
+
+
+
+

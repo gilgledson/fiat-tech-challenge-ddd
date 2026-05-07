@@ -83,3 +83,12 @@ class AtivarInativarServicoUseCaseTest {
         assertThrows(NotFoundException.class, () -> ativarUseCase.executar(id));
     }
 }
+
+
+
+
+
+
+
+
+

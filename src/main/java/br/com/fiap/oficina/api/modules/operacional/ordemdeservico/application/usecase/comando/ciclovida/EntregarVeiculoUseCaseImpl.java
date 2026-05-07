@@ -32,3 +32,9 @@ public class EntregarVeiculoUseCaseImpl implements EntregarVeiculoUseCase {
         eventBus.publish(OrdemServicoEntregue.TOPICO, event.toJson());
     }
 }
+
+
+
+
+
+

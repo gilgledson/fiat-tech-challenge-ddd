@@ -17,3 +17,9 @@ public record UsuarioResponse(
                 usuario.isAtivo());
     }
 }
+
+
+
+
+
+

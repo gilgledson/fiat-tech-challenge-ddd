@@ -6,3 +6,9 @@ import java.util.UUID;
 public interface AprovarOrdemDeServicoUseCase {
     void executar(UUID id, AprovarServicoRequest request);
 }
+
+
+
+
+
+

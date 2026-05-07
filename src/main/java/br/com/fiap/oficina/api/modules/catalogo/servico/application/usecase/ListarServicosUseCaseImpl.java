@@ -20,3 +20,9 @@ public class ListarServicosUseCaseImpl implements ListarServicosUseCase {
                 paginaServicos.totalPaginas(), paginaServicos.totalElementos());
     }
 }
+
+
+
+
+
+

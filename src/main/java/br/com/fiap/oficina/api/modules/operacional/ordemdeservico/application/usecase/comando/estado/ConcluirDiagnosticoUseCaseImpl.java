@@ -32,9 +32,18 @@ public class ConcluirDiagnosticoUseCaseImpl implements ConcluirDiagnosticoUseCas
 
         repository.atualizar(ordem);
 
-        OrdemServicoDiagnosticoConcluido event = new OrdemServicoDiagnosticoConcluido(ordem.getId());
+        OrdemServicoDiagnosticoConcluido event = new OrdemServicoDiagnosticoConcluido(
+                ordem.getId(),
+                ordem.calcularValorTotal(true),
+                ordem.getClienteId());
         eventBus.publish(OrdemServicoDiagnosticoConcluido.TOPICO, event.toJson());
 
         return OrdemDeServicoOutputMapper.toOutput(ordem);
     }
 }
+
+
+
+
+
+

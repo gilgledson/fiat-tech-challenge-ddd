@@ -27,3 +27,9 @@ public class CadastrarVeiculoUseCaseImpl implements CadastrarVeiculoUseCase {
         return VeiculoOutputMapper.toOutput(veiculo);
     }
 }
+
+
+
+
+
+

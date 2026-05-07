@@ -603,6 +603,96 @@
 					}
 				},
 				{
+					"name": "9.1. Obter Orcamento por OS ID (JSON)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 404 || pm.response.code === 500) {",
+									"    if (!pm.collectionVariables.get(\"orcamento_retry_count\")) {",
+									"        pm.collectionVariables.set(\"orcamento_retry_count\", 1);",
+									"    } else {",
+									"        var count = parseInt(pm.collectionVariables.get(\"orcamento_retry_count\"));",
+									"        pm.collectionVariables.set(\"orcamento_retry_count\", count + 1);",
+									"    }",
+									"    ",
+									"    if (parseInt(pm.collectionVariables.get(\"orcamento_retry_count\")) <= 5) {",
+									"        console.log(\"Orcamento não encontrada, tentando novamente em 1s... Tentativa \" + pm.collectionVariables.get(\"orcamento_retry_count\"));",
+									"        postman.setNextRequest(pm.info.requestName);",
+									"    } else {",
+									"        pm.test(\"Orcamento Encontrada após retentativas\", () => pm.response.to.be.success);",
+									"    }",
+									"} else {",
+									"    var res = pm.response.json();",
+									"    pm.collectionVariables.set(\"orcamento_retry_count\", 0);",
+									"    pm.collectionVariables.set(\"orcamento_id\", res.id);",
+									"    pm.test(\"Orcamento Gerada no Diagnóstico\", () => pm.response.to.be.success);",
+									"    pm.test(\"Valor do Orçamento\", () => pm.expect(res.valorTotal).to.equal(635.0));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/orcamentos/ordem-servico/{{os_id}}/json",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"orcamentos",
+								"ordem-servico",
+								"{{os_id}}",
+								"json"
+							]
+						}
+					}
+				},
+				{
+					"name": "9.2. Aceitar Orçamento Manualmente (Assinatura)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Aceite Manual Sucesso\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"assinaturaBase64\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==\",\n    \"servicosAceitos\": [\"{{serv_instance_id}}\", \"{{serv_corretivo_instance_id}}\"],\n    \"servicosRejeitados\": []\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/orcamentos/{{orcamento_id}}/aceitar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"orcamentos",
+								"{{orcamento_id}}",
+								"aceitar"
+							]
+						}
+					}
+				},
+				{
 					"name": "10. Validar Bloqueio Rejeição Corretivo",
 					"event": [
 						{
@@ -643,40 +733,34 @@
 					}
 				},
 				{
-					"name": "10.1. Aprovar OS Corretamente",
+					"name": "10.1. Validar Status da OS (Aprovada Automaticamente)",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Aprovação com corretivo sucesso\", () => pm.response.to.be.success);"
+									"var res = pm.response.json();",
+									"pm.test(\"OS deve estar APROVADA\", () => pm.expect(res.status).to.equal(\"APROVADA\"));",
+									"pm.test(\"Serviços devem estar APROVADOS\", () => {",
+									"    res.servicos.forEach(s => pm.expect(s.status).to.equal(\"APROVADO\"));",
+									"});"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"servicosAprovados\": [\"{{serv_instance_id}}\", \"{{serv_corretivo_instance_id}}\"],\n    \"servicosRejeitados\": []\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{baseUrl}}/api/ordens/{{os_id}}/aprovar",
+							"raw": "{{baseUrl}}/api/ordens/{{os_id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
 								"ordens",
-								"{{os_id}}",
-								"aprovar"
+								"{{os_id}}"
 							]
 						}
 					}
@@ -993,38 +1077,21 @@
 			]
 		},
 		{
-			"name": "Faturamento",
+			"name": "Orcamentomento",
 			"item": [
 				{
-					"name": "16. Obter Fatura por OS ID (JSON)",
+					"name": "16. Validar Valor Final da Orcamento (Pós Execução)",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"if (pm.response.code === 404 || pm.response.code === 500) {",
-									"    if (!pm.collectionVariables.get(\"fatura_retry_count\")) {",
-									"        pm.collectionVariables.set(\"fatura_retry_count\", 1);",
-									"    } else {",
-									"        var count = parseInt(pm.collectionVariables.get(\"fatura_retry_count\"));",
-									"        pm.collectionVariables.set(\"fatura_retry_count\", count + 1);",
-									"    }",
-									"    ",
-									"    if (parseInt(pm.collectionVariables.get(\"fatura_retry_count\")) <= 5) {",
-									"        console.log(\"Fatura não encontrada, tentando novamente em 1s... Tentativa \" + pm.collectionVariables.get(\"fatura_retry_count\"));",
-									"        postman.setNextRequest(pm.info.requestName);",
-									"    } else {",
-									"        pm.test(\"Fatura Encontrada após retentativas\", () => pm.response.to.be.success);",
-									"    }",
-									"} else {",
-									"    var res = pm.response.json();",
-									"    pm.collectionVariables.set(\"fatura_retry_count\", 0);",
-									"    pm.collectionVariables.set(\"fatura_id\", res.id);",
-									"    pm.test(\"Fatura Encontrada\", () => pm.response.to.be.success);",
-									"    pm.test(\"Valor da fatura deve considerar apenas itens aprovados\", () => {",
-									"        pm.expect(res.valorTotal).to.equal(755.0);",
-									"    });",
-									"}"
+									"var res = pm.response.json();",
+									"pm.test(\"Orcamento Final Encontrada\", () => pm.response.to.be.success);",
+									"pm.test(\"Valor final deve considerar itens extras\", () => {",
+									"    // 635.0 (original) + 120.0 (servico extra) = 755.0",
+									"    pm.expect(res.valorTotal).to.equal(755.0);",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -1034,13 +1101,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/faturas/ordem-servico/{{os_id}}/json",
+							"raw": "{{baseUrl}}/api/orcamentos/ordem-servico/{{os_id}}/json",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"faturas",
+								"orcamentos",
 								"ordem-servico",
 								"{{os_id}}",
 								"json"
@@ -1063,21 +1130,21 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/faturas/{{fatura_id}}/confirmar-pagamento",
+							"raw": "{{baseUrl}}/api/orcamentos/{{orcamento_id}}/confirmar-pagamento",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"faturas",
-								"{{fatura_id}}",
+								"orcamentos",
+								"{{orcamento_id}}",
 								"confirmar-pagamento"
 							]
 						}
 					}
 				},
 				{
-					"name": "18. Baixar PDF da Fatura",
+					"name": "18. Baixar PDF da Orcamento",
 					"event": [
 						{
 							"listen": "test",
@@ -1094,14 +1161,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/faturas/{{fatura_id}}",
+							"raw": "{{baseUrl}}/api/orcamentos/{{orcamento_id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"faturas",
-								"{{fatura_id}}"
+								"orcamentos",
+								"{{orcamento_id}}"
 							]
 						}
 					}
@@ -1228,11 +1295,11 @@
 			"value": ""
 		},
 		{
-			"key": "fatura_id",
+			"key": "orcamento_id",
 			"value": ""
 		},
 		{
-			"key": "fatura_retry_count",
+			"key": "orcamento_retry_count",
 			"value": "0"
 		},
 		{
@@ -1249,3 +1316,4 @@
 		}
 	]
 }
+

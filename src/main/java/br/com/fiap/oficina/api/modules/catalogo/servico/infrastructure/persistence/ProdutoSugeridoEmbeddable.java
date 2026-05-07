@@ -23,3 +23,9 @@ public class ProdutoSugeridoEmbeddable {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal quantidade;
 }
+
+
+
+
+
+

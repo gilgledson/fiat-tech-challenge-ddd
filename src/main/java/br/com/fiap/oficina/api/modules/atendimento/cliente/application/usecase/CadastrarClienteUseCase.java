@@ -9,3 +9,9 @@ public interface CadastrarClienteUseCase {
     ClienteOutput executar(UUID usuarioId, String nome, String email, String cpfCnpj, String telefone,
             Endereco endereco);
 }
+
+
+
+
+
+

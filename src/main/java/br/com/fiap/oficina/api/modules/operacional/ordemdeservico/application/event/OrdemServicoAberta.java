@@ -13,3 +13,9 @@ public record OrdemServicoAberta(UUID ordemServicoId, UUID clienteId, UUID veicu
                 .put("veiculoId", veiculoId.toString());
     }
 }
+
+
+
+
+
+

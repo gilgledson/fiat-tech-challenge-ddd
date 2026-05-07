@@ -9,3 +9,9 @@ public record ProdutoSugeridoOutput(
         BigDecimal quantidade
 ) {
 }
+
+
+
+
+
+

@@ -56,3 +56,12 @@ class ListarClientesUseCaseTest {
         assertEquals(1, resultado.totalElementos());
     }
 }
+
+
+
+
+
+
+
+
+

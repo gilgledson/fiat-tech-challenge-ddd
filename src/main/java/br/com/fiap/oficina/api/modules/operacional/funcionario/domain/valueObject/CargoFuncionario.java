@@ -30,3 +30,9 @@ public enum CargoFuncionario {
         throw new IllegalArgumentException("ID de cargo inválido: " + id);
     }
 }
+
+
+
+
+
+

@@ -9,3 +9,9 @@ public interface AtendimentoGateway {
     Optional<ClienteSnapshotDTO> buscarClientePorId(UUID id);
     Optional<VeiculoSnapshotDTO> buscarVeiculoPorId(UUID id);
 }
+
+
+
+
+
+

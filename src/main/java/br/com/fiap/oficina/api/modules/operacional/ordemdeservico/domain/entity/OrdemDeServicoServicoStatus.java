@@ -6,6 +6,7 @@ public enum OrdemDeServicoServicoStatus {
     APROVADO,
     EM_EXECUCAO,
     REJEITADO,
+    CANCELADO,
     FINALIZADO;
 
     public static OrdemDeServicoServicoStatus fromString(String status) {
@@ -19,3 +20,9 @@ public enum OrdemDeServicoServicoStatus {
         }
     }
 }
+
+
+
+
+
+

@@ -22,3 +22,9 @@ public class FuncionarioFactory {
         return new Funcionario(usuarioId, nome, sobrenome, cpf, telefone, cargo);
     }
 }
+
+
+
+
+
+

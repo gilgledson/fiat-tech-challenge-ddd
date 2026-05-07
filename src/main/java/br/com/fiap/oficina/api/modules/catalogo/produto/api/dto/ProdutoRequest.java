@@ -16,3 +16,9 @@ public record ProdutoRequest(
                 @NotNull(message = "A unidade de medida é obrigatória") @JsonProperty("unidade_medida") @Schema(description = "unidade de medida do produto", defaultValue = "UN") UnidadeMedida unidadeMedida) {
 
 }
+
+
+
+
+
+

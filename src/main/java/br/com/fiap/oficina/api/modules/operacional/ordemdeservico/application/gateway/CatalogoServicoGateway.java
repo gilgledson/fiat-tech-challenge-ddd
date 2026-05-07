@@ -7,3 +7,9 @@ import java.util.UUID;
 public interface CatalogoServicoGateway {
     Optional<ServicoSnapshotDTO> buscarPorId(UUID id);
 }
+
+
+
+
+
+

@@ -7,7 +7,6 @@ import java.util.UUID;
 import br.com.fiap.oficina.api.modules.relatorios.application.repository.RelatorioRepository;
 import br.com.fiap.oficina.api.modules.relatorios.domain.RelatorioEsforcoOs;
 import br.com.fiap.oficina.api.modules.relatorios.domain.RelatorioTempoMedioServico;
-import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -27,24 +26,21 @@ public class RelatorioRepositoryImpl implements RelatorioRepository {
         return Optional.of(new RelatorioEsforcoOs(
                 entity.getOrdemDeServicoId(),
                 entity.getTotalServicosRealizados(),
-                entity.getEsforcoTotalMinutos()
-        ));
+                entity.getEsforcoTotalMinutos()));
     }
 
     @Override
     public List<RelatorioTempoMedioServico> buscarTemposMediosServicos() {
         List<RelatorioTempoMedioServicoJpaEntity> entities = em.createQuery(
-                "SELECT r FROM RelatorioTempoMedioServicoJpaEntity r", 
-                RelatorioTempoMedioServicoJpaEntity.class
-        ).getResultList();
-        
+                "SELECT r FROM RelatorioTempoMedioServicoJpaEntity r",
+                RelatorioTempoMedioServicoJpaEntity.class).getResultList();
+
         return entities.stream()
                 .map(e -> new RelatorioTempoMedioServico(
                         e.getServicoId(),
                         e.getNomeServico(),
                         e.getQuantidadeExecucoesHistoricas(),
-                        e.getTempoMedioMinutos()
-                ))
+                        e.getTempoMedioMinutos()))
                 .toList();
     }
 }

@@ -17,3 +17,9 @@ public record PaginaResponse<T>(
                 pagina.totalElementos());
     }
 }
+
+
+
+
+
+

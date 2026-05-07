@@ -26,3 +26,9 @@ public record ServicoOrcamentoRequest(
                 return valorUnitario.multiply(BigDecimal.valueOf(quantidade));
         }
 }
+
+
+
+
+
+

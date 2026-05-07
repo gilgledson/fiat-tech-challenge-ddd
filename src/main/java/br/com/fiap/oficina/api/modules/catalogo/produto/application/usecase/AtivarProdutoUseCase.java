@@ -7,3 +7,9 @@ import java.util.UUID;
 public interface AtivarProdutoUseCase {
     public Produto executar(UUID id);
 }
+
+
+
+
+
+

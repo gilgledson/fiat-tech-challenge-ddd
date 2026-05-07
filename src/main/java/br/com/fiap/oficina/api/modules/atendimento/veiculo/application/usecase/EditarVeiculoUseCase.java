@@ -7,3 +7,9 @@ import java.util.UUID;
 public interface EditarVeiculoUseCase {
     VeiculoOutput executar(UUID id, UUID clienteId, String placa, String marca, String modelo, int ano);
 }
+
+
+
+
+
+

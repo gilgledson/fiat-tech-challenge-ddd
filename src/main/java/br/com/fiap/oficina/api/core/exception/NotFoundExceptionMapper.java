@@ -22,3 +22,9 @@ public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundExceptio
                 .build();
     }
 }
+
+
+
+
+
+

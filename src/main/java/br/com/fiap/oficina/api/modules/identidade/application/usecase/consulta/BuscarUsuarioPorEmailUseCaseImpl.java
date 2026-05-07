@@ -16,3 +16,9 @@ public class BuscarUsuarioPorEmailUseCaseImpl implements BuscarUsuarioPorEmailUs
         return repository.buscarPorEmail(email);
     }
 }
+
+
+
+
+
+

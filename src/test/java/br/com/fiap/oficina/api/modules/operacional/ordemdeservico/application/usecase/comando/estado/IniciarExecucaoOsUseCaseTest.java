@@ -89,3 +89,12 @@ class IniciarExecucaoOsUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> useCase.executar(osId));
     }
 }
+
+
+
+
+
+
+
+
+

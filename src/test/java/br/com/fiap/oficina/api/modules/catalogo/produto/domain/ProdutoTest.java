@@ -151,3 +151,12 @@ class ProdutoTest {
         assertEquals(new BigDecimal("6"), produto.calcularDisponivel());
     }
 }
+
+
+
+
+
+
+
+
+

@@ -37,3 +37,9 @@ public class RejeitarOrcamentoUseCaseImpl implements RejeitarOrcamentoUseCase {
         return OrdemDeServicoOutputMapper.toOutput(ordem);
     }
 }
+
+
+
+
+
+

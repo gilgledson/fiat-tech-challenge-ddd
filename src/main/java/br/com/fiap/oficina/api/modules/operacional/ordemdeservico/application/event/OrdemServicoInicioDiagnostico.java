@@ -11,3 +11,9 @@ public record OrdemServicoInicioDiagnostico(UUID ordemServicoId) {
                 .put("ordemServicoId", ordemServicoId.toString());
     }
 }
+
+
+
+
+
+

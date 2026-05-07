@@ -18,3 +18,9 @@ public record VeiculoRequest(
 
                 @NotNull(message = "O ano é obrigatório") @Schema(description = "Ano do veículo", defaultValue = "2023") int ano) {
 }
+
+
+
+
+
+

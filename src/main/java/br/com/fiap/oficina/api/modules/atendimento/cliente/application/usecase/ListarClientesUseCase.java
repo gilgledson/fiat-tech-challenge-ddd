@@ -6,3 +6,9 @@ import br.com.fiap.oficina.api.shared.domain.entity.Pagina;
 public interface ListarClientesUseCase {
     Pagina<ClienteOutput> executar(int pagina, int tamanhoLista, boolean incluirInativos);
 }
+
+
+
+
+
+

@@ -34,3 +34,9 @@ public class CadastrarFuncionarioUseCaseImpl implements CadastrarFuncionarioUseC
         return FuncionarioOutputMapper.toOutput(funcionario);
     }
 }
+
+
+
+
+
+

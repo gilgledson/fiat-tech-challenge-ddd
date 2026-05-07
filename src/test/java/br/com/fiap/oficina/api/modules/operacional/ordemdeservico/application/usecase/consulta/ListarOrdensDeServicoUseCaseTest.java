@@ -67,3 +67,12 @@ class ListarOrdensDeServicoUseCaseTest {
         assertEquals(0L, resultado.totalElementos());
     }
 }
+
+
+
+
+
+
+
+
+

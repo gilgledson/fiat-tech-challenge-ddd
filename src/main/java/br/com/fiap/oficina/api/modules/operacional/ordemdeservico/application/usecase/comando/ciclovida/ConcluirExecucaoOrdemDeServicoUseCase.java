@@ -5,3 +5,9 @@ import java.util.UUID;
 public interface ConcluirExecucaoOrdemDeServicoUseCase {
     void executar(UUID id);
 }
+
+
+
+
+
+

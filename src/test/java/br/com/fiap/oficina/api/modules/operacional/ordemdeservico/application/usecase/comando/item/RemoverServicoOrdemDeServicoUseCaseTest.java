@@ -132,3 +132,12 @@ class RemoverServicoOrdemDeServicoUseCaseTest {
         verify(osRepository, never()).atualizar(any());
     }
 }
+
+
+
+
+
+
+
+
+

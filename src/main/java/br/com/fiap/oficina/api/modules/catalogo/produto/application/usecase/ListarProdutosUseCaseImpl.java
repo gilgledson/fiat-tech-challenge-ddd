@@ -14,3 +14,9 @@ public class ListarProdutosUseCaseImpl implements ListarProdutosUseCase {
         return repository.listarTodos(pagina, tamanhoLista, incluirInativos);
     }
 }
+
+
+
+
+
+

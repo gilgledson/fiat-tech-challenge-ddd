@@ -23,3 +23,9 @@ public class BuscarOrdemDeServicoUseCaseImpl implements BuscarOrdemDeServicoUseC
         return OrdemDeServicoOutputMapper.toOutput(ordem);
     }
 }
+
+
+
+
+
+

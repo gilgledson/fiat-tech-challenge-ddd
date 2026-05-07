@@ -59,3 +59,9 @@ public class ClienteFactory {
         return new Cliente(usuarioId, nome, email, cpfCnpj, telefone, endereco);
     }
 }
+
+
+
+
+
+

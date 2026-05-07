@@ -65,3 +65,9 @@ public class UsuarioJpaEntity {
     @Column(nullable = false)
     private boolean ativo;
 }
+
+
+
+
+
+

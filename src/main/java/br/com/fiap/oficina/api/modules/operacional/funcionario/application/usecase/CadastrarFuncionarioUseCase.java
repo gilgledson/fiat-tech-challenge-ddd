@@ -7,3 +7,9 @@ import java.util.UUID;
 public interface CadastrarFuncionarioUseCase {
     FuncionarioOutput executar(UUID usuarioId, String nome, String sobrenome, String cpf, String telefone, CargoFuncionario cargo);
 }
+
+
+
+
+
+

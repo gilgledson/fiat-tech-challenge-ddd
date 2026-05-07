@@ -7,3 +7,9 @@ import java.util.UUID;
 public interface AdicionarServicoOrdemDeServicoUseCase {
     OrdemDeServicoOutput executar(UUID ordemDeServicoId, AdicionarServicoRequest request);
 }
+
+
+
+
+
+

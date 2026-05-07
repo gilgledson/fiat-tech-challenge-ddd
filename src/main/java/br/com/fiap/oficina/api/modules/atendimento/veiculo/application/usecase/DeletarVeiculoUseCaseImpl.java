@@ -17,3 +17,9 @@ public class DeletarVeiculoUseCaseImpl implements DeletarVeiculoUseCase {
         repository.deletar(id);
     }
 }
+
+
+
+
+
+

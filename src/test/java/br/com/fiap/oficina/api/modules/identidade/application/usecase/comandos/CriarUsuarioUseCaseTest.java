@@ -63,3 +63,12 @@ class CriarUsuarioUseCaseTest {
         verify(repository, never()).salvar(any());
     }
 }
+
+
+
+
+
+
+
+
+

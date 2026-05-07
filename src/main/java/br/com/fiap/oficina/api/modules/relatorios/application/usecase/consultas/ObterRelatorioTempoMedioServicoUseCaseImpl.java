@@ -10,12 +10,8 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class ObterRelatorioTempoMedioServicoUseCaseImpl implements ObterRelatorioTempoMedioServicoUseCase {
 
-    private final RelatorioRepository repository;
-
     @Inject
-    public ObterRelatorioTempoMedioServicoUseCaseImpl(RelatorioRepository repository) {
-        this.repository = repository;
-    }
+    RelatorioRepository repository;
 
     @Override
     public List<RelatorioTempoMedioServicoResponse> executar() {
@@ -29,3 +25,9 @@ public class ObterRelatorioTempoMedioServicoUseCaseImpl implements ObterRelatori
                 .toList();
     }
 }
+
+
+
+
+
+

@@ -80,3 +80,12 @@ class AtivarInativarVeiculoUseCaseTest {
         assertThrows(NotFoundException.class, () -> ativarUseCase.executar(id));
     }
 }
+
+
+
+
+
+
+
+
+

@@ -44,3 +44,12 @@ class ListarFuncionariosUseCaseTest {
         verify(repository, times(1)).listarTodos(0, 10, false);
     }
 }
+
+
+
+
+
+
+
+
+

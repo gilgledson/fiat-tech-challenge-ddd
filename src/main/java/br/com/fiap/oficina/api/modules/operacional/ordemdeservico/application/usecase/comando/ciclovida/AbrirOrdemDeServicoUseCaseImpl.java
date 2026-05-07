@@ -53,3 +53,9 @@ public class AbrirOrdemDeServicoUseCaseImpl implements AbrirOrdemDeServicoUseCas
         return OrdemDeServicoOutputMapper.toOutput(ordem);
     }
 }
+
+
+
+
+
+

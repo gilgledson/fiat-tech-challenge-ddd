@@ -22,3 +22,9 @@ public class DesativarFuncionarioUseCaseImpl implements DesativarFuncionarioUseC
         repository.atualizar(funcionario);
     }
 }
+
+
+
+
+
+

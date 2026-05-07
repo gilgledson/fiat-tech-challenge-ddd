@@ -28,3 +28,9 @@ public class EditarClienteUseCaseImpl implements EditarClienteUseCase {
         return ClienteOutputMapper.toOutput(cliente);
     }
 }
+
+
+
+
+
+

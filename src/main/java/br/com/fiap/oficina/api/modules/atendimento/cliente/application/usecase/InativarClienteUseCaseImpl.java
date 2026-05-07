@@ -23,3 +23,9 @@ public class InativarClienteUseCaseImpl implements InativarClienteUseCase {
         repository.atualizar(cliente);
     }
 }
+
+
+
+
+
+

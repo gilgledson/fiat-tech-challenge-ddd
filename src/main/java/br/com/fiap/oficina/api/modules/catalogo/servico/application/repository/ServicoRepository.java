@@ -17,3 +17,9 @@ public interface ServicoRepository {
 
     public void deletar(UUID id);
 }
+
+
+
+
+
+

@@ -31,3 +31,9 @@ public class EnderecoEmbeddable {
     @Column(name = "uf", length = 2) // Mapeando exatamente para o nome da coluna no seu SQL
     private String estado;
 }
+
+
+
+
+
+

@@ -13,3 +13,9 @@ public record OrdemDeServicoProdutoResponse(
                 @JsonProperty("valor_unitario") @Schema(description = "Valor unitário cobrado") BigDecimal valorUnitario,
                 @JsonProperty("valor_total") @Schema(description = "Valor total do produto (qtd x unitário)") BigDecimal valorTotal) {
 }
+
+
+
+
+
+

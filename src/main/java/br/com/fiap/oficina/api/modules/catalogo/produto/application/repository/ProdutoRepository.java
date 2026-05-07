@@ -24,3 +24,9 @@ public interface ProdutoRepository {
     public Pagina<Produto> listarTodos(int pagina, int tamanhoLista, boolean incluirInativos);
 
 }
+
+
+
+
+
+

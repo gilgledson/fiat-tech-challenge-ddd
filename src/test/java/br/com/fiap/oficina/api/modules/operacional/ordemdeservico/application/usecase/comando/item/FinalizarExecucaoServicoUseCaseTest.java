@@ -122,3 +122,12 @@ class FinalizarExecucaoServicoUseCaseTest {
         verify(repository, never()).atualizar(any());
     }
 }
+
+
+
+
+
+
+
+
+

@@ -9,3 +9,9 @@ public record AprovarServicoRequest(
 
         @Schema(description = "Lista de IDs de serviços que foram rejeitados pelo cliente") List<UUID> servicosRejeitados) {
 }
+
+
+
+
+
+

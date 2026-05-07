@@ -7,3 +7,9 @@ import java.util.UUID;
 public interface BuscarOrdemDeServicoUseCase {
     OrdemDeServicoOutput executar(UUID id);
 }
+
+
+
+
+
+

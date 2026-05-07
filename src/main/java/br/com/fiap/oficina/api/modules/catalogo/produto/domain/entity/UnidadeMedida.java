@@ -6,3 +6,9 @@ public enum UnidadeMedida {
     KG, // Quilograma (Graxa)
     MT  // Metro (Mangueiras, Fios)
 }
+
+
+
+
+
+

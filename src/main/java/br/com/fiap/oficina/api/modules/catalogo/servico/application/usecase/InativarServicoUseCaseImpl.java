@@ -20,3 +20,9 @@ public class InativarServicoUseCaseImpl implements InativarServicoUseCase {
         servicoRepository.atualizar(servico);
     }
 }
+
+
+
+
+
+

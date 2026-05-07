@@ -6,3 +6,9 @@ import java.util.UUID;
 public interface RemoverProdutoOrdemDeServicoUseCase {
     OrdemDeServicoOutput executar(UUID ordemDeServicoId, UUID produtoId);
 }
+
+
+
+
+
+

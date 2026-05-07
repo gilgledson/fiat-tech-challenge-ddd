@@ -49,3 +49,9 @@ public class PanacheUsuarioRepositoryImpl implements UsuarioRepository, PanacheR
                 });
     }
 }
+
+
+
+
+
+

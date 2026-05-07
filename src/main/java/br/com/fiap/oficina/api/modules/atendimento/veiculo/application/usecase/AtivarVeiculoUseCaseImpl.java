@@ -23,3 +23,9 @@ public class AtivarVeiculoUseCaseImpl implements AtivarVeiculoUseCase {
         repository.atualizar(veiculo);
     }
 }
+
+
+
+
+
+

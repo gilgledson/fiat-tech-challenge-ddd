@@ -8,3 +8,9 @@ import br.com.fiap.oficina.api.modules.relatorios.api.dto.RelatorioEsforcoOsResp
 public interface ObterRelatorioEsforcoOsUseCase {
     Optional<RelatorioEsforcoOsResponse> executar(UUID osId);
 }
+
+
+
+
+
+

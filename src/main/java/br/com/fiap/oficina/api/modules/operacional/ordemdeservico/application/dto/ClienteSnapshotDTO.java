@@ -7,3 +7,9 @@ public record ClienteSnapshotDTO(
         String nome,
         String cpfCnpj
 ) {}
+
+
+
+
+
+

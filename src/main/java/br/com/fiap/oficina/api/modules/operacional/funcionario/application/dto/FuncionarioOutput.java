@@ -15,3 +15,9 @@ public record FuncionarioOutput(
     boolean ativo,
     LocalDateTime deletadoEm
 ) {}
+
+
+
+
+
+

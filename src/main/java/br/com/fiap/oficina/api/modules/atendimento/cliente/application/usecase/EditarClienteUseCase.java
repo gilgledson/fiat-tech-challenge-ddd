@@ -8,3 +8,9 @@ import java.util.UUID;
 public interface EditarClienteUseCase {
     ClienteOutput executar(UUID id, String nome, String email, String telefone, Endereco endereco);
 }
+
+
+
+
+
+

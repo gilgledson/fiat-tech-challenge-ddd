@@ -9,3 +9,9 @@ public interface CadastrarProdutoUseCase {
     public Produto executar(String nome, String codigoBarras, BigDecimal precoUnitario, BigDecimal quantidade,
             UnidadeMedida unidadeMedida);
 }
+
+
+
+
+
+

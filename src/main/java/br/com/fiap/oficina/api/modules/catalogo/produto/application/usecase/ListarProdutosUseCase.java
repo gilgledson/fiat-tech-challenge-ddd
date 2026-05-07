@@ -6,3 +6,9 @@ import br.com.fiap.oficina.api.shared.domain.entity.Pagina;
 public interface ListarProdutosUseCase {
     public Pagina<Produto> executar(int pagina, int tamanhoLista, boolean incluirInativos);
 }
+
+
+
+
+
+

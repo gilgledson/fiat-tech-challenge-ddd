@@ -11,3 +11,9 @@ public interface RelatorioRepository {
     Optional<RelatorioEsforcoOs> buscarEsforcoPorOsId(UUID osId);
     List<RelatorioTempoMedioServico> buscarTemposMediosServicos();
 }
+
+
+
+
+
+

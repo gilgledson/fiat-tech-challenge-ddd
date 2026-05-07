@@ -26,3 +26,9 @@ public class RelatorioEsforcoOsJpaEntity {
     @Column(name = "esforco_total_minutos")
     private Long esforcoTotalMinutos;
 }
+
+
+
+
+
+

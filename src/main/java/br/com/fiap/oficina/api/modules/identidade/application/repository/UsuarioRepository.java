@@ -14,3 +14,9 @@ public interface UsuarioRepository {
     Optional<Usuario> buscarPorId(UUID id);
 
 }
+
+
+
+
+
+

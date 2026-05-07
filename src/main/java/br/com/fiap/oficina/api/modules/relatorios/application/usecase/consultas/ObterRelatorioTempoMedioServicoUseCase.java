@@ -7,3 +7,9 @@ import br.com.fiap.oficina.api.modules.relatorios.api.dto.RelatorioTempoMedioSer
 public interface ObterRelatorioTempoMedioServicoUseCase {
     List<RelatorioTempoMedioServicoResponse> executar();
 }
+
+
+
+
+
+

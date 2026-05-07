@@ -58,3 +58,12 @@ class EditarVeiculoUseCaseTest {
         );
     }
 }
+
+
+
+
+
+
+
+
+

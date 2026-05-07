@@ -32,3 +32,9 @@ public class ListarFuncionariosUseCaseImpl implements ListarFuncionariosUseCase 
         );
     }
 }
+
+
+
+
+
+

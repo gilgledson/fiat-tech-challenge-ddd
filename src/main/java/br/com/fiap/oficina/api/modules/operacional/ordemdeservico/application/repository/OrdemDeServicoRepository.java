@@ -20,3 +20,9 @@ public interface OrdemDeServicoRepository {
     void deletar(UUID id);
 
 }
+
+
+
+
+
+

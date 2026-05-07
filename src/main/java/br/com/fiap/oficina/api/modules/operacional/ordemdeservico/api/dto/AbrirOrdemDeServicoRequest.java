@@ -13,3 +13,9 @@ public record AbrirOrdemDeServicoRequest(
 
                 @Schema(description = "Descrição do problema relatado pelo cliente", defaultValue = "Carro fazendo barulho ao frear") @JsonProperty("descricao_problema") String descricaoProblema) {
 }
+
+
+
+
+
+

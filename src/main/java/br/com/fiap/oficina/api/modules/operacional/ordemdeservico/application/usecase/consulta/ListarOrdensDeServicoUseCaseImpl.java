@@ -29,3 +29,9 @@ public class ListarOrdensDeServicoUseCaseImpl implements ListarOrdensDeServicoUs
                                 paginaOrdens.totalPaginas(), paginaOrdens.totalElementos());
         }
 }
+
+
+
+
+
+

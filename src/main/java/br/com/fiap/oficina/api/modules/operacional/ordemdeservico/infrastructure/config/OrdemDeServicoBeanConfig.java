@@ -85,8 +85,9 @@ public class OrdemDeServicoBeanConfig {
     @ApplicationScoped
     public AprovarOrdemDeServicoUseCase aprovarOrdemDeServicoUseCase(
             OrdemDeServicoRepository repository,
+            CatalogoProdutoGateway produtoGateway,
             EventBus eventBus) {
-        return new AprovarOrdemDeServicoUseCaseImpl(repository, eventBus);
+        return new AprovarOrdemDeServicoUseCaseImpl(repository, produtoGateway, eventBus);
     }
 
     @Produces
@@ -140,3 +141,9 @@ public class OrdemDeServicoBeanConfig {
     }
 
 }
+
+
+
+
+
+

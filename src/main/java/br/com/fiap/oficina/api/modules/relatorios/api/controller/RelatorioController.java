@@ -8,6 +8,7 @@ import br.com.fiap.oficina.api.modules.relatorios.api.dto.RelatorioTempoMedioSer
 import br.com.fiap.oficina.api.modules.relatorios.application.usecase.consultas.ObterRelatorioEsforcoOsUseCase;
 import br.com.fiap.oficina.api.modules.relatorios.application.usecase.consultas.ObterRelatorioTempoMedioServicoUseCase;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -23,18 +24,14 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Relatórios", description = "Endpoints para extração de métricas e relatórios operacionais")
+@ApplicationScoped
 public class RelatorioController {
 
-    private final ObterRelatorioEsforcoOsUseCase obterEsforcoOsUseCase;
-    private final ObterRelatorioTempoMedioServicoUseCase obterTempoMedioServicoUseCase;
+    @Inject
+    ObterRelatorioEsforcoOsUseCase obterEsforcoOsUseCase;
 
     @Inject
-    public RelatorioController(
-            ObterRelatorioEsforcoOsUseCase obterEsforcoOsUseCase,
-            ObterRelatorioTempoMedioServicoUseCase obterTempoMedioServicoUseCase) {
-        this.obterEsforcoOsUseCase = obterEsforcoOsUseCase;
-        this.obterTempoMedioServicoUseCase = obterTempoMedioServicoUseCase;
-    }
+    ObterRelatorioTempoMedioServicoUseCase obterTempoMedioServicoUseCase;
 
     @GET
     @Path("/esforco-os/{osId}")

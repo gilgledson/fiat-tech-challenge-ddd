@@ -12,3 +12,9 @@ public record OrdemServicoCancelada(UUID ordemServicoId, String motivo) {
                 .put("motivo", motivo);
     }
 }
+
+
+
+
+
+

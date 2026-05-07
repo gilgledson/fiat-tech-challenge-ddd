@@ -26,3 +26,9 @@ public class ListarVeiculosUseCaseImpl implements ListarVeiculosUseCase {
                 paginaVeiculos.totalPaginas(), paginaVeiculos.totalElementos());
     }
 }
+
+
+
+
+
+

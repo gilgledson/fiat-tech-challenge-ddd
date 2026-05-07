@@ -63,3 +63,12 @@ class DeletarFuncionarioUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> useCase.executar(id));
     }
 }
+
+
+
+
+
+
+
+
+

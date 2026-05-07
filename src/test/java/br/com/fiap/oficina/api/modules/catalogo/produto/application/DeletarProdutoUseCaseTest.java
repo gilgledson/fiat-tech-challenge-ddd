@@ -35,3 +35,12 @@ class DeletarProdutoUseCaseTest {
         verify(repository).delete(id);
     }
 }
+
+
+
+
+
+
+
+
+

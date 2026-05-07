@@ -5,3 +5,9 @@ public interface PasswordEncoder {
 
     public String criptografar(String senhaPura);
 }
+
+
+
+
+
+

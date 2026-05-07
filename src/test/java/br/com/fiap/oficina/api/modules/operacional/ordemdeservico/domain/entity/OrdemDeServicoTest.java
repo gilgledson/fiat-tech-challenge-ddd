@@ -61,3 +61,12 @@ class OrdemDeServicoTest {
         assertEquals(BigDecimal.ZERO, os.calcularValorTotal());
     }
 }
+
+
+
+
+
+
+
+
+

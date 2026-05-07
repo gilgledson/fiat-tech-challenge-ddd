@@ -10,7 +10,7 @@ public class ClienteOutputMapper {
         
         return new ClienteOutput(
                 cliente.getId(),
-                cliente.getUsuarioId(),
+                cliente.getUsuarioId().orElse(null),
                 cliente.getNome(),
                 cliente.getEmail(),
                 cliente.getCpfCnpj(),
@@ -20,3 +20,9 @@ public class ClienteOutputMapper {
         );
     }
 }
+
+
+
+
+
+

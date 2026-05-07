@@ -1,0 +1,106 @@
+package br.com.fiap.oficina.api.modules.orcamento.api.controller;
+
+import br.com.fiap.oficina.api.modules.orcamento.application.usecase.consultas.BaixarOrcamentoPorOrdemServicoUseCase;
+import br.com.fiap.oficina.api.modules.orcamento.application.usecase.consultas.BaixarOrcamentoUseCase;
+import br.com.fiap.oficina.api.modules.orcamento.api.dto.AceitarOrcamentoRequest;
+import br.com.fiap.oficina.api.modules.orcamento.api.dto.ConfirmarPagamentoRequest;
+import br.com.fiap.oficina.api.modules.orcamento.application.usecase.comandos.ConfirmarPagamentoOrcamentoUseCase;
+import br.com.fiap.oficina.api.modules.orcamento.domain.entity.Orcamento;
+import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuario;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import br.com.fiap.oficina.api.modules.orcamento.application.usecase.comandos.AprovarOrcamentoManualUseCase;
+import br.com.fiap.oficina.api.modules.orcamento.infrastructure.storage.LocalFileStorageService;
+import io.vertx.core.json.JsonObject;
+import java.util.UUID;
+
+@Path("/api/faturas")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "orcamento", description = "Gestão de faturas e pagamentos")
+public class OrcamentoController {
+
+    @Inject
+    ConfirmarPagamentoOrcamentoUseCase ConfirmarPagamentoOrcamentoUseCase;
+
+    @Inject
+    BaixarOrcamentoUseCase BaixarOrcamentoUseCase;
+
+    @Inject
+    BaixarOrcamentoPorOrdemServicoUseCase BaixarOrcamentoPorOrdemServicoUseCase;
+
+    @Inject
+    AprovarOrcamentoManualUseCase aprovarOrcamentoManualUseCase;
+
+    @Inject
+    LocalFileStorageService storageService;
+
+    @POST
+    @Path("/{id}/confirmar-pagamento")
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE })
+    @Operation(summary = "Confirmar pagamento de umo Or�amento")
+    public Response confirmarPagamento(@PathParam("id") UUID id, @Valid ConfirmarPagamentoRequest request) {
+        ConfirmarPagamentoOrcamentoUseCase.execute(id, request.metodoPagamento());
+        return Response.noContent().build();
+    }
+
+    @POST
+    @Path("/{id}/aceitar")
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE })
+    @Operation(summary = "Aceitar orçamento manualmente (assinatura Base64 e lista de serviços)")
+    public Response aceitarOrcamento(
+            @PathParam("id") UUID id,
+            @Valid AceitarOrcamentoRequest request) {
+
+        if (request.assinaturaBase64() == null || request.assinaturaBase64().isBlank()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new JsonObject().put("mensagem", "Assinatura Base64 é obrigatória"))
+                    .build();
+        }
+
+        String path = storageService.storeBase64(request.assinaturaBase64(), "assinatura_" + id);
+        aprovarOrcamentoManualUseCase.executar(id, path, request.servicosAceitos(), request.servicosRejeitados());
+        return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/{id}")
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE })
+    @Operation(summary = "Obter Orcamento por ID")
+    @Produces("application/pdf")
+    public Response buscarOrcamentoPorId(@PathParam("id") UUID id) {
+        byte[] orcamento = BaixarOrcamentoUseCase.executar(id);
+        return Response.ok(orcamento).build();
+    }
+
+    @GET
+    @Path("/ordem-servico/{id}")
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE })
+    @Operation(summary = "Obter Orcamento por ID da Ordem de Serviço")
+    @Produces("application/pdf")
+    public Response buscarOrcamentoPorOrdemServicoId(@PathParam("id") UUID id) {
+        byte[] orcamento = BaixarOrcamentoPorOrdemServicoUseCase.executar(id);
+        return Response.ok(orcamento).build();
+    }
+
+    @GET
+    @Path("/ordem-servico/{id}/json")
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE })
+    @Operation(summary = "Obter Orcamento por ID da Ordem de Serviço (JSON)")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response buscarOrcamentoPorOrdemServicoIdJson(@PathParam("id") UUID id) {
+        Orcamento orcamento = BaixarOrcamentoPorOrdemServicoUseCase.buscarPorOrdemServicoId(id);
+        return Response.ok(orcamento).build();
+    }
+}

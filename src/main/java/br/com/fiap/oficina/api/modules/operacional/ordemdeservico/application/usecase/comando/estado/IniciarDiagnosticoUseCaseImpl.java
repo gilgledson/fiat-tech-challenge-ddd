@@ -37,3 +37,9 @@ public class IniciarDiagnosticoUseCaseImpl implements IniciarDiagnosticoUseCase 
         return OrdemDeServicoOutputMapper.toOutput(ordem);
     }
 }
+
+
+
+
+
+

@@ -59,3 +59,12 @@ class CadastrarProdutoUseCaseTest {
         verify(repository, never()).salvar(any());
     }
 }
+
+
+
+
+
+
+
+
+

@@ -50,3 +50,12 @@ class EfetuarLoginUseCaseTest {
                 () -> useCase.executar("user@test.com", "senha_errada"));
     }
 }
+
+
+
+
+
+
+
+
+

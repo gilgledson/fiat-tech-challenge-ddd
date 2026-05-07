@@ -25,7 +25,7 @@ import java.util.UUID;
 @Path("/api/ordens")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "Ordem de Serviço", description = "Gestão de ordens de serviço da oficina")
+@Tag(name = "Ordem de Servico", description = "Gestao de ordens de servico da oficina")
 public class OrdemDeServicoController {
 
     @Inject
@@ -137,7 +137,7 @@ public class OrdemDeServicoController {
     @POST
     @Path("/{id}/servicos")
     @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
-    @Operation(summary = "Adicionar serviço à Ordem de Serviço")
+    @Operation(summary = "Adicionar servico a Ordem de Servico")
     public Response adicionarServico(
             @PathParam("id") UUID id,
             @Valid AdicionarServicoRequest request) {
@@ -175,7 +175,7 @@ public class OrdemDeServicoController {
     }
 
     // =======================================================
-    // MÁQUINA DE ESTADOS (TASK-BASED REST) E CANCELAMENTO
+    // MAQUINA DE ESTADOS (TASK-BASED REST) E CANCELAMENTO
     // =======================================================
 
     @POST
@@ -211,7 +211,7 @@ public class OrdemDeServicoController {
     @POST
     @Path("/{id}/concluir-execucao")
     @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
-    @Operation(summary = "Concluir Execução da Ordem de Serviço (Pronto para faturamento)")
+    @Operation(summary = "Concluir Execucao da Ordem de Servico (Pronto para orcamento)")
     public Response concluirExecucao(@PathParam("id") UUID id) {
         concluirExecucaoOrdemDeServicoUseCase.executar(id);
         return Response.noContent().build();
@@ -261,3 +261,9 @@ public class OrdemDeServicoController {
         return Response.noContent().build();
     }
 }
+
+
+
+
+
+

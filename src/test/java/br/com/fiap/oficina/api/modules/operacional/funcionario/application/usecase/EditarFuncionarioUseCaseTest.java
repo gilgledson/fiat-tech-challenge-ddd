@@ -71,3 +71,12 @@ class EditarFuncionarioUseCaseTest {
                 "Nome", "Sobrenome", "111.111.111-11", "(11) 1111-1111", CargoFuncionario.MECANICO));
     }
 }
+
+
+
+
+
+
+
+
+

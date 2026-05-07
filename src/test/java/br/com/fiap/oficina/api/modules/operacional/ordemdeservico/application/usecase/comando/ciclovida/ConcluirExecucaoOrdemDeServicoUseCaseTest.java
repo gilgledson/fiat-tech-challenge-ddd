@@ -97,3 +97,12 @@ class ConcluirExecucaoOrdemDeServicoUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> useCase.executar(osId));
     }
 }
+
+
+
+
+
+
+
+
+

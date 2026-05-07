@@ -24,3 +24,9 @@ public interface VeiculoRepository {
     public Pagina<Veiculo> listarTodos(int pagina, int tamanhoLista, boolean incluirInativos);
 
 }
+
+
+
+
+
+

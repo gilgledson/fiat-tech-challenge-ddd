@@ -5,3 +5,9 @@ import java.util.UUID;
 public interface FinalizarExecucaoServicoUseCase {
     void executar(UUID ordemId, UUID id);
 }
+
+
+
+
+
+

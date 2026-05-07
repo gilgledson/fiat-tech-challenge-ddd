@@ -26,3 +26,9 @@ public class ListarClientesUseCaseImpl implements ListarClientesUseCase {
                 paginaClientes.totalPaginas(), paginaClientes.totalElementos());
     }
 }
+
+
+
+
+
+

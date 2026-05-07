@@ -56,3 +56,12 @@ class FuncionarioTest {
         assertThrows(IllegalArgumentException.class, funcionario::ativar);
     }
 }
+
+
+
+
+
+
+
+
+

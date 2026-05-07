@@ -45,3 +45,12 @@ class ListarVeiculosUseCaseTest {
         assertEquals(1, resultado.totalElementos());
     }
 }
+
+
+
+
+
+
+
+
+

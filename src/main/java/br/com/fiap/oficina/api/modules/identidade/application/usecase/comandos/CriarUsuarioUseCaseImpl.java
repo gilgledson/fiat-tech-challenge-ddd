@@ -25,3 +25,9 @@ public class CriarUsuarioUseCaseImpl implements CriarUsuarioUseCase {
         return novoUsuario;
     }
 }
+
+
+
+
+
+

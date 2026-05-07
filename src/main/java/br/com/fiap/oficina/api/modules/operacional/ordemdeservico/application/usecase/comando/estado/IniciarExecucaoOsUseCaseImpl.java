@@ -35,3 +35,9 @@ public class IniciarExecucaoOsUseCaseImpl implements IniciarExecucaoOsUseCase {
         eventBus.publish(OrdemServicoExecucaoIniciada.TOPICO, event.toJson());
     }
 }
+
+
+
+
+
+

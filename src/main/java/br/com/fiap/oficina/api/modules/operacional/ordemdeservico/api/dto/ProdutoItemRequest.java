@@ -11,3 +11,9 @@ public record ProdutoItemRequest(
         @NotNull(message = "O ID do produto é obrigatório") @JsonProperty("produto_id") UUID produtoId,
         @NotNull(message = "A quantidade é obrigatória") @Min(value = 0, message = "A quantidade mínima é 0") BigDecimal quantidade) {
 }
+
+
+
+
+
+

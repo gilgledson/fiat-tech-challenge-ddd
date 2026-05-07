@@ -27,3 +27,9 @@ public class EditarVeiculoUseCaseImpl implements EditarVeiculoUseCase {
         return VeiculoOutputMapper.toOutput(veiculo);
     }
 }
+
+
+
+
+
+

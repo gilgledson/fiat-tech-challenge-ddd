@@ -23,7 +23,7 @@ public class PanacheClienteRepositoryImpl implements ClienteRepository, PanacheR
     public void salvar(Cliente cliente) {
         ClienteJpaEntity entity = new ClienteJpaEntity();
         entity.setId(cliente.getId());
-        entity.setUsuarioId(cliente.getUsuarioId());
+        entity.setUsuarioId(cliente.getUsuarioId().orElse(null));
         entity.setNome(cliente.getNome());
         entity.setEmail(cliente.getEmail());
         entity.setCpfCnpj(cliente.getCpfCnpj());
@@ -39,7 +39,7 @@ public class PanacheClienteRepositoryImpl implements ClienteRepository, PanacheR
         ClienteJpaEntity entity = findByIdOptional(cliente.getId())
                 .orElseThrow(() -> new NotFoundException("Cliente não encontrado"));
 
-        entity.setUsuarioId(cliente.getUsuarioId());
+        entity.setUsuarioId(cliente.getUsuarioId().orElse(null));
         entity.setNome(cliente.getNome());
         entity.setEmail(cliente.getEmail());
         entity.setCpfCnpj(cliente.getCpfCnpj());
@@ -127,3 +127,9 @@ public class PanacheClienteRepositoryImpl implements ClienteRepository, PanacheR
         return embeddable;
     }
 }
+
+
+
+
+
+

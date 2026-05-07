@@ -44,3 +44,9 @@ public class FuncionarioBeanConfig {
         return new AtivarFuncionarioUseCaseImpl(repository);
     }
 }
+
+
+
+
+
+

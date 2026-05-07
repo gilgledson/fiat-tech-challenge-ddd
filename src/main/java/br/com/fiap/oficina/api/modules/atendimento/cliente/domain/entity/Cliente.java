@@ -13,7 +13,7 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Cliente {
     private UUID id;
-    private UUID usuarioId;
+    private Optional<UUID> usuarioId;
     private String nome;
     private String email;
     private String cpfCnpj;
@@ -23,7 +23,7 @@ public class Cliente {
 
     public Cliente(UUID usuarioId, String nome, String email, String cpfCnpj, String telefone, Endereco endereco) {
         this.id = UUID.randomUUID();
-        this.usuarioId = usuarioId;
+        this.usuarioId = Optional.ofNullable(usuarioId);
         this.nome = nome;
         this.email = email;
         this.cpfCnpj = cpfCnpj;
@@ -35,7 +35,7 @@ public class Cliente {
 
     public static Cliente reconstituir(UUID id, UUID usuarioId, String nome, String email, String cpfCnpj,
             String telefone, Endereco endereco, Optional<LocalDateTime> deletadoEm) {
-        Cliente cliente = new Cliente(id, usuarioId, nome, email, cpfCnpj, telefone, endereco, deletadoEm);
+        Cliente cliente = new Cliente(id, Optional.ofNullable(usuarioId), nome, email, cpfCnpj, telefone, endereco, deletadoEm);
         cliente.validar();
         return cliente;
     }
@@ -80,3 +80,9 @@ public class Cliente {
         }
     }
 }
+
+
+
+
+
+

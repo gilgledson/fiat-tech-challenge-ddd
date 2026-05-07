@@ -129,3 +129,9 @@ public class ClienteController {
         return Response.status(Response.Status.OK).entity(response).build();
     }
 }
+
+
+
+
+
+

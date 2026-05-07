@@ -5,3 +5,9 @@ import java.util.UUID;
 public interface DeletarFuncionarioUseCase {
     void executar(UUID id);
 }
+
+
+
+
+
+

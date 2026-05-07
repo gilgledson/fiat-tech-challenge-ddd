@@ -69,3 +69,12 @@ class CadastrarServicoUseCaseTest {
         verify(servicoRepository, times(1)).salvar(any());
     }
 }
+
+
+
+
+
+
+
+
+

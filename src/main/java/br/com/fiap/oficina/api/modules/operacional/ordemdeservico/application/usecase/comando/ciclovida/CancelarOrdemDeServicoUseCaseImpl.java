@@ -44,3 +44,9 @@ public class CancelarOrdemDeServicoUseCaseImpl implements CancelarOrdemDeServico
         eventBus.publish(OrdemServicoCancelada.TOPICO, event.toJson());
     }
 }
+
+
+
+
+
+

@@ -77,3 +77,12 @@ class CadastrarClienteUseCaseTest {
         verify(repository, never()).salvar(any());
     }
 }
+
+
+
+
+
+
+
+
+

@@ -14,6 +14,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.util.UUID;
+
 @ApplicationScoped
 public class AtendimentoSeeder implements Seeder {
 
@@ -47,11 +49,15 @@ public class AtendimentoSeeder implements Seeder {
         if (clienteRepository.listarTodos(0, 1, false).totalElementos() == 0) {
             // Cria alguns clientes de teste
             for (int i = 0; i < 5; i++) {
-                // Cada cliente precisa de um usuário com perfil CLIENTE
-                Usuario usuario = usuarioFactory.create(PerfilUsuario.CLIENTE);
-                usuarioRepository.salvar(usuario);
+                UUID usuarioId = null;
+                // Cria usuário apenas para os 3 primeiros clientes
+                if (i < 3) {
+                    Usuario usuario = usuarioFactory.create(PerfilUsuario.CLIENTE);
+                    usuarioRepository.salvar(usuario);
+                    usuarioId = usuario.getId();
+                }
                 
-                Cliente cliente = clienteFactory.create(usuario.getId());
+                Cliente cliente = clienteFactory.create(usuarioId);
                 clienteRepository.salvar(cliente);
 
                 // Cria um veículo para cada cliente
@@ -60,3 +66,9 @@ public class AtendimentoSeeder implements Seeder {
         }
     }
 }
+
+
+
+
+
+

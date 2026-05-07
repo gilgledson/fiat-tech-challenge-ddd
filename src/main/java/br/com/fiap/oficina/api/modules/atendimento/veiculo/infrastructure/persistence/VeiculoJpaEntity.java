@@ -52,3 +52,9 @@ public class VeiculoJpaEntity {
     public LocalDateTime getDeletadoEm() { return deletadoEm; }
     public void setDeletadoEm(LocalDateTime deletadoEm) { this.deletadoEm = deletadoEm; }
 }
+
+
+
+
+
+

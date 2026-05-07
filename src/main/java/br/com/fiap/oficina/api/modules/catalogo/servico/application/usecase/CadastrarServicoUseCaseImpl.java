@@ -30,3 +30,9 @@ public class CadastrarServicoUseCaseImpl implements CadastrarServicoUseCase {
         return servicoOutputMapper.mapear(novoServico);
     }
 }
+
+
+
+
+
+

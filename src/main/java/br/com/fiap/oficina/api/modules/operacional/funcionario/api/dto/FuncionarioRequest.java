@@ -33,3 +33,9 @@ public record FuncionarioRequest(
     @Schema(description = "Cargo do funcionário") 
     CargoFuncionario cargo
 ) {}
+
+
+
+
+
+

@@ -11,3 +11,9 @@ public record OrdemServicoPaga(UUID ordemServicoId) {
                 .put("ordemServicoId", ordemServicoId.toString());
     }
 }
+
+
+
+
+
+

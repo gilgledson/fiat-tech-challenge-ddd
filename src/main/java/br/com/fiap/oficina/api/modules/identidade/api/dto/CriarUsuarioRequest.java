@@ -18,3 +18,9 @@ public record CriarUsuarioRequest(
     @NotNull(message = "O perfil é obrigatório")
     PerfilUsuario perfil
 ) {}
+
+
+
+
+
+

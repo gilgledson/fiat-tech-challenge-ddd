@@ -90,3 +90,12 @@ class RejeitarOrcamentoUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> useCase.executar(osId));
     }
 }
+
+
+
+
+
+
+
+
+

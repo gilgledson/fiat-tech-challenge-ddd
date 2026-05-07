@@ -63,3 +63,9 @@ public class ConcluirExecucaoOrdemDeServicoUseCaseImpl implements ConcluirExecuc
         eventBus.publish(OrdemServicoExecucaoConcluidaEvent.TOPICO, event.toJson());
     }
 }
+
+
+
+
+
+

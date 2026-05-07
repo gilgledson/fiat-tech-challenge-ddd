@@ -73,3 +73,9 @@ public class FuncionarioRepositoryImpl
         return new Pagina<>(itens, pagina, tamanhoLista, (int) query.pageCount(), query.count());
     }
 }
+
+
+
+
+
+

@@ -21,3 +21,9 @@ public class VeiculoFactory {
         return new Veiculo(clienteId, placa, marca, modelo, ano);
     }
 }
+
+
+
+
+
+

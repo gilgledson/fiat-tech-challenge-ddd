@@ -8,3 +8,9 @@ public record RelatorioTempoMedioServico(
     Integer quantidadeExecucoesHistoricas,
     Long tempoMedioMinutos
 ) {}
+
+
+
+
+
+

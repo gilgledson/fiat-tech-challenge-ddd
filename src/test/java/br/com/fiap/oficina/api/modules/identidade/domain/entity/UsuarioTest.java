@@ -65,3 +65,12 @@ class UsuarioTest {
         assertEquals(PerfilUsuario.CLIENTE, PerfilUsuario.fromString("cliente"));
     }
 }
+
+
+
+
+
+
+
+
+

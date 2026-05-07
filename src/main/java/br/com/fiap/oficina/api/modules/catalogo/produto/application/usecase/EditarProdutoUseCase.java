@@ -11,3 +11,9 @@ public interface EditarProdutoUseCase {
             UnidadeMedida unidadeMedida);
 
 }
+
+
+
+
+
+

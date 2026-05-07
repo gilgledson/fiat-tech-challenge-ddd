@@ -20,3 +20,9 @@ public class AtivarProdutoUseCaseImpl implements AtivarProdutoUseCase {
         return produto;
     }
 }
+
+
+
+
+
+

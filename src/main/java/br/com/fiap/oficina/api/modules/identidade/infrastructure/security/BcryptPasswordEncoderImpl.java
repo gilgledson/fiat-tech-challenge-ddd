@@ -16,3 +16,9 @@ public class BcryptPasswordEncoderImpl implements PasswordEncoder {
         return BcryptUtil.matches(senhaPura, hashSenha);
     }
 }
+
+
+
+
+
+

@@ -26,3 +26,9 @@ public interface ClienteRepository {
     public Pagina<Cliente> listarTodos(int pagina, int tamanhoLista, boolean incluirInativos);
 
 }
+
+
+
+
+
+

@@ -7,3 +7,9 @@ import java.util.UUID;
 public interface CadastrarVeiculoUseCase {
     VeiculoOutput executar(UUID clienteId, String placa, String marca, String modelo, int ano);
 }
+
+
+
+
+
+

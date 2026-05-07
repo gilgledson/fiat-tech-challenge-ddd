@@ -28,3 +28,9 @@ public record EnderecoRequest(
                 this.estado());
     }
 }
+
+
+
+
+
+

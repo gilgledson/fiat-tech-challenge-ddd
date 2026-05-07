@@ -46,3 +46,9 @@ public class CatalogoSeeder implements Seeder {
         }
     }
 }
+
+
+
+
+
+

@@ -7,3 +7,9 @@ import java.util.UUID;
 public interface ListarOrdensDeServicoUseCase {
     Pagina<OrdemDeServicoOutput> executar(UUID clienteId, UUID veiculoId, int pagina, int tamanho, boolean incluirInativas);
 }
+
+
+
+
+
+

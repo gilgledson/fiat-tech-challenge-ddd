@@ -12,3 +12,9 @@ public interface EditarServicoUseCase {
     public ServicoOutput executar(UUID id, String nome, TipoServico tipo, BigDecimal precoBase,
             List<ProdutoSugerido> produtosSugeridos);
 }
+
+
+
+
+
+

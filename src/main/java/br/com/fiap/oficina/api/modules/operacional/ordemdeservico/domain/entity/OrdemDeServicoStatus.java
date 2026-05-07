@@ -16,7 +16,7 @@ public enum OrdemDeServicoStatus {
     EM_EXECUCAO("Em Execução"),
 
     // 4. Fase Financeira e Fechamento (Caixa / Recepção)
-    AGUARDANDO_PAGAMENTO("Aguardando Pagamento"), // O mecânico terminou o serviço! Fatura gerada.
+    AGUARDANDO_PAGAMENTO("Aguardando Pagamento"), // O mecânico terminou o serviço! Orcamento gerada.
     PAGA("Paga"),                                 // O cliente passou o cartão. Carro liberado.
     ENTREGUE("Entregue"),                         // Cliente pegou a chave e foi embora.
 
@@ -45,3 +45,9 @@ public enum OrdemDeServicoStatus {
         }
     }
 }
+
+
+
+
+
+

@@ -5,3 +5,9 @@ import java.util.UUID;
 public interface DeletarProdutoUseCase {
     public void executar(UUID id);
 }
+
+
+
+
+
+

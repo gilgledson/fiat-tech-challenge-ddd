@@ -17,3 +17,9 @@ public class DeletarProdutoUseCaseImpl implements DeletarProdutoUseCase {
         repository.delete(id);
     }
 }
+
+
+
+
+
+

@@ -8,6 +8,7 @@ import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.
 import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.TipoServico;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.event.OrdemServicoAprovada;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.event.OrdemServicoRejeitada;
+import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.gateway.CatalogoProdutoGateway;
 import io.vertx.core.eventbus.EventBus;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class AprovarOrdemDeServicoUseCaseImpl implements AprovarOrdemDeServicoUseCase {
 
     private final OrdemDeServicoRepository repository;
+    private final CatalogoProdutoGateway produtoGateway;
     private final EventBus eventBus;
 
     @Override
@@ -54,11 +56,19 @@ public class AprovarOrdemDeServicoUseCaseImpl implements AprovarOrdemDeServicoUs
                     .forEach(s -> s.setStatus(OrdemDeServicoServicoStatus.APROVADO));
         }
 
-        // Atualiza status dos serviços rejeitados
+        // Atualiza status dos serviços rejeitados e libera estoque
         if (request.servicosRejeitados() != null) {
             ordem.getServicos().stream()
                     .filter(s -> request.servicosRejeitados().contains(s.getId()))
-                    .forEach(s -> s.setStatus(OrdemDeServicoServicoStatus.REJEITADO));
+                    .forEach(s -> {
+                        s.setStatus(OrdemDeServicoServicoStatus.CANCELADO);
+                        // Libera o estoque de todos os produtos associados a este serviço
+                        if (s.getProdutos() != null) {
+                            s.getProdutos().forEach(p -> 
+                                produtoGateway.liberarEstoqueReservado(p.getProdutoId(), p.getQuantidade())
+                            );
+                        }
+                    });
         }
 
         // Decide status final da OS
@@ -90,3 +100,9 @@ public class AprovarOrdemDeServicoUseCaseImpl implements AprovarOrdemDeServicoUs
         }
     }
 }
+
+
+
+
+
+

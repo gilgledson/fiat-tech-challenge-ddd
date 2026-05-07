@@ -1,0 +1,1 @@
+ALTER TABLE FATURA ADD COLUMN assinatura_cliente VARCHAR(500);

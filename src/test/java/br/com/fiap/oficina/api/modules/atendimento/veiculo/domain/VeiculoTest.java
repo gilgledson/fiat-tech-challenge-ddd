@@ -92,3 +92,12 @@ class VeiculoTest {
         assertThrows(IllegalArgumentException.class, v::ativar);
     }
 }
+
+
+
+
+
+
+
+
+

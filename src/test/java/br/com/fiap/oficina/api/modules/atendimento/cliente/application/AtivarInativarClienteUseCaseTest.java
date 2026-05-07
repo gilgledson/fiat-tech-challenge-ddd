@@ -103,3 +103,12 @@ class AtivarInativarClienteUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> ativarUseCase.executar(id));
     }
 }
+
+
+
+
+
+
+
+
+

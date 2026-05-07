@@ -9,3 +9,9 @@ public record VeiculoSnapshotDTO(
         String modelo,
         String marca
 ) {}
+
+
+
+
+
+

@@ -13,3 +13,9 @@ public interface CadastrarServicoUseCase {
             List<ProdutoSugerido> produtosSugeridos);
 
 }
+
+
+
+
+
+

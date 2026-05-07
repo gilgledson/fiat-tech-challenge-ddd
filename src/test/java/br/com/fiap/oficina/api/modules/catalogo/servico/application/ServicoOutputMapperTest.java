@@ -71,3 +71,12 @@ class ServicoOutputMapperTest {
         assertTrue(mapper.mapearLista(List.of()).isEmpty());
     }
 }
+
+
+
+
+
+
+
+
+

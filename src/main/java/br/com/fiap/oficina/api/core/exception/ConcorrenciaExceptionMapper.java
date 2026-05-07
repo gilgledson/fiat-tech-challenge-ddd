@@ -22,3 +22,9 @@ public class ConcorrenciaExceptionMapper implements ExceptionMapper<OptimisticLo
     private record ErroResponse(String codigo, String mensagem) {
     }
 }
+
+
+
+
+
+

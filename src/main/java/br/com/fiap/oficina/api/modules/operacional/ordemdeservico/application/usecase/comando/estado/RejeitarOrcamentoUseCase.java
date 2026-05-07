@@ -6,3 +6,9 @@ import java.util.UUID;
 public interface RejeitarOrcamentoUseCase {
     OrdemDeServicoOutput executar(UUID id);
 }
+
+
+
+
+
+

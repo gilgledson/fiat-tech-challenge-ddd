@@ -32,3 +32,9 @@ public class AtendimentoGatewayImpl implements AtendimentoGateway {
                 .map(v -> new VeiculoSnapshotDTO(v.getId(), v.getClienteId(), v.getPlaca(), v.getModelo(), v.getMarca()));
     }
 }
+
+
+
+
+
+

@@ -17,3 +17,9 @@ public class DeletarClienteUseCaseImpl implements DeletarClienteUseCase {
         repository.deletar(id);
     }
 }
+
+
+
+
+
+

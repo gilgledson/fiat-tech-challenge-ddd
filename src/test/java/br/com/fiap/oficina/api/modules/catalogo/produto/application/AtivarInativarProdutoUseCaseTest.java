@@ -110,3 +110,12 @@ class AtivarInativarProdutoUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> ativarUseCase.executar(id));
     }
 }
+
+
+
+
+
+
+
+
+

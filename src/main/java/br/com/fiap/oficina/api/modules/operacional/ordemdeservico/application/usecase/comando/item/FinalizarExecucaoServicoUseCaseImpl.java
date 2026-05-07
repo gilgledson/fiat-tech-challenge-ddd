@@ -39,3 +39,9 @@ public class FinalizarExecucaoServicoUseCaseImpl implements FinalizarExecucaoSer
         repository.atualizar(ordem);
     }
 }
+
+
+
+
+
+

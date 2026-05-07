@@ -5,3 +5,9 @@ import java.util.UUID;
 public interface AtivarVeiculoUseCase {
     void executar(UUID id);
 }
+
+
+
+
+
+

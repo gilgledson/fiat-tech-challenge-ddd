@@ -21,3 +21,9 @@ public class CatalogoServicoGatewayImpl implements CatalogoServicoGateway {
                 .map(s -> new ServicoSnapshotDTO(s.getId(), s.getNome(), s.getPrecoBase(), s.getTipo()));
     }
 }
+
+
+
+
+
+

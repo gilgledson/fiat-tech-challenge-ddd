@@ -22,3 +22,9 @@ public class ProdutoFactory {
         return new Produto(nome, codigoBarras, preco, estoque, reservado, UnidadeMedida.UN);
     }
 }
+
+
+
+
+
+

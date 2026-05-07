@@ -5,3 +5,9 @@ import java.util.UUID;
 public interface IniciarExecucaoOsUseCase {
     void executar(UUID id);
 }
+
+
+
+
+
+

@@ -58,3 +58,12 @@ class CadastrarVeiculoUseCaseTest {
         verify(repository, never()).salvar(any());
     }
 }
+
+
+
+
+
+
+
+
+

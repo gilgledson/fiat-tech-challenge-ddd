@@ -21,3 +21,9 @@ public class DeletarFuncionarioUseCaseImpl implements DeletarFuncionarioUseCase 
         repository.atualizar(funcionario);
     }
 }
+
+
+
+
+
+

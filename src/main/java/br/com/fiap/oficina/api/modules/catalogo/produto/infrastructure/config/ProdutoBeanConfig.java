@@ -46,3 +46,9 @@ public class ProdutoBeanConfig {
         return new DeletarProdutoUseCaseImpl(repository);
     }
 }
+
+
+
+
+
+

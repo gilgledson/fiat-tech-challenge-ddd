@@ -21,3 +21,9 @@ public class InativarProdutoUseCaseImpl implements InativarProdutoUseCase{
 
     }
 }
+
+
+
+
+
+

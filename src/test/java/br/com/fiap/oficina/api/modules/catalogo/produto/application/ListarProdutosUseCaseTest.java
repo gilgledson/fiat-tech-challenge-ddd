@@ -43,3 +43,12 @@ class ListarProdutosUseCaseTest {
         assertEquals("Oleo", resultado.itens().get(0).getNome());
     }
 }
+
+
+
+
+
+
+
+
+

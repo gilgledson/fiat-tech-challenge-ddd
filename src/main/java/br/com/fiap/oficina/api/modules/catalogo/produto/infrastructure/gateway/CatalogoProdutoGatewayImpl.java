@@ -53,3 +53,9 @@ public class CatalogoProdutoGatewayImpl implements CatalogoProdutoGateway {
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
     }
 }
+
+
+
+
+
+

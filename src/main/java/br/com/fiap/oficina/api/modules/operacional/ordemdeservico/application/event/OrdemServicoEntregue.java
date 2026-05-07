@@ -11,3 +11,9 @@ public record OrdemServicoEntregue(UUID ordemServicoId) {
                 .put("ordemServicoId", ordemServicoId.toString());
     }
 }
+
+
+
+
+
+

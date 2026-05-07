@@ -126,3 +126,9 @@ public class ProdutoJpaEntity {
         this.quantidadeEstoqueReservado = this.quantidadeEstoqueReservado.subtract(quantidade);
     }
 }
+
+
+
+
+
+

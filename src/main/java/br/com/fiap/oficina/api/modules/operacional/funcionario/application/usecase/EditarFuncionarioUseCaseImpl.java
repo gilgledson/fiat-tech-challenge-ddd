@@ -35,3 +35,9 @@ public class EditarFuncionarioUseCaseImpl implements EditarFuncionarioUseCase {
         return FuncionarioOutputMapper.toOutput(funcionario);
     }
 }
+
+
+
+
+
+

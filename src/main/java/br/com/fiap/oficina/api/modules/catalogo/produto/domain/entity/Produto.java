@@ -163,3 +163,9 @@ public class Produto {
         return this.quantidadeEstoqueFisico.subtract(this.quantidadeEstoqueReservado);
     }
 }
+
+
+
+
+
+

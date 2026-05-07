@@ -10,3 +10,9 @@ public record ServicoSnapshotDTO(
         BigDecimal precoBase,
         TipoServico tipo
 ) {}
+
+
+
+
+
+

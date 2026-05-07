@@ -6,3 +6,9 @@ import java.util.UUID;
 public interface ConcluirDiagnosticoUseCase {
     OrdemDeServicoOutput executar(UUID id);
 }
+
+
+
+
+
+

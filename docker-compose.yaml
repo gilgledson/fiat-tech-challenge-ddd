@@ -20,6 +20,15 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  sonarqube:
+    image: sonarqube:latest
+    container_name: oficina-sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_COMPUTERNAME=oficina-sonarqube
+    networks:
+      - oficina-network
 
   # 2. A sua API Quarkus
   oficina-api:

@@ -41,3 +41,9 @@ public class ClienteJpaEntity {
     @Column(name = "deletado_em")
     private LocalDateTime deletadoEm;
 }
+
+
+
+
+
+

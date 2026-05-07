@@ -14,3 +14,9 @@ public record AdicionarProdutoRequest(
 
                 @DecimalMin(value = "0.01", message = "A quantidade mínima é 0.01") @Schema(description = "Quantidade a ser adicionada", defaultValue = "0.50") BigDecimal quantidade) {
 }
+
+
+
+
+
+

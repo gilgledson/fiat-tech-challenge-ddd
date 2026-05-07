@@ -127,3 +127,12 @@ class CancelarOrdemDeServicoUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> useCase.executar(osId, "motivo"));
     }
 }
+
+
+
+
+
+
+
+
+

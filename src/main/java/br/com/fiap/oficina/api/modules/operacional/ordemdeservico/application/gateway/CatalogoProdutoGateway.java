@@ -11,3 +11,9 @@ public interface CatalogoProdutoGateway {
     void liberarEstoqueReservado(UUID id, BigDecimal quantidade);
     void confirmarVenda(UUID id, BigDecimal quantidade);
 }
+
+
+
+
+
+

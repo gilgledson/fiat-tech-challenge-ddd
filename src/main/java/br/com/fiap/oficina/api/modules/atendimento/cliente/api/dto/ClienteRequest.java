@@ -20,3 +20,9 @@ public record ClienteRequest(
 
                 @NotNull(message = "O endereço é obrigatório") @jakarta.validation.Valid @Schema(description = "Endereço do cliente") EnderecoRequest endereco) {
 }
+
+
+
+
+
+

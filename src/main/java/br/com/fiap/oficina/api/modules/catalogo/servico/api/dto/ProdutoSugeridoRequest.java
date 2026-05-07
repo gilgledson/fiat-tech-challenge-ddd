@@ -13,3 +13,9 @@ public record ProdutoSugeridoRequest(
 
                 @NotNull(message = "A quantidade é obrigatória") @DecimalMin(value = "0.01", message = "A quantidade deve ser maior que zero") @Schema(description = "Quantidade necessária do produto para este serviço", defaultValue = "4.50") BigDecimal quantidade) {
 }
+
+
+
+
+
+

@@ -8,3 +8,9 @@ public record ProdutoSnapshotDTO(
         String nome,
         BigDecimal precoUnitario
 ) {}
+
+
+
+
+
+

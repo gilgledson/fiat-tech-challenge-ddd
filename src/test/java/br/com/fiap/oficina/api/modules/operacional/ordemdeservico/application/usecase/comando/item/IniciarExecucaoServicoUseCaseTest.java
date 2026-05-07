@@ -147,3 +147,12 @@ class IniciarExecucaoServicoUseCaseTest {
         verify(repository, never()).atualizar(any());
     }
 }
+
+
+
+
+
+
+
+
+

@@ -24,3 +24,9 @@ public class IllegalArgumentExceptionMapper implements ExceptionMapper<IllegalAr
                 .build();
     }
 }
+
+
+
+
+
+

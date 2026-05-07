@@ -5,3 +5,9 @@ import java.util.UUID;
 public interface DeletarClienteUseCase {
     void executar(UUID id);
 }
+
+
+
+
+
+

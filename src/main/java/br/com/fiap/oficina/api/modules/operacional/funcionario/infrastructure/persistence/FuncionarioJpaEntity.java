@@ -77,3 +77,9 @@ public class FuncionarioJpaEntity {
                 .build();
     }
 }
+
+
+
+
+
+

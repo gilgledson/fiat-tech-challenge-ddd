@@ -8,3 +8,9 @@ public record ErroResponse(
         String mensagem,
         LocalDateTime timestamp
 ) {}
+
+
+
+
+
+

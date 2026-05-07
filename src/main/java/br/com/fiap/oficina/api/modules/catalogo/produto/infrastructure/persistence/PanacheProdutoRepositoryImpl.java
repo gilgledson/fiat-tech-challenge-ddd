@@ -104,3 +104,9 @@ public class PanacheProdutoRepositoryImpl implements
                 Optional.ofNullable(entity.getDeletadoEm()));
     }
 }
+
+
+
+
+
+

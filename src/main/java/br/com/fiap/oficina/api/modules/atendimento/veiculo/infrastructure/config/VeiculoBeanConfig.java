@@ -38,3 +38,9 @@ public class VeiculoBeanConfig {
         return new ListarVeiculosUseCaseImpl(repository);
     }
 }
+
+
+
+
+
+

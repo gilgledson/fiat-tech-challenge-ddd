@@ -43,3 +43,12 @@ class EnderecoTest {
         assertEquals("Rua Teste", endereco.getLogradouro());
     }
 }
+
+
+
+
+
+
+
+
+

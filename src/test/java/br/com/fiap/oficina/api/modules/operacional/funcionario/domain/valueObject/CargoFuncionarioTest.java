@@ -33,3 +33,12 @@ class CargoFuncionarioTest {
         assertEquals("Administrador", CargoFuncionario.ADMINISTRADOR.getDescricao());
     }
 }
+
+
+
+
+
+
+
+
+

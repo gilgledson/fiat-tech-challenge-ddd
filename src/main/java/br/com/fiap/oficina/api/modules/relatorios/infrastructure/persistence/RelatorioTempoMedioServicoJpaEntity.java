@@ -27,3 +27,9 @@ public class RelatorioTempoMedioServicoJpaEntity {
     private Long tempoMedioMinutos;
 
 }
+
+
+
+
+
+

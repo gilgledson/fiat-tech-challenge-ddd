@@ -46,3 +46,12 @@ class BuscarUsuarioPorEmailUseCaseTest {
         assertTrue(resultado.isEmpty());
     }
 }
+
+
+
+
+
+
+
+
+

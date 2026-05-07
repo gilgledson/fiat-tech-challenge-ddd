@@ -21,3 +21,9 @@ public interface FuncionarioRepository {
 
     Pagina<Funcionario> listarTodos(int pagina, int tamanhoLista, boolean incluirInativos);
 }
+
+
+
+
+
+

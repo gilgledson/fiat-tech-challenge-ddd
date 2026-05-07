@@ -90,3 +90,9 @@ public class PanacheVeiculoRepositoryImpl implements VeiculoRepository, PanacheR
         );
     }
 }
+
+
+
+
+
+

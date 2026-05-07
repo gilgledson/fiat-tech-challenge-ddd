@@ -30,13 +30,24 @@ public class OrdemDeServico {
     private LocalDateTime deletadoEm;
 
     public java.math.BigDecimal calcularValorTotal() {
+        return calcularValorTotal(false);
+    }
+
+    public java.math.BigDecimal calcularValorTotal(boolean incluirPendentes) {
         java.math.BigDecimal totalServicos = (servicos == null ? new ArrayList<OrdemDeServicoServicos>() : servicos).stream()
                 .filter(s -> s.getStatus() == OrdemDeServicoServicoStatus.APROVADO || 
                              s.getStatus() == OrdemDeServicoServicoStatus.EM_EXECUCAO || 
-                             s.getStatus() == OrdemDeServicoServicoStatus.FINALIZADO)
+                             s.getStatus() == OrdemDeServicoServicoStatus.FINALIZADO ||
+                             (incluirPendentes && s.getStatus() == OrdemDeServicoServicoStatus.PENDENTE))
                 .map(OrdemDeServicoServicos::getTotal)
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
                 
         return totalServicos;
     }
 }
+
+
+
+
+
+

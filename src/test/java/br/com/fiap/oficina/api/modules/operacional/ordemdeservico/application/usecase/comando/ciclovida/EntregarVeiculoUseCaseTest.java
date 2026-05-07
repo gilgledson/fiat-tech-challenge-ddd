@@ -88,3 +88,12 @@ class EntregarVeiculoUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> useCase.executar(osId));
     }
 }
+
+
+
+
+
+
+
+
+

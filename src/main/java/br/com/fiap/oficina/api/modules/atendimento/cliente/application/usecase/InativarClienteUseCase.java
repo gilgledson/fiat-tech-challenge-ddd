@@ -5,3 +5,9 @@ import java.util.UUID;
 public interface InativarClienteUseCase {
     void executar(UUID id);
 }
+
+
+
+
+
+

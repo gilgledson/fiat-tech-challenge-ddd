@@ -18,3 +18,9 @@ public class DeletarServicoUseCaseImpl implements DeletarServicoUseCase {
         servicoRepository.deletar(id);
     }
 }
+
+
+
+
+
+

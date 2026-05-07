@@ -38,3 +38,9 @@ public class ClienteBeanConfig {
         return new ListarClientesUseCaseImpl(repository);
     }
 }
+
+
+
+
+
+

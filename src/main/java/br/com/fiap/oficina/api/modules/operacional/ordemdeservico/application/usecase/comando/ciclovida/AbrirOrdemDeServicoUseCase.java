@@ -7,3 +7,9 @@ import java.util.UUID;
 public interface AbrirOrdemDeServicoUseCase {
     OrdemDeServicoOutput executar(UUID clienteId, UUID veiculoId, String descricaoProblema);
 }
+
+
+
+
+
+

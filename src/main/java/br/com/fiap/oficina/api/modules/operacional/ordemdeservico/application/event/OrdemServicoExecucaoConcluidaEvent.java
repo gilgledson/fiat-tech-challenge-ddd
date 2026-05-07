@@ -14,3 +14,9 @@ public record OrdemServicoExecucaoConcluidaEvent(UUID ordemServicoId, BigDecimal
                 .put("clienteId", clienteId.toString());
     }
 }
+
+
+
+
+
+

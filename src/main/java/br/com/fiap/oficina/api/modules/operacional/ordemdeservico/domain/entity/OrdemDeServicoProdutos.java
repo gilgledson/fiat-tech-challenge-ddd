@@ -24,3 +24,9 @@ public class OrdemDeServicoProdutos {
         return this.precoUnitario.multiply(this.quantidade);
     }
 }
+
+
+
+
+
+

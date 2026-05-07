@@ -11,3 +11,9 @@ public record OrdemServicoRejeitada(UUID ordemServicoId) {
                 .put("ordemServicoId", ordemServicoId.toString());
     }
 }
+
+
+
+
+
+

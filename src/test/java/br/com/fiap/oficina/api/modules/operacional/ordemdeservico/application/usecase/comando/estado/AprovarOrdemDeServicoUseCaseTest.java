@@ -102,3 +102,12 @@ class AprovarOrdemDeServicoUseCaseTest {
         assertTrue(os.getStatus() == OrdemDeServicoStatus.EM_EXECUCAO);
     }
 }
+
+
+
+
+
+
+
+
+

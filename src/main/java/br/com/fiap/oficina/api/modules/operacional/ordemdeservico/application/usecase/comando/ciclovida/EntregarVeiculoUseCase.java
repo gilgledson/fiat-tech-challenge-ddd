@@ -5,3 +5,9 @@ import java.util.UUID;
 public interface EntregarVeiculoUseCase {
     void executar(UUID id);
 }
+
+
+
+
+
+

@@ -152,3 +152,9 @@ public class VeiculoController {
         return Response.status(Response.Status.OK).entity(response).build();
     }
 }
+
+
+
+
+
+

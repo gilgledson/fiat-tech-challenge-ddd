@@ -7,3 +7,9 @@ public record RelatorioEsforcoOs(
     Integer totalServicosRealizados,
     Long esforcoTotalMinutos
 ) {}
+
+
+
+
+
+

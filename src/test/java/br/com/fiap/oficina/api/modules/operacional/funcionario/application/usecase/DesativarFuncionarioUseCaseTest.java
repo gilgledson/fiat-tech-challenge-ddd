@@ -64,3 +64,12 @@ class DesativarFuncionarioUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> useCase.executar(id));
     }
 }
+
+
+
+
+
+
+
+
+

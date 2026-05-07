@@ -14,3 +14,9 @@ public record ProdutoSugeridoResponse(
         return new ProdutoSugeridoResponse(dominio.produtoId(), dominio.nomeProduto(), dominio.quantidade());
     }
 }
+
+
+
+
+
+

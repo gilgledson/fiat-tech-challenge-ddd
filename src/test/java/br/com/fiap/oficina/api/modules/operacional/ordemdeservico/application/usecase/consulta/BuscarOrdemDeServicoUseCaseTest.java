@@ -55,3 +55,12 @@ class BuscarOrdemDeServicoUseCaseTest {
         assertThrows(NotFoundException.class, () -> useCase.executar(id));
     }
 }
+
+
+
+
+
+
+
+
+

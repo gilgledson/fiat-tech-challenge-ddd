@@ -22,3 +22,9 @@ public class AtivarFuncionarioUseCaseImpl implements AtivarFuncionarioUseCase {
         repository.atualizar(funcionario);
     }
 }
+
+
+
+
+
+

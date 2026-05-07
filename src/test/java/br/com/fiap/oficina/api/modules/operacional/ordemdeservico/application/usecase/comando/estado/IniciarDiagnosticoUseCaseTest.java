@@ -90,3 +90,12 @@ class IniciarDiagnosticoUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> useCase.executar(osId));
     }
 }
+
+
+
+
+
+
+
+
+

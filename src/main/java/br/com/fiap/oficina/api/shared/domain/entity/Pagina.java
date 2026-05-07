@@ -15,4 +15,10 @@ public record Pagina<T>(
         List<R> novasItens = itens.stream().map(mapper).collect(Collectors.toList());
         return new Pagina<>(novasItens, paginaAtual, tamanhoPagina, totalPaginas, totalElementos);
     }
-}
+}
+
+
+
+
+
+

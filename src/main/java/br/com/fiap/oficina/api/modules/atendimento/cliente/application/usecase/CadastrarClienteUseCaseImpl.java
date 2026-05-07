@@ -35,3 +35,9 @@ public class CadastrarClienteUseCaseImpl implements CadastrarClienteUseCase {
         return ClienteOutputMapper.toOutput(cliente);
     }
 }
+
+
+
+
+
+

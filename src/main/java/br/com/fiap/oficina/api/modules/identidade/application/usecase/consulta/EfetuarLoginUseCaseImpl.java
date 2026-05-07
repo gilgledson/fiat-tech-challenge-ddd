@@ -41,3 +41,9 @@ public class EfetuarLoginUseCaseImpl implements EfetuarLoginUseCase {
         return new TokenResponse(token, Duration.ofHours(8).toMillis() / 1000, refreshToken, "Bearer");
     }
 }
+
+
+
+
+
+

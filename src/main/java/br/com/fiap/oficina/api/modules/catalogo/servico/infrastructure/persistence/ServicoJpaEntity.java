@@ -50,3 +50,9 @@ public class ServicoJpaEntity {
         return getClass().hashCode();
     }
 }
+
+
+
+
+
+

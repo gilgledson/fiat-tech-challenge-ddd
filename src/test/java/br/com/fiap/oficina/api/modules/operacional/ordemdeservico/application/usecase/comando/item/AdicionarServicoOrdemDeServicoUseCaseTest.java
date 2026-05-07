@@ -179,3 +179,12 @@ class AdicionarServicoOrdemDeServicoUseCaseTest {
         verify(osRepository, never()).atualizar(any());
     }
 }
+
+
+
+
+
+
+
+
+
