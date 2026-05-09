@@ -11,34 +11,25 @@ import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuar
 import br.com.fiap.oficina.api.modules.identidade.infrastructure.seeder.UsuarioFactory;
 import br.com.fiap.oficina.api.shared.infrastructure.seeder.Seeder;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.UUID;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class AtendimentoSeeder implements Seeder {
 
     @ConfigProperty(name = "quarkus.profile")
     private String ambiente;
 
-    @Inject
-    ClienteRepository clienteRepository;
-
-    @Inject
-    ClienteFactory clienteFactory;
-
-    @Inject
-    VeiculoRepository veiculoRepository;
-
-    @Inject
-    VeiculoFactory veiculoFactory;
-
-    @Inject
-    UsuarioRepository usuarioRepository;
-
-    @Inject
-    UsuarioFactory usuarioFactory;
+    private final ClienteRepository clienteRepository;
+    private final ClienteFactory clienteFactory;
+    private final VeiculoRepository veiculoRepository;
+    private final VeiculoFactory veiculoFactory;
+    private final UsuarioRepository usuarioRepository;
+    private final UsuarioFactory usuarioFactory;
 
     @Override
     public void execute() {
@@ -48,7 +39,7 @@ public class AtendimentoSeeder implements Seeder {
 
         if (clienteRepository.listarTodos(0, 1, false).totalElementos() == 0) {
             // Cria alguns clientes de teste
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 15; i++) {
                 UUID usuarioId = null;
                 // Cria usuário apenas para os 3 primeiros clientes
                 if (i < 3) {
@@ -56,7 +47,7 @@ public class AtendimentoSeeder implements Seeder {
                     usuarioRepository.salvar(usuario);
                     usuarioId = usuario.getId();
                 }
-                
+
                 Cliente cliente = clienteFactory.create(usuarioId);
                 clienteRepository.salvar(cliente);
 
@@ -66,9 +57,3 @@ public class AtendimentoSeeder implements Seeder {
         }
     }
 }
-
-
-
-
-
-

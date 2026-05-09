@@ -6,19 +6,17 @@ import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dt
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dto.VeiculoSnapshotDTO;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.gateway.AtendimentoGateway;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class AtendimentoGatewayImpl implements AtendimentoGateway {
 
-    @Inject
-    ClienteRepository clienteRepository;
-
-    @Inject
-    VeiculoRepository veiculoRepository;
+    private final ClienteRepository clienteRepository;
+    private final VeiculoRepository veiculoRepository;
 
     @Override
     public Optional<ClienteSnapshotDTO> buscarClientePorId(UUID id) {
@@ -29,12 +27,7 @@ public class AtendimentoGatewayImpl implements AtendimentoGateway {
     @Override
     public Optional<VeiculoSnapshotDTO> buscarVeiculoPorId(UUID id) {
         return veiculoRepository.buscarPorId(id)
-                .map(v -> new VeiculoSnapshotDTO(v.getId(), v.getClienteId(), v.getPlaca(), v.getModelo(), v.getMarca()));
+                .map(v -> new VeiculoSnapshotDTO(v.getId(), v.getClienteId(), v.getPlaca(), v.getModelo(),
+                        v.getMarca()));
     }
 }
-
-
-
-
-
-

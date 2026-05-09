@@ -5,13 +5,13 @@ import java.util.List;
 import br.com.fiap.oficina.api.modules.relatorios.api.dto.RelatorioTempoMedioServicoResponse;
 import br.com.fiap.oficina.api.modules.relatorios.application.repository.RelatorioRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class ObterRelatorioTempoMedioServicoUseCaseImpl implements ObterRelatorioTempoMedioServicoUseCase {
 
-    @Inject
-    RelatorioRepository repository;
+    private final RelatorioRepository repository;
 
     @Override
     public List<RelatorioTempoMedioServicoResponse> executar() {
@@ -20,14 +20,7 @@ public class ObterRelatorioTempoMedioServicoUseCaseImpl implements ObterRelatori
                         r.servicoId(),
                         r.nomeServico(),
                         r.quantidadeExecucoesHistoricas(),
-                        r.tempoMedioMinutos()
-                ))
+                        r.tempoMedioMinutos()))
                 .toList();
     }
 }
-
-
-
-
-
-

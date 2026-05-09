@@ -7,7 +7,6 @@ import br.com.fiap.oficina.api.modules.catalogo.produto.domain.entity.Produto;
 import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuario;
 import br.com.fiap.oficina.api.shared.api.dto.PaginaResponse;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -15,6 +14,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Produtos", description = "Endpoints para gestão de produtos")
+@RequiredArgsConstructor
 public class ProdutoController {
     private final CadastrarProdutoUseCase cadastrarProdutoUseCase;
     private final ListarProdutosUseCase listarProdutosUseCase;
@@ -33,22 +35,6 @@ public class ProdutoController {
     private final InativarProdutoUseCase inativarProdutoUseCase;
     private final AtivarProdutoUseCase ativarProdutoUseCase;
     private final DeletarProdutoUseCase deletarProdutoUseCase;
-
-    @Inject
-    public ProdutoController(
-            CadastrarProdutoUseCase cadastrarProdutoUseCase,
-            ListarProdutosUseCase listarProdutosUseCase,
-            EditarProdutoUseCase editarProdutoUseCase,
-            InativarProdutoUseCase inativarProdutoUseCase,
-            AtivarProdutoUseCase ativarProdutoUseCase,
-            DeletarProdutoUseCase deletarProdutoUseCase) {
-        this.cadastrarProdutoUseCase = cadastrarProdutoUseCase;
-        this.listarProdutosUseCase = listarProdutosUseCase;
-        this.editarProdutoUseCase = editarProdutoUseCase;
-        this.inativarProdutoUseCase = inativarProdutoUseCase;
-        this.ativarProdutoUseCase = ativarProdutoUseCase;
-        this.deletarProdutoUseCase = deletarProdutoUseCase;
-    }
 
     @POST
     @RolesAllowed(PerfilUsuario.Constants.ADMIN)
@@ -143,9 +129,3 @@ public class ProdutoController {
     }
 
 }
-
-
-
-
-
-

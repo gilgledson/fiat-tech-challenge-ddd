@@ -10,7 +10,8 @@ import br.com.fiap.oficina.api.modules.orcamento.domain.entity.Orcamento;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.Location;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
+
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import java.io.ByteArrayOutputStream;
@@ -19,25 +20,29 @@ import java.util.UUID;
 @ApplicationScoped
 public class BaixarOrcamentoUseCaseImpl implements BaixarOrcamentoUseCase {
 
-        @Inject
-        OrcamentoRepository repository;
+        private final OrcamentoRepository repository;
+        private final AtendimentoGateway atendimentoGateway;
+        private final OperacionalGateway operacionalGateway;
+        private final Template templateFatura;
 
-        @Inject
-        AtendimentoGateway atendimentoGateway;
-
-        @Inject
-        OperacionalGateway operacionalGateway;
-
-        @Inject
-        @Location("orcamento/orcamento")
-        Template templateFatura;
+        public BaixarOrcamentoUseCaseImpl(
+                        OrcamentoRepository repository,
+                        AtendimentoGateway atendimentoGateway,
+                        OperacionalGateway operacionalGateway,
+                        @Location("orcamento/orcamento") Template templateFatura) {
+                this.repository = repository;
+                this.atendimentoGateway = atendimentoGateway;
+                this.operacionalGateway = operacionalGateway;
+                this.templateFatura = templateFatura;
+        }
 
         @Override
         public byte[] executar(UUID id) {
                 Orcamento orcamento = repository.buscarPorId(id)
                                 .orElseThrow(() -> new RuntimeException("Orcamento nao encontrado"));
 
-                OrdemServicoOrcamentoDTO os = operacionalGateway.buscarOrdemDeServicoPorId(orcamento.getOrdemServicoId())
+                OrdemServicoOrcamentoDTO os = operacionalGateway
+                                .buscarOrdemDeServicoPorId(orcamento.getOrdemServicoId())
                                 .orElseThrow(() -> new RuntimeException("Ordem de servico nao encontrada"));
 
                 ClienteOrcamentoDTO cliente = atendimentoGateway.buscarClientePorId(os.getClienteId())
@@ -47,7 +52,7 @@ public class BaixarOrcamentoUseCaseImpl implements BaixarOrcamentoUseCase {
                                 .orElseThrow(() -> new RuntimeException("Veiculo nao encontrado"));
 
                 String htmlRenderizado = templateFatura
-                                .data("orcamento", orcamento)
+                                .data("fatura", orcamento)
                                 .data("os", os)
                                 .data("cliente", cliente)
                                 .data("veiculo", veiculo)

@@ -62,6 +62,10 @@ src/main/java/.../modules/<contexto>/<agregado>/
 | `catalogo` | `produto`, `servico` |
 | `atendimento` | `cliente`, `veiculo` |
 | `identidade` | *(autenticação via JWT)* |
+| `operacional` | `ordemdeservico`, `funcionario` |
+| `orcamento` | `orcamento` |
+| `notificacao` | `envio de mensagens` |
+| `relatorios` | `métricas operacionais` |
 
 ---
 
@@ -80,6 +84,26 @@ src/main/java/.../modules/<contexto>/<agregado>/
 |---|---|
 | **Cliente** | Cadastro de clientes com endereço completo, CPF/CNPJ e vínculo com usuário |
 | **Veículo** | Cadastro de veículos vinculados a clientes, com placa, marca, modelo e ano |
+
+### 🛠️ Operacional
+
+| Recurso | Descrição |
+|---|---|
+| **Ordem de Serviço** | Ciclo de vida completo (Diagnóstico -> Execução -> Entrega) com controle de esforço e itens |
+| **Funcionário** | Cadastro de mecânicos e atendentes vinculados a usuários do sistema |
+
+### 💰 Orçamento
+
+| Recurso | Descrição |
+|---|---|
+| **Orçamento** | Geração de orçamentos em PDF (Qute), aprovação manual com assinatura e gestão de faturamento |
+
+### 📊 Relatórios
+
+| Recurso | Descrição |
+|---|---|
+| **Esforço por OS** | Cálculo automático do tempo total de intervenção (minutos) em cada Ordem de Serviço finalizada |
+| **Tempo Médio** | Média histórica de execução de cada tipo de serviço para otimização de agenda e custos |
 
 ---
 
@@ -115,7 +139,7 @@ Para facilitar o desenvolvimento e testes, implementamos um sistema de **Semeadu
   - **Identidade**: Usuários administradores, mecânicos e atendentes.
   - **Catálogo**: Produtos com estoque e serviços variados.
   - **Atendimento**: Clientes com endereços brasileiros reais e veículos vinculados.
-  - **Operacional**: Ordens de Serviço em diversos estados (abertas, em execução, finalizadas) para alimentar relatórios.
+  - **Operacional**: Gerador automático de 50 Ordens de Serviço distribuídas nos últimos 90 dias, com funcionários atribuídos e tempos de execução randômicos para visualização de métricas reais nos relatórios.
 
 ---
 
@@ -135,6 +159,8 @@ O schema é versionado via **Flyway** com migrations incrementais:
 | `V1.0.9` | Criação da tabela de fatura |
 | `V1.1.0` | Adição de suporte a reserva de estoque no catálogo |
 | `V1.1.1` | Controle de concorrência otimista (Versioning) para produtos |
+| `V1.1.22` | Criação de views para relatórios de esforço e tempo médio |
+| `V1.1.24` | Renomear tabela de fatura para orçamento |
 | `V2` *(testdata)* | Seeds de produtos e serviços para ambiente de testes |
 
 ---
@@ -242,6 +268,36 @@ A documentação interativa completa está disponível no Swagger UI após subir
 | `PUT` | `/api/veiculos/{id}` | Editar veículo |
 | `DELETE` | `/api/veiculos/{id}` | Inativar / deletar veículo |
 | `POST` | `/api/veiculos/{id}/ativacao` | Reativar veículo |
+
+### Operacional (Ordens de Serviço)
+
+| Método | Endpoint | Descrição | Roles |
+|---|---|---|---|
+| `POST` | `/api/ordens` | Abrir nova OS | `ADMIN`, `ATENDENTE` |
+| `GET` | `/api/ordens/{id}` | Detalhes da OS | `ADMIN`, `MECANICO`, `ATENDENTE`, `CLIENTE` |
+| `POST` | `/api/ordens/{id}/servicos` | Adicionar serviço à OS | `ADMIN`, `MECANICO` |
+| `POST` | `/api/ordens/{id}/iniciar-diagnostico` | Iniciar diagnóstico | `ADMIN`, `MECANICO` |
+| `POST` | `/api/ordens/{id}/concluir-diagnostico` | Finalizar diagnóstico | `ADMIN`, `MECANICO` |
+| `POST` | `/api/ordens/{id}/aprovar` | Aprovar orçamento | `ADMIN`, `ATENDENTE`, `CLIENTE` |
+| `POST` | `/api/ordens/{id}/iniciar-execucao` | Iniciar execução (OS) | `ADMIN`, `MECANICO` |
+| `POST` | `/api/ordens/{id}/concluir-execucao` | Concluir execução (OS) | `ADMIN`, `MECANICO` |
+| `POST` | `/api/ordens/{id}/entregar` | Entrega do veículo | `ADMIN`, `ATENDENTE` |
+
+### Orçamentos
+
+| Método | Endpoint | Descrição | Roles |
+|---|---|---|---|
+| `GET` | `/api/orcamentos/{id}` | Baixar orçamento (PDF) | `ADMIN`, `ATENDENTE` |
+| `POST` | `/api/orcamentos/{id}/aceitar` | Aceitar com assinatura (Base64) | `ADMIN`, `ATENDENTE` |
+| `POST` | `/api/orcamentos/{id}/confirmar-pagamento` | Baixa financeira | `ADMIN`, `ATENDENTE` |
+| `GET` | `/api/orcamentos/ordem-servico/{id}/json` | Dados do orçamento | `ADMIN`, `ATENDENTE` |
+
+### Relatórios
+
+| Método | Endpoint | Descrição | Roles |
+|---|---|---|---|
+| `GET` | `/api/relatorios/esforco-os/{osId}` | Esforço total de uma OS específica | `ADMIN`, `MECANICO` |
+| `GET` | `/api/relatorios/tempo-medio-servicos` | Média histórica de tempo por serviço | `ADMIN` |
 
 ### Paginação
 

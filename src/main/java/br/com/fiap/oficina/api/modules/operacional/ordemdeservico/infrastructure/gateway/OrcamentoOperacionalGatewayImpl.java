@@ -4,21 +4,21 @@ import br.com.fiap.oficina.api.modules.orcamento.application.dto.OrdemServicoOrc
 import br.com.fiap.oficina.api.modules.orcamento.application.gateway.OperacionalGateway;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.repository.OrdemDeServicoRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @ApplicationScoped
 @Getter
 @Setter
+@RequiredArgsConstructor
 public class OrcamentoOperacionalGatewayImpl implements OperacionalGateway {
 
-        @Inject
-        OrdemDeServicoRepository ordemDeServicoRepository;
+        private final OrdemDeServicoRepository ordemDeServicoRepository;
 
         @Override
         public Optional<OrdemServicoOrcamentoDTO> buscarOrdemDeServicoPorId(UUID id) {
@@ -28,9 +28,11 @@ public class OrcamentoOperacionalGatewayImpl implements OperacionalGateway {
                                                 os.getClienteId(),
                                                 os.getVeiculoId(),
                                                 os.getServicos().stream()
-                                                                .filter(s -> s.getStatus() == br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus.APROVADO ||
-                                                                             s.getStatus() == br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus.EM_EXECUCAO ||
-                                                                             s.getStatus() == br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus.FINALIZADO)
+                                                                .filter(s -> s.getStatus() == br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus.APROVADO
+                                                                                ||
+                                                                                s.getStatus() == br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus.EM_EXECUCAO
+                                                                                ||
+                                                                                s.getStatus() == br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus.FINALIZADO)
                                                                 .map(s -> new OrdemServicoOrcamentoDTO.ItemServicoDTO(
                                                                                 s.getNome(),
                                                                                 s.getQuantidade(),
@@ -42,14 +44,9 @@ public class OrcamentoOperacionalGatewayImpl implements OperacionalGateway {
                                                                                                                 p.getQuantidade(),
                                                                                                                 p.getPrecoUnitario(),
                                                                                                                 p.getTotal()))
-                                                                                                .collect(Collectors.toList())))
+                                                                                                .collect(Collectors
+                                                                                                                .toList())))
                                                                 .collect(Collectors.toList()),
                                                 os.calcularValorTotal()));
         }
 }
-
-
-
-
-
-

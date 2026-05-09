@@ -6,13 +6,14 @@ import br.com.fiap.oficina.api.modules.operacional.funcionario.api.dto.Funcionar
 import br.com.fiap.oficina.api.modules.operacional.funcionario.application.usecase.*;
 import br.com.fiap.oficina.api.shared.api.dto.PaginaResponse;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import java.util.UUID;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Funcionários", description = "Gestão de funcionários da oficina")
+@RequiredArgsConstructor
 public class FuncionarioController {
 
     private final CadastrarFuncionarioUseCase cadastrarUseCase;
@@ -29,22 +31,6 @@ public class FuncionarioController {
     private final DesativarFuncionarioUseCase desativarUseCase;
     private final DeletarFuncionarioUseCase deletarUseCase;
     private final AtivarFuncionarioUseCase ativarUseCase;
-
-    @Inject
-    public FuncionarioController(
-            CadastrarFuncionarioUseCase cadastrarUseCase,
-            ListarFuncionariosUseCase listarUseCase,
-            EditarFuncionarioUseCase editarUseCase,
-            DesativarFuncionarioUseCase desativarUseCase,
-            DeletarFuncionarioUseCase deletarUseCase,
-            AtivarFuncionarioUseCase ativarUseCase) {
-        this.cadastrarUseCase = cadastrarUseCase;
-        this.listarUseCase = listarUseCase;
-        this.editarUseCase = editarUseCase;
-        this.desativarUseCase = desativarUseCase;
-        this.deletarUseCase = deletarUseCase;
-        this.ativarUseCase = ativarUseCase;
-    }
 
     @POST
     @RolesAllowed(PerfilUsuario.Constants.ADMIN)
@@ -56,13 +42,12 @@ public class FuncionarioController {
                 request.sobrenome(),
                 request.cpf(),
                 request.telefone(),
-                request.cargo()
-        );
+                request.cargo());
         return Response.status(Response.Status.CREATED).entity(FuncionarioResponse.fromOutput(output)).build();
     }
 
     @GET
-    @RolesAllowed({PerfilUsuario.Constants.ADMIN})
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN })
     @Operation(summary = "Listar todos os funcionários")
     public Response listar(
             @QueryParam("pagina") @DefaultValue("0") @Min(0) int pagina,
@@ -84,8 +69,7 @@ public class FuncionarioController {
                 request.sobrenome(),
                 request.cpf(),
                 request.telefone(),
-                request.cargo()
-        );
+                request.cargo());
         return Response.ok(FuncionarioResponse.fromOutput(output)).build();
     }
 
@@ -116,9 +100,3 @@ public class FuncionarioController {
         return Response.noContent().build();
     }
 }
-
-
-
-
-
-

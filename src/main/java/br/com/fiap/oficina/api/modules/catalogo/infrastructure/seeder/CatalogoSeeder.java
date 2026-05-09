@@ -9,25 +9,19 @@ import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.TipoServic
 import br.com.fiap.oficina.api.modules.catalogo.servico.infrastructure.seeder.ServicoFactory;
 import br.com.fiap.oficina.api.shared.infrastructure.seeder.Seeder;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class CatalogoSeeder implements Seeder {
 
     @ConfigProperty(name = "quarkus.profile")
     private String ambiente;
 
-    @Inject
-    ProdutoRepository produtoRepository;
-
-    @Inject
-    ProdutoFactory produtoFactory;
-
-    @Inject
-    ServicoRepository servicoRepository;
-
-    @Inject
-    ServicoFactory servicoFactory;
+    private final ProdutoRepository produtoRepository;
+    private final ProdutoFactory produtoFactory;
+    private final ServicoRepository servicoRepository;
+    private final ServicoFactory servicoFactory;
 
     @Override
     public void execute() {
@@ -35,20 +29,16 @@ public class CatalogoSeeder implements Seeder {
             return;
         }
         if (produtoRepository.listarTodos(0, 1, false).totalElementos() == 0) {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 20; i++) {
                 produtoRepository.salvar(produtoFactory.create());
             }
         }
 
         if (servicoRepository.listarTodos(0, 1, false).totalElementos() == 0) {
-            servicoRepository.salvar(servicoFactory.create(TipoServico.PREVENTIVO));
-            servicoRepository.salvar(servicoFactory.create(TipoServico.CORRETIVO));
+            for (int i = 0; i < 4; i++) {
+                servicoRepository.salvar(servicoFactory.create(TipoServico.PREVENTIVO));
+                servicoRepository.salvar(servicoFactory.create(TipoServico.CORRETIVO));
+            }
         }
     }
 }
-
-
-
-
-
-

@@ -8,13 +8,14 @@ import br.com.fiap.oficina.api.modules.catalogo.servico.application.usecase.dto.
 import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.ProdutoSugerido;
 import br.com.fiap.oficina.api.shared.api.dto.PaginaResponse;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Serviços", description = "Gestão de catalogo de serviços")
+@RequiredArgsConstructor
 public class ServicoController {
     private final CadastrarServicoUseCase cadastrarServicoUseCase;
     private final ListarServicosUseCase listarServicosUseCase;
@@ -33,24 +35,6 @@ public class ServicoController {
     private final AtivarServicoUseCase ativarServicoUseCase;
     private final InativarServicoUseCase inativarServicoUseCase;
     private final DeletarServicoUseCase deletarServicoUseCase;
-
-    @Inject
-    public ServicoController(
-            CadastrarServicoUseCase cadastrarServicoUseCase,
-            ListarServicosUseCase listarServicosUseCase,
-            EditarServicoUseCase editarServicoUseCase,
-            AtivarServicoUseCase ativarServicoUseCase,
-            InativarServicoUseCase inativarServicoUseCase,
-            DeletarServicoUseCase deletarServicoUseCase
-
-    ) {
-        this.cadastrarServicoUseCase = cadastrarServicoUseCase;
-        this.listarServicosUseCase = listarServicosUseCase;
-        this.editarServicoUseCase = editarServicoUseCase;
-        this.ativarServicoUseCase = ativarServicoUseCase;
-        this.inativarServicoUseCase = inativarServicoUseCase;
-        this.deletarServicoUseCase = deletarServicoUseCase;
-    }
 
     @GET
     @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO,
@@ -126,9 +110,3 @@ public class ServicoController {
     }
 
 }
-
-
-
-
-
-

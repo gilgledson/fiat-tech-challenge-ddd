@@ -10,25 +10,22 @@ import br.com.fiap.oficina.api.modules.operacional.funcionario.application.repos
 import br.com.fiap.oficina.api.modules.operacional.funcionario.domain.valueObject.CargoFuncionario;
 import br.com.fiap.oficina.api.shared.infrastructure.seeder.Seeder;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class FuncionarioSeeder implements Seeder {
 
     @ConfigProperty(name = "quarkus.profile")
     private String ambiente;
 
-    @Inject
-    FuncionarioRepository repository;
+    private final FuncionarioRepository repository;
 
-    @Inject
-    FuncionarioFactory factory;
+    private final FuncionarioFactory factory;
 
-    @Inject
-    UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    @Inject
-    UsuarioFactory usuarioFactory;
+    private final UsuarioFactory usuarioFactory;
 
     @Override
     public void execute() {
@@ -54,9 +51,3 @@ public class FuncionarioSeeder implements Seeder {
         }
     }
 }
-
-
-
-
-
-

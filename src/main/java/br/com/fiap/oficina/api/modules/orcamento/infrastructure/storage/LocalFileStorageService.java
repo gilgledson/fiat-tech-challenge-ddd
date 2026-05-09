@@ -28,7 +28,7 @@ public class LocalFileStorageService {
 
             Files.write(filePath, content);
 
-            return filePath.toString();
+            return filename;
         } catch (IOException e) {
             throw new RuntimeException("Falha ao salvar arquivo", e);
         }
@@ -43,10 +43,8 @@ public class LocalFileStorageService {
         byte[] decodedBytes = Base64.getDecoder().decode(pureBase64);
         return store(decodedBytes, filenamePrefix + ".png");
     }
+
+    public String storeBase64(String base64Content) {
+        return storeBase64(base64Content, "assinatura_" + UUID.randomUUID());
+    }
 }
-
-
-
-
-
-

@@ -5,18 +5,18 @@ import br.com.fiap.oficina.api.modules.catalogo.produto.domain.entity.Produto;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dto.ProdutoSnapshotDTO;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.gateway.CatalogoProdutoGateway;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class CatalogoProdutoGatewayImpl implements CatalogoProdutoGateway {
 
-    @Inject
-    ProdutoRepository produtoRepository;
+    private final ProdutoRepository produtoRepository;
 
     @Override
     public Optional<ProdutoSnapshotDTO> buscarPorId(UUID id) {
@@ -53,9 +53,3 @@ public class CatalogoProdutoGatewayImpl implements CatalogoProdutoGateway {
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
     }
 }
-
-
-
-
-
-

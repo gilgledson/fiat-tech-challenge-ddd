@@ -6,13 +6,13 @@ import java.util.UUID;
 import br.com.fiap.oficina.api.modules.relatorios.api.dto.RelatorioEsforcoOsResponse;
 import br.com.fiap.oficina.api.modules.relatorios.application.repository.RelatorioRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class ObterRelatorioEsforcoOsUseCaseImpl implements ObterRelatorioEsforcoOsUseCase {
 
-    @Inject
-    RelatorioRepository repository;
+    private final RelatorioRepository repository;
 
     @Override
     public Optional<RelatorioEsforcoOsResponse> executar(UUID osId) {

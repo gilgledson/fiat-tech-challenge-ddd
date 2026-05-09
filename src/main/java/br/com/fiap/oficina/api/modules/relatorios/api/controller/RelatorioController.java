@@ -9,7 +9,6 @@ import br.com.fiap.oficina.api.modules.relatorios.application.usecase.consultas.
 import br.com.fiap.oficina.api.modules.relatorios.application.usecase.consultas.ObterRelatorioTempoMedioServicoUseCase;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -17,6 +16,8 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
@@ -25,13 +26,11 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Relatórios", description = "Endpoints para extração de métricas e relatórios operacionais")
 @ApplicationScoped
+@RequiredArgsConstructor
 public class RelatorioController {
 
-    @Inject
-    ObterRelatorioEsforcoOsUseCase obterEsforcoOsUseCase;
-
-    @Inject
-    ObterRelatorioTempoMedioServicoUseCase obterTempoMedioServicoUseCase;
+    private final ObterRelatorioEsforcoOsUseCase obterEsforcoOsUseCase;
+    private final ObterRelatorioTempoMedioServicoUseCase obterTempoMedioServicoUseCase;
 
     @GET
     @Path("/esforco-os/{osId}")

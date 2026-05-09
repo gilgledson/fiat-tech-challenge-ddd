@@ -4,16 +4,16 @@ import br.com.fiap.oficina.api.modules.catalogo.servico.application.repository.S
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dto.ServicoSnapshotDTO;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.gateway.CatalogoServicoGateway;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class CatalogoServicoGatewayImpl implements CatalogoServicoGateway {
 
-    @Inject
-    ServicoRepository servicoRepository;
+    private final ServicoRepository servicoRepository;
 
     @Override
     public Optional<ServicoSnapshotDTO> buscarPorId(UUID id) {
@@ -21,9 +21,3 @@ public class CatalogoServicoGatewayImpl implements CatalogoServicoGateway {
                 .map(s -> new ServicoSnapshotDTO(s.getId(), s.getNome(), s.getPrecoBase(), s.getTipo()));
     }
 }
-
-
-
-
-
-

@@ -8,14 +8,14 @@ import br.com.fiap.oficina.api.modules.relatorios.application.repository.Relator
 import br.com.fiap.oficina.api.modules.relatorios.domain.RelatorioEsforcoOs;
 import br.com.fiap.oficina.api.modules.relatorios.domain.RelatorioTempoMedioServico;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 
 @ApplicationScoped
+@RequiredArgsConstructor
 public class RelatorioRepositoryImpl implements RelatorioRepository {
 
-    @Inject
-    EntityManager em;
+    private final EntityManager em;
 
     @Override
     public Optional<RelatorioEsforcoOs> buscarEsforcoPorOsId(UUID osId) {

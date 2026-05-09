@@ -17,7 +17,7 @@ public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundExceptio
                 exception.getMessage(),
                 LocalDateTime.now()
         );
-        return Response.status(Response.Status.BAD_REQUEST)
+        return Response.status(Response.Status.NOT_FOUND)
                 .entity(erroResponse)
                 .build();
     }

@@ -18,16 +18,6 @@ public class Produto {
     private UnidadeMedida unidadeMedida;
     private Optional<LocalDateTime> deletadoEm;
 
-    public UUID getId() { return id; }
-    public String getNome() { return nome; }
-    public String getCodigoBarras() { return codigoBarras; }
-    public BigDecimal getPrecoUnitario() { return precoUnitario; }
-    public BigDecimal getQuantidadeEstoqueFisico() { return quantidadeEstoqueFisico; }
-    public BigDecimal getQuantidadeEstoqueReservado() { return quantidadeEstoqueReservado; }
-    public UnidadeMedida getUnidadeMedida() { return unidadeMedida; }
-    public Optional<LocalDateTime> getDeletadoEm() { return deletadoEm; }
-
-
     public Produto(String nome, String codigoBarras, BigDecimal precoUnitario, BigDecimal quantidadeEstoqueFisico,
             BigDecimal quantidadeEstoqueReservado, UnidadeMedida unidadeMedida) {
         if (precoUnitario.compareTo(BigDecimal.ZERO) <= 0) {
@@ -163,9 +153,3 @@ public class Produto {
         return this.quantidadeEstoqueFisico.subtract(this.quantidadeEstoqueReservado);
     }
 }
-
-
-
-
-
-

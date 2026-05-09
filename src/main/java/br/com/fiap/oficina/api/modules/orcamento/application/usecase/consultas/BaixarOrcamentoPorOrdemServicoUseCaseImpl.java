@@ -3,19 +3,19 @@ package br.com.fiap.oficina.api.modules.orcamento.application.usecase.consultas;
 import br.com.fiap.oficina.api.modules.orcamento.application.repository.OrcamentoRepository;
 import br.com.fiap.oficina.api.modules.orcamento.domain.entity.Orcamento;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.UUID;
 
+import lombok.RequiredArgsConstructor;
+
 @ApplicationScoped
+@RequiredArgsConstructor
 public class BaixarOrcamentoPorOrdemServicoUseCaseImpl implements BaixarOrcamentoPorOrdemServicoUseCase {
 
-    @Inject
-    OrcamentoRepository orcamentoRepository;
+    private final OrcamentoRepository orcamentoRepository;
 
-    @Inject
-    BaixarOrcamentoUseCase baixarOrcamentoUseCase;
+    private final BaixarOrcamentoUseCase baixarOrcamentoUseCase;
 
     @Override
     public byte[] executar(UUID ordemServicoId) {
@@ -27,14 +27,7 @@ public class BaixarOrcamentoPorOrdemServicoUseCaseImpl implements BaixarOrcament
     public Orcamento buscarPorOrdemServicoId(UUID ordemServicoId) {
         return orcamentoRepository.buscarPorOrdemServicoId(ordemServicoId)
                 .orElseThrow(
-                        () -> new NotFoundException("Orcamento não encontrada para a ordem de serviço " + ordemServicoId));
+                        () -> new NotFoundException(
+                                "Orcamento não encontrada para a ordem de serviço " + ordemServicoId));
     }
 }
-
-
-
-
-
-
-
-

@@ -8,7 +8,6 @@ import br.com.fiap.oficina.api.modules.orcamento.application.usecase.comandos.Co
 import br.com.fiap.oficina.api.modules.orcamento.domain.entity.Orcamento;
 import br.com.fiap.oficina.api.modules.identidade.domain.valueobject.PerfilUsuario;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -18,40 +17,44 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import br.com.fiap.oficina.api.modules.orcamento.application.usecase.comandos.AprovarOrcamentoManualUseCase;
 import br.com.fiap.oficina.api.modules.orcamento.infrastructure.storage.LocalFileStorageService;
 import io.vertx.core.json.JsonObject;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.UriInfo;
+import java.io.File;
 import java.util.UUID;
 
-@Path("/api/faturas")
+@Path("/api/orcamentos")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "orcamento", description = "Gestão de faturas e pagamentos")
+@RequiredArgsConstructor
 public class OrcamentoController {
 
-    @Inject
-    ConfirmarPagamentoOrcamentoUseCase ConfirmarPagamentoOrcamentoUseCase;
+    private final ConfirmarPagamentoOrcamentoUseCase confirmarPagamentoOrcamentoUseCase;
 
-    @Inject
-    BaixarOrcamentoUseCase BaixarOrcamentoUseCase;
+    private final BaixarOrcamentoUseCase baixarOrcamentoUseCase;
 
-    @Inject
-    BaixarOrcamentoPorOrdemServicoUseCase BaixarOrcamentoPorOrdemServicoUseCase;
+    private final BaixarOrcamentoPorOrdemServicoUseCase BaixarOrcamentoPorOrdemServicoUseCase;
 
-    @Inject
-    AprovarOrcamentoManualUseCase aprovarOrcamentoManualUseCase;
+    private final AprovarOrcamentoManualUseCase aprovarOrcamentoManualUseCase;
 
-    @Inject
-    LocalFileStorageService storageService;
+    private final LocalFileStorageService storageService;
+
+    @Context
+    UriInfo uriInfo;
 
     @POST
     @Path("/{id}/confirmar-pagamento")
     @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE })
-    @Operation(summary = "Confirmar pagamento de umo Or�amento")
+    @Operation(summary = "Confirmar pagamento de umo Oramento")
     public Response confirmarPagamento(@PathParam("id") UUID id, @Valid ConfirmarPagamentoRequest request) {
-        ConfirmarPagamentoOrcamentoUseCase.execute(id, request.metodoPagamento());
+        confirmarPagamentoOrcamentoUseCase.execute(id, request.metodoPagamento());
         return Response.noContent().build();
     }
 
@@ -69,9 +72,30 @@ public class OrcamentoController {
                     .build();
         }
 
-        String path = storageService.storeBase64(request.assinaturaBase64(), "assinatura_" + id);
-        aprovarOrcamentoManualUseCase.executar(id, path, request.servicosAceitos(), request.servicosRejeitados());
-        return Response.noContent().build();
+        String filename = storageService.storeBase64(request.assinaturaBase64(), "assinatura_" + id);
+
+        String assinaturaUrl = uriInfo.getBaseUriBuilder()
+                .path(OrcamentoController.class)
+                .path("assinaturas")
+                .path(filename)
+                .build()
+                .toString();
+
+        aprovarOrcamentoManualUseCase.executar(id, assinaturaUrl, request.servicosAceitos(), request.servicosRejeitados());
+        return Response.ok(new JsonObject().put("assinaturaUrl", assinaturaUrl)).build();
+    }
+
+    @GET
+    @Path("/assinaturas/{filename}")
+    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE })
+    @Produces("image/png")
+    @Operation(summary = "Obter imagem da assinatura")
+    public Response obterAssinatura(@PathParam("filename") String filename) {
+        File file = new File("uploads/assinaturas/" + filename);
+        if (!file.exists()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(file).build();
     }
 
     @GET
@@ -80,7 +104,7 @@ public class OrcamentoController {
     @Operation(summary = "Obter Orcamento por ID")
     @Produces("application/pdf")
     public Response buscarOrcamentoPorId(@PathParam("id") UUID id) {
-        byte[] orcamento = BaixarOrcamentoUseCase.executar(id);
+        byte[] orcamento = baixarOrcamentoUseCase.executar(id);
         return Response.ok(orcamento).build();
     }
 

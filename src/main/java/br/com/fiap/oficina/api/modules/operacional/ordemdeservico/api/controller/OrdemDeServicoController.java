@@ -9,13 +9,14 @@ import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.us
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.usecase.comando.item.*;
 import br.com.fiap.oficina.api.shared.api.dto.PaginaResponse;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.RequiredArgsConstructor;
+
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -26,10 +27,10 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Ordem de Servico", description = "Gestao de ordens de servico da oficina")
+@RequiredArgsConstructor
 public class OrdemDeServicoController {
 
-    @Inject
-    JsonWebToken jwt;
+    private final JsonWebToken jwt;
 
     private final AbrirOrdemDeServicoUseCase abrirOrdemDeServicoUseCase;
     private final BuscarOrdemDeServicoUseCase buscarOrdemDeServicoUseCase;
@@ -49,42 +50,6 @@ public class OrdemDeServicoController {
     private final ConcluirExecucaoOrdemDeServicoUseCase concluirExecucaoOrdemDeServicoUseCase;
     private final CancelarOrdemDeServicoUseCase cancelarOrdemDeServicoUseCase;
     private final EntregarVeiculoUseCase entregarVeiculoUseCase;
-
-    @Inject
-    public OrdemDeServicoController(
-            AbrirOrdemDeServicoUseCase abrirOrdemDeServicoUseCase,
-            BuscarOrdemDeServicoUseCase buscarOrdemDeServicoUseCase,
-            ListarOrdensDeServicoUseCase listarOrdensDeServicoUseCase,
-            IniciarDiagnosticoUseCase iniciarDiagnosticoUseCase,
-            ConcluirDiagnosticoUseCase concluirDiagnosticoUseCase,
-            RejeitarOrcamentoUseCase rejeitarOrcamentoUseCase,
-            AdicionarServicoOrdemDeServicoUseCase adicionarServicoUseCase,
-            RemoverProdutoOrdemDeServicoUseCase removerProdutoUseCase,
-            RemoverServicoOrdemDeServicoUseCase removerServicoUseCase,
-            IniciarExecucaoServicoUseCase iniciarExecucaoServicoUseCase,
-            FinalizarExecucaoServicoUseCase finalizarExecucaoServicoUseCase,
-            AprovarOrdemDeServicoUseCase aprovarOrdemDeServicoUseCase,
-            IniciarExecucaoOsUseCase iniciarExecucaoOsUseCase,
-            ConcluirExecucaoOrdemDeServicoUseCase concluirExecucaoOrdemDeServicoUseCase,
-            CancelarOrdemDeServicoUseCase cancelarOrdemDeServicoUseCase,
-            EntregarVeiculoUseCase entregarVeiculoUseCase) {
-        this.abrirOrdemDeServicoUseCase = abrirOrdemDeServicoUseCase;
-        this.buscarOrdemDeServicoUseCase = buscarOrdemDeServicoUseCase;
-        this.listarOrdensDeServicoUseCase = listarOrdensDeServicoUseCase;
-        this.iniciarDiagnosticoUseCase = iniciarDiagnosticoUseCase;
-        this.concluirDiagnosticoUseCase = concluirDiagnosticoUseCase;
-        this.rejeitarOrcamentoUseCase = rejeitarOrcamentoUseCase;
-        this.adicionarServicoUseCase = adicionarServicoUseCase;
-        this.removerProdutoUseCase = removerProdutoUseCase;
-        this.removerServicoUseCase = removerServicoUseCase;
-        this.iniciarExecucaoServicoUseCase = iniciarExecucaoServicoUseCase;
-        this.finalizarExecucaoServicoUseCase = finalizarExecucaoServicoUseCase;
-        this.aprovarOrdemDeServicoUseCase = aprovarOrdemDeServicoUseCase;
-        this.iniciarExecucaoOsUseCase = iniciarExecucaoOsUseCase;
-        this.concluirExecucaoOrdemDeServicoUseCase = concluirExecucaoOrdemDeServicoUseCase;
-        this.cancelarOrdemDeServicoUseCase = cancelarOrdemDeServicoUseCase;
-        this.entregarVeiculoUseCase = entregarVeiculoUseCase;
-    }
 
     @POST
     @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE })
@@ -198,7 +163,6 @@ public class OrdemDeServicoController {
         return Response.noContent().build();
     }
 
-
     @POST
     @Path("/{id}/iniciar-execucao")
     @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
@@ -261,9 +225,3 @@ public class OrdemDeServicoController {
         return Response.noContent().build();
     }
 }
-
-
-
-
-
-
