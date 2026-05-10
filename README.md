@@ -112,6 +112,7 @@ src/main/java/.../modules/<contexto>/<agregado>/
 | Tecnologia | Versão | Uso |
 |---|---|---|
 | [Quarkus](https://quarkus.io/) | 3.34.5 | Framework principal (runtime Java nativo em nuvem) |
+| [Eclipse Vert.x](https://vertx.io/) | — | Comunicação reativa e EventBus para eventos internos de comunicação entre módulos |
 | [Java](https://www.java.com/) | 17 | Linguagem de programação |
 | [Hibernate ORM + Panache](https://quarkus.io/guides/hibernate-orm-panache) | — | Persistência e repositórios JPA |
 | [PostgreSQL](https://www.postgresql.org/) | — | Banco de dados relacional |
