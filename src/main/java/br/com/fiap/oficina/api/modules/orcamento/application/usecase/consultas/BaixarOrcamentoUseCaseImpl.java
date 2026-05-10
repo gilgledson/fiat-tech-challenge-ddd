@@ -10,7 +10,6 @@ import br.com.fiap.oficina.api.modules.orcamento.domain.entity.Orcamento;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.Location;
 import jakarta.enterprise.context.ApplicationScoped;
-import lombok.RequiredArgsConstructor;
 
 import org.xhtmlrenderer.pdf.ITextRenderer;
 

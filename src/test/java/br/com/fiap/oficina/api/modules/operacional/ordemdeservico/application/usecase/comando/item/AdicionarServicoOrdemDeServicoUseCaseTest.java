@@ -10,6 +10,7 @@ import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.ga
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dto.OrdemDeServicoOutput;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.repository.OrdemDeServicoRepository;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.*;
+import io.vertx.core.eventbus.EventBus;
 import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,12 +40,16 @@ class AdicionarServicoOrdemDeServicoUseCaseTest {
     @Mock
     private CatalogoProdutoGateway produtoGateway;
 
+    @Mock
+    private EventBus eventBus;
+
     @InjectMocks
     private AdicionarServicoOrdemDeServicoUseCaseImpl useCase;
 
     private OrdemDeServico criarOs(OrdemDeServicoStatus status) {
         OrdemDeServico os = new OrdemDeServico();
         os.setId(UUID.randomUUID());
+        os.setClienteId(UUID.randomUUID());
         os.setStatus(status);
         return os;
     }

@@ -2,7 +2,6 @@ package br.com.fiap.oficina.api.modules.notificacao.infrastructure.gateway;
 
 import br.com.fiap.oficina.api.modules.notificacao.application.gateway.AtendimentoNotificacaoGateway;
 import br.com.fiap.oficina.api.modules.notificacao.application.gateway.IdentidadeNotificacaoGateway;
-import br.com.fiap.oficina.api.modules.notificacao.domain.entity.Notificacao;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dto.NotificacaoSnapshotDTO;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.gateway.NotificacaoGateway;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -28,7 +27,8 @@ public class NotificacaoGatewayImpl implements NotificacaoGateway {
         // Priorizamos o e-mail do cadastro do cliente (Atendimento)
         String email = cliente.email();
 
-        // Se o e-mail do cadastro estiver vazio, tentamos buscar o e-mail da conta de usuário (Identidade)
+        // Se o e-mail do cadastro estiver vazio, tentamos buscar o e-mail da conta de
+        // usuário (Identidade)
         if ((email == null || email.isBlank()) && cliente.usuarioId().isPresent()) {
             var usuarioOpt = identidadeGateway.buscarUsuarioPorId(cliente.usuarioId().get());
             if (usuarioOpt.isPresent()) {

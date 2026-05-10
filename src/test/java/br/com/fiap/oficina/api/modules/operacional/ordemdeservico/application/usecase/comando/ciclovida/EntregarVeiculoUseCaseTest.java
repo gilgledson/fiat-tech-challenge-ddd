@@ -38,6 +38,7 @@ class EntregarVeiculoUseCaseTest {
         UUID osId = UUID.randomUUID();
         OrdemDeServico os = new OrdemDeServico();
         os.setId(osId);
+        os.setClienteId(UUID.randomUUID());
         os.setStatus(OrdemDeServicoStatus.PAGA);
 
         when(repository.buscarPorId(osId)).thenReturn(Optional.of(os));
@@ -65,6 +66,7 @@ class EntregarVeiculoUseCaseTest {
         UUID osId = UUID.randomUUID();
         OrdemDeServico os = new OrdemDeServico();
         os.setId(osId);
+        os.setClienteId(UUID.randomUUID());
         os.setStatus(OrdemDeServicoStatus.AGUARDANDO_PAGAMENTO);
 
         when(repository.buscarPorId(osId)).thenReturn(Optional.of(os));
@@ -81,6 +83,7 @@ class EntregarVeiculoUseCaseTest {
         UUID osId = UUID.randomUUID();
         OrdemDeServico os = new OrdemDeServico();
         os.setId(osId);
+        os.setClienteId(UUID.randomUUID());
         os.setStatus(OrdemDeServicoStatus.EM_EXECUCAO);
 
         when(repository.buscarPorId(osId)).thenReturn(Optional.of(os));
