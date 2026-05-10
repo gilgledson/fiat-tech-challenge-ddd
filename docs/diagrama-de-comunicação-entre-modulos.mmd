@@ -1,0 +1,67 @@
+graph TD
+    subgraph "Módulo Orçamento"
+        ORC[Orcamento]
+        ORC_EV_ACEITO[OrcamentoAceitoEvent]
+        ORC_EV_PAGO[OrcamentoPagoEvent]
+        ORC_EV_REJ[OrcamentoRejeitadoEvent]
+    end
+
+    subgraph "Módulo Operacional"
+        OP_LIS_ACEITO[AprovarOsOnOrcamentoAceitoListener]
+        OP_LIS_REJ[RejeitarOsOnOrcamentoRejeitadoListener]
+        OP_LIS_PAGO[ConfirmarPagamentoOsOnOrcamentoPagoListener]
+        
+        OP_UC_APROVAR[AprovarOrdemDeServicoUseCase]
+        OP_UC_REJEITAR[RejeitarOrcamentoUseCase]
+        
+        OP_EV_OS[OS Events: Diag, Serv, Fim, Entregue]
+        OP_GW_CAT[CatalogoProdutoGateway]
+    end
+
+    subgraph "Módulo Notificação"
+        NOT_LIS[NotificacaoEventsListener]
+        NOT_GAT[NotificacaoGatewayImpl]
+        NOT_GW_OP[OperacionalNotificacaoGateway]
+    end
+
+    subgraph "Módulos de Suporte"
+        CAT[Catálogo/Estoque]
+        ATEND[Atendimento - Clientes]
+        IDENT[Identidade - Usuários]
+    end
+
+    %% Fluxo de Eventos do Orçamento
+    ORC -- "Aceite Parcial/Total" --> ORC_EV_ACEITO
+    ORC -- "Pagamento" --> ORC_EV_PAGO
+    ORC -- "Rejeição Total" --> ORC_EV_REJ
+
+    %% Reação do Operacional aos Eventos de Orçamento
+    ORC_EV_ACEITO -. "Assina" .-> OP_LIS_ACEITO
+    ORC_EV_REJ -. "Assina" .-> OP_LIS_REJ
+    ORC_EV_PAGO -. "Assina" .-> OP_LIS_PAGO
+
+    OP_LIS_ACEITO --> OP_UC_APROVAR
+    OP_LIS_REJ --> OP_UC_REJEITAR
+
+    %% Gestão de Estoque (Liberar Peças se Rejeitado)
+    OP_UC_APROVAR -- "Libera itens rejeitados" --> OP_GW_CAT
+    OP_UC_REJEITAR -- "Libera todos os itens" --> OP_GW_CAT
+    OP_GW_CAT --> CAT
+
+    %% Fluxo de Notificação (Ouve tudo)
+    ORC_EV_ACEITO -. "Assina" .-> NOT_LIS
+    ORC_EV_PAGO -. "Assina" .-> NOT_LIS
+    ORC_EV_REJ -. "Assina" .-> NOT_LIS
+    OP_EV_OS -. "Assina" .-> NOT_LIS
+
+    %% Resolução de Dados na Notificação
+    NOT_LIS -- "Resolve ClienteId via OS" --> NOT_GW_OP
+    NOT_LIS -- "Envia Notificação" --> NOT_GAT
+    NOT_GAT -- "Busca Email Contato" --> ATEND
+    NOT_GAT -- "Busca Email Conta" --> IDENT
+
+    %% Estilo
+    style ORC fill:#f9f,stroke:#333
+    style OP_UC_APROVAR fill:#dfd,stroke:#333
+    style OP_UC_REJEITAR fill:#fdd,stroke:#333
+    style CAT fill:#bbf,stroke:#333
