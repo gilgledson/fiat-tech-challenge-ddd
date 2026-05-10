@@ -41,8 +41,9 @@ public class OrdemDeServicoBeanConfig {
     public AdicionarServicoOrdemDeServicoUseCase adicionarServicoOrdemDeServicoUseCase(
             OrdemDeServicoRepository osRepository,
             CatalogoServicoGateway servicoGateway,
-            CatalogoProdutoGateway produtoGateway) {
-        return new AdicionarServicoOrdemDeServicoUseCaseImpl(osRepository, servicoGateway, produtoGateway);
+            CatalogoProdutoGateway produtoGateway,
+            EventBus eventBus) {
+        return new AdicionarServicoOrdemDeServicoUseCaseImpl(osRepository, servicoGateway, produtoGateway, eventBus);
     }
 
     @Produces
@@ -128,8 +129,9 @@ public class OrdemDeServicoBeanConfig {
     @ApplicationScoped
     public RejeitarOrcamentoUseCase rejeitarOrcamentoUseCase(
             OrdemDeServicoRepository repository,
+            CatalogoProdutoGateway produtoGateway,
             EventBus eventBus) {
-        return new RejeitarOrcamentoUseCaseImpl(repository, eventBus);
+        return new RejeitarOrcamentoUseCaseImpl(repository, produtoGateway, eventBus);
     }
 
     @Produces

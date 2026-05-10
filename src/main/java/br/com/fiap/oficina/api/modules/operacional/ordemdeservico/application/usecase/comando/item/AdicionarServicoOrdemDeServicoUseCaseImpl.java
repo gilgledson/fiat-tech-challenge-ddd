@@ -12,6 +12,8 @@ import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoProdutos;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicos;
+import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.event.OrdemServicoServicoAdicionado;
+import io.vertx.core.eventbus.EventBus;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class AdicionarServicoOrdemDeServicoUseCaseImpl implements AdicionarServi
     private final OrdemDeServicoRepository osRepository;
     private final CatalogoServicoGateway servicoGateway;
     private final CatalogoProdutoGateway produtoGateway;
+    private final EventBus eventBus;
 
     @Override
     @Transactional
@@ -72,6 +75,9 @@ public class AdicionarServicoOrdemDeServicoUseCaseImpl implements AdicionarServi
 
         ordem.getServicos().add(item);
         osRepository.atualizar(ordem);
+
+        eventBus.publish(OrdemServicoServicoAdicionado.TOPICO, 
+            new OrdemServicoServicoAdicionado(ordemDeServicoId, ordem.getClienteId(), item.getServicoId(), item.getNome()).toJson());
 
         return OrdemDeServicoOutputMapper.toOutput(ordem);
     }

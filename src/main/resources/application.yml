@@ -15,7 +15,11 @@ quarkus:
   # Configurações do Hibernate (Desativado para o Flyway assumir o controle)
   hibernate-orm:
     log:
-      sql: true
+      sql: false
+  log:
+    category:
+      "org.hibernate":
+        level: WARN
 
   # Configurações do Flyway (Migrações)
   flyway:

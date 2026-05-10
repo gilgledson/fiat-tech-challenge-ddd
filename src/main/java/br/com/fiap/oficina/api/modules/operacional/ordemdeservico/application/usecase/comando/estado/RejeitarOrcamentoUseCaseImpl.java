@@ -6,6 +6,8 @@ import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.re
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServico;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoStatus;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.event.OrdemServicoRejeitada;
+import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.gateway.CatalogoProdutoGateway;
+import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoServicoStatus;
 import io.vertx.core.eventbus.EventBus;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import java.util.UUID;
 public class RejeitarOrcamentoUseCaseImpl implements RejeitarOrcamentoUseCase {
 
     private final OrdemDeServicoRepository repository;
+    private final CatalogoProdutoGateway produtoGateway;
     private final EventBus eventBus;
 
     @Override
@@ -29,6 +32,17 @@ public class RejeitarOrcamentoUseCaseImpl implements RejeitarOrcamentoUseCase {
         }
 
         ordem.setStatus(OrdemDeServicoStatus.REJEITADA);
+        
+        // Libera estoque de todos os serviços da OS
+        ordem.getServicos().forEach(s -> {
+            s.setStatus(OrdemDeServicoServicoStatus.CANCELADO);
+            if (s.getProdutos() != null) {
+                s.getProdutos().forEach(p -> 
+                    produtoGateway.liberarEstoqueReservado(p.getProdutoId(), p.getQuantidade())
+                );
+            }
+        });
+
         repository.atualizar(ordem);
 
         OrdemServicoRejeitada event = new OrdemServicoRejeitada(ordem.getId());

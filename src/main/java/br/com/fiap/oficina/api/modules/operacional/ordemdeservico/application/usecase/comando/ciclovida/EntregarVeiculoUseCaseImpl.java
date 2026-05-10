@@ -28,7 +28,7 @@ public class EntregarVeiculoUseCaseImpl implements EntregarVeiculoUseCase {
         ordem.setStatus(OrdemDeServicoStatus.ENTREGUE);
         repository.atualizar(ordem);
 
-        OrdemServicoEntregue event = new OrdemServicoEntregue(ordem.getId());
+        OrdemServicoEntregue event = new OrdemServicoEntregue(ordem.getId(), ordem.getClienteId());
         eventBus.publish(OrdemServicoEntregue.TOPICO, event.toJson());
     }
 }

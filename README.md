@@ -171,9 +171,15 @@ O schema é versionado via **Flyway** com migrations incrementais:
 O projeto foi refatorado para uma estrutura de **Monolito Modular**, garantindo o baixo acoplamento entre os contextos de negócio:
 
 ### Comunicação entre Módulos
-- **Gateways**: O módulo `Operacional` (Ordens de Serviço) não conhece as entidades JPA de outros módulos. Ele utiliza interfaces de Gateway para consultar dados.
-- **SnapshotDTOs**: A troca de informações entre módulos é feita através de DTOs imutáveis, evitando o vazamento de entidades de domínio.
-- **Isolamento de Banco**: Cada módulo gerencia suas próprias tabelas, respeitando as fronteiras do contexto.
+
+O sistema utiliza uma arquitetura baseada em **Eventos (Event-Driven)** e **Gateways** para garantir que os módulos sejam independentes e desacoplados:
+
+- **EventBus (Vert.x)**: Comunicação assíncrona para disparar notificações, atualizar estoque e sincronizar estados entre contextos (ex: Aprovação de Orçamento -> Início da OS).
+- **Gateways**: Interfaces que definem os contratos de consulta entre módulos, evitando o acoplamento direto entre entidades JPA.
+- **SnapshotDTOs**: Troca de informações através de objetos imutáveis, protegendo a integridade do domínio de cada contexto.
+- **Isolamento de Banco**: Cada módulo gerencia suas próprias tabelas, respeitando as fronteiras do contexto delimitado.
+
+![Diagrama de Comunicação entre Módulos](docs/diagrama-de-comunicação-entre-modulos.png)
 
 ### 📦 Gestão de Estoque
 Implementamos uma lógica de reserva de estoque robusta para evitar vendas de produtos inexistentes:
