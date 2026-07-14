@@ -47,7 +47,9 @@ jobs:
         git push
 
     - name: 6. Build da Aplicação (JAR)
-      run: ./mvnw clean package -DskipTests
+      run: |
+        chmod +x mvnw
+        ./mvnw clean package -DskipTests
 
     - name: 7. Login no Docker Hub
       uses: docker/login-action@v3
