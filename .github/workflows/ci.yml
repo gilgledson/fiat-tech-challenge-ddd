@@ -92,6 +92,15 @@ jobs:
         resource-group: oficina-resources
         cluster-name: oficina-aks-cluster
 
+    - name: 7.5. Preencher credenciais do Secret a partir dos GitHub Secrets
+      env:
+        DB_APP_USERNAME: ${{ secrets.DB_APP_USERNAME }}
+        DB_APP_PASSWORD: ${{ secrets.DB_APP_PASSWORD }}
+        WEBHOOK_APROVACAO_SECRET: ${{ secrets.WEBHOOK_APROVACAO_SECRET }}
+      run: |
+        envsubst < k8s/app/secret.yaml > k8s/app/secret.rendered.yaml
+        mv k8s/app/secret.rendered.yaml k8s/app/secret.yaml
+
     - name: 8. Deploy no Kubernetes (AKS)
       uses: Azure/k8s-deploy@v5
       with:

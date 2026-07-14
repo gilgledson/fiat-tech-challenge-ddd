@@ -17,6 +17,8 @@
 - [Banco de Dados](#-banco-de-dados)
 - [Como Executar](#-como-executar)
 - [Arquitetura de Infraestrutura e Deploy (Fase 2)](#-arquitetura-de-infraestrutura-e-deploy-fase-2)
+- [Infraestrutura como Código (Terraform)](#-infraestrutura-como-código-terraform)
+- [Deploy em Kubernetes](#-deploy-em-kubernetes)
 - [Endpoints](#-endpoints)
 - [Testes](#-testes)
 - [Cobertura de Código](#-cobertura-de-código)
@@ -201,14 +203,6 @@ A Ordem de Serviço (OS) segue uma transição estrita de estados para garantir 
 - **EM_EXECUCAO**: Fase onde os mecânicos iniciam e finalizam tarefas em tempo real, acompanhando a duração exata de cada intervenção.
 - **CONCLUIDA**: Encerra a OS. Aciona eventos no EventBus que disparam a baixa de estoque e preparam os dados para faturamento automático.
 
-### 📝 Decisão de Design: Abertura da OS em Fluxo Incremental
-
-O enunciado do Tech Challenge (Fase 2) descreve a API de abertura de OS como recebendo "dados do cliente, veículo, serviços e peças" em uma única chamada. Optamos por **manter o fluxo incremental** já existente (`POST /api/ordens` recebe apenas `clienteId`, `veiculoId` e `descricaoProblema`; serviços e produtos são adicionados posteriormente via `POST /api/ordens/{id}/servicos` e `POST /api/ordens/{id}/produtos`).
-
-**Motivo**: no processo real da oficina, o atendente que abre a OS **não tem como saber** quais serviços e peças serão necessários — essa informação só é levantada pelo mecânico durante a etapa de diagnóstico (`EM_DIAGNOSTICO`). Exigir serviços/peças já na abertura inverteria a ordem lógica do atendimento e forçaria dados fictícios ou vazios no momento da criação da OS.
-
-**Como o fluxo cobre o requisito**: a "identificação única da OS" é retornada imediatamente na abertura (`POST /api/ordens`), e os serviços/peças entram no mesmo agregado (mesma OS) nas etapas seguintes do ciclo de vida, antes do envio do orçamento para aprovação (`AGUARDANDO_APROVACAO`). O resultado funcional — uma OS com cliente, veículo, serviços e peças associados — é o mesmo, apenas construído em etapas que refletem o processo real da oficina em vez de uma única chamada.
-
 ### 📄 Faturamento e Geração de Documentos
 O módulo de faturamento é totalmente assíncrono e dissociado:
 - **Separação de Módulos**: Ele coleta dados via "Gateways" (Padrão Adapter), sem referenciar diretamente as tabelas de outros contextos.
@@ -270,6 +264,12 @@ A infraestrutura roda inteiramente na nuvem (Azure), provisionada via **Terrafor
 
 > Fonte editável: [docs/diagrama-arquitetura-infraestrutura.mmd](docs/diagrama-arquitetura-infraestrutura.mmd) (Mermaid).
 
+### 🔗 Entregáveis
+
+- **Collection completa das APIs (Postman):** [docs/postman_collection.json](docs/postman_collection.json)
+- **Documentação interativa (Swagger UI):** disponível em `/q/swagger-ui/#/` após subir a aplicação
+- **Vídeo demonstrativo (até 15 min):** _TODO — adicionar link do YouTube/Vimeo antes da entrega_ (roteiro de gravação: [docs/roteiro-video-apresentacao.md](docs/roteiro-video-apresentacao.md))
+
 ---
 
 ## ☁️ Infraestrutura como Código (Terraform)
@@ -297,18 +297,60 @@ Os seguintes recursos são criados automaticamente na Azure:
    ```bash
    terraform init
    ```
-3. Visualize o plano de execução para revisar os recursos que serão criados:
+3. Defina a senha do administrador do Postgres (obrigatória — a variável não tem default por segurança, mínimo 12 caracteres):
+   ```bash
+   # Linux/macOS
+   export TF_VAR_db_admin_password="uma-senha-forte-aqui"
+
+   # Windows (PowerShell)
+   $env:TF_VAR_db_admin_password = "uma-senha-forte-aqui"
+   ```
+4. Visualize o plano de execução para revisar os recursos que serão criados:
    ```bash
    terraform plan
    ```
-4. Aplique as configurações para provisionar os recursos (confirme com `yes`):
+5. Aplique as configurações para provisionar os recursos (confirme com `yes`):
    ```bash
    terraform apply
    ```
-5. Para destruir a infraestrutura posteriormente (evitar custos adicionais):
+6. Para destruir a infraestrutura posteriormente (evitar custos adicionais):
    ```bash
    terraform destroy
    ```
+
+---
+
+## ☸️ Deploy em Kubernetes
+
+Depois que o AKS existe (via Terraform, passo anterior), a aplicação é implantada automaticamente pelo **GitHub Actions** a cada push na `main` (job `build-and-deploy` do [ci.yml](.github/workflows/ci.yml)): build da imagem, push para o Docker Hub, e aplicação dos manifestos de `/k8s/app` via `Azure/k8s-deploy`.
+
+### Segredos necessários na pipeline (GitHub Actions → Settings → Secrets)
+
+| Secret | Uso |
+|---|---|
+| `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` | Login e push da imagem no Docker Hub |
+| `AZURE_CREDENTIALS` | Autenticação no Azure (`azure/login`) |
+| `DB_APP_USERNAME` / `DB_APP_PASSWORD` | Credenciais que a API usa para conectar no Postgres Flexible Server (injetadas no `Secret` do K8s) |
+| `WEBHOOK_APROVACAO_SECRET` | Secret do endpoint `/api/ordens/{id}/aprovacao-externa` |
+
+> Os manifestos em `k8s/app/secret.yaml` usam placeholders `${...}` — a pipeline os preenche via `envsubst` antes do apply. **Nunca** commitar os valores reais no lugar dos placeholders.
+
+### Deploy manual (sem esperar o CI/CD)
+
+Com o `kubectl` já apontando para o cluster (`az aks get-credentials --resource-group oficina-resources --name oficina-aks-cluster`):
+
+```bash
+kubectl apply -f k8s/app/configMap.yaml
+
+DB_APP_USERNAME=app_user DB_APP_PASSWORD="sua-senha" WEBHOOK_APROVACAO_SECRET="seu-secret" \
+  envsubst < k8s/app/secret.yaml | kubectl apply -f -
+
+kubectl apply -f k8s/app/deployment.yaml
+kubectl apply -f k8s/app/service.yaml
+kubectl apply -f k8s/app/hpa.yaml
+
+kubectl rollout status deployment/oficina-api
+```
 
 ---
 
@@ -351,12 +393,13 @@ A documentação interativa completa está disponível no Swagger UI após subir
 
 | Método | Endpoint | Descrição | Roles |
 |---|---|---|---|
-| `POST` | `/api/ordens` | Abrir nova OS | `ADMIN`, `ATENDENTE` |
+| `POST` | `/api/ordens` | Abrir nova OS (cliente, veículo e, opcionalmente, serviços/peças já identificados) | `ADMIN`, `ATENDENTE` |
 | `GET` | `/api/ordens/{id}` | Detalhes da OS | `ADMIN`, `MECANICO`, `ATENDENTE`, `CLIENTE` |
-| `POST` | `/api/ordens/{id}/servicos` | Adicionar serviço à OS | `ADMIN`, `MECANICO` |
+| `POST` | `/api/ordens/{id}/servicos` | Adicionar serviço à OS (quando não informado já na abertura) | `ADMIN`, `MECANICO` |
 | `POST` | `/api/ordens/{id}/iniciar-diagnostico` | Iniciar diagnóstico | `ADMIN`, `MECANICO` |
 | `POST` | `/api/ordens/{id}/concluir-diagnostico` | Finalizar diagnóstico | `ADMIN`, `MECANICO` |
 | `POST` | `/api/ordens/{id}/aprovar` | Aprovar orçamento | `ADMIN`, `ATENDENTE`, `CLIENTE` |
+| `POST` | `/api/ordens/{id}/aprovacao-externa` | Webhook para aprovação/recusa externa do orçamento (ex: portal do cliente, gateway de pagamento). Autenticado por secret compartilhado no header `X-Webhook-Secret`, **não** por JWT de usuário. | *(sem role — auth por secret)* |
 | `POST` | `/api/ordens/{id}/iniciar-execucao` | Iniciar execução (OS) | `ADMIN`, `MECANICO` |
 | `POST` | `/api/ordens/{id}/concluir-execucao` | Concluir execução (OS) | `ADMIN`, `MECANICO` |
 | `POST` | `/api/ordens/{id}/entregar` | Entrega do veículo | `ADMIN`, `ATENDENTE` |
@@ -466,6 +509,7 @@ Nossa collection automatizada valida:
 3.  **Fluxo de Negócio**: Abertura de OS -> Adição de Itens -> Aprovação -> Execução -> Finalização.
 4.  **Cálculos**: Verificação de preços totais, descontos e taxas.
 5.  **Estoque**: Validação de baixa física e reserva de estoque em tempo real.
+6.  **Fase 2**: pasta dedicada `Fase 2 - Novos Endpoints` cobrindo abertura de OS já com serviços/peças, ordenação por status e exclusão de OS finalizadas na listagem, e o webhook de aprovação externa (`/aprovacao-externa`) — incluindo o caso de secret inválido (401).
 
 ---
 

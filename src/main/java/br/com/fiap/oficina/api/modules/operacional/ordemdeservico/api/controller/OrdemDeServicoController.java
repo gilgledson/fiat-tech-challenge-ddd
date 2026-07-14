@@ -8,6 +8,8 @@ import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.us
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.usecase.comando.estado.*;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.usecase.comando.item.*;
 import br.com.fiap.oficina.api.shared.api.dto.PaginaResponse;
+import br.com.fiap.oficina.api.shared.infrastructure.security.WebhookAuthValidator;
+import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -50,15 +52,17 @@ public class OrdemDeServicoController {
     private final ConcluirExecucaoOrdemDeServicoUseCase concluirExecucaoOrdemDeServicoUseCase;
     private final CancelarOrdemDeServicoUseCase cancelarOrdemDeServicoUseCase;
     private final EntregarVeiculoUseCase entregarVeiculoUseCase;
+    private final WebhookAuthValidator webhookAuthValidator;
 
     @POST
     @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.ATENDENTE })
-    @Operation(summary = "Abrir nova Ordem de Serviço")
+    @Operation(summary = "Abrir nova Ordem de Serviço, opcionalmente já com serviços e peças identificados")
     public Response abrir(@Valid AbrirOrdemDeServicoRequest request) {
         var output = abrirOrdemDeServicoUseCase.executar(
                 request.clienteId(),
                 request.veiculoId(),
-                request.descricaoProblema());
+                request.descricaoProblema(),
+                request.servicos());
         return Response.status(Response.Status.CREATED).entity(OrdemDeServicoResponse.fromOutput(output)).build();
     }
 
@@ -159,6 +163,22 @@ public class OrdemDeServicoController {
     public Response aprovar(
             @PathParam("id") UUID id,
             @Valid AprovarServicoRequest request) {
+        aprovarOrdemDeServicoUseCase.executar(id, request);
+        return Response.noContent().build();
+    }
+
+    @POST
+    @Path("/{id}/aprovacao-externa")
+    @PermitAll
+    @Operation(summary = "Webhook para notificação externa de aprovação ou recusa do orçamento (ex: portal do cliente, gateway de pagamento). "
+            + "Autenticado por secret compartilhado no header X-Webhook-Secret, não por JWT de usuário.")
+    public Response aprovacaoExterna(
+            @PathParam("id") UUID id,
+            @HeaderParam("X-Webhook-Secret") String webhookSecret,
+            @Valid AprovarServicoRequest request) {
+        if (!webhookAuthValidator.valido(webhookSecret)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
         aprovarOrdemDeServicoUseCase.executar(id, request);
         return Response.noContent().build();
     }

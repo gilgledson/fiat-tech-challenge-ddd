@@ -1176,6 +1176,259 @@
 			]
 		},
 		{
+			"name": "Fase 2 - Novos Endpoints",
+			"item": [
+				{
+					"name": "21. Abrir OS com Serviço e Peça na Abertura",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"os_id_fase2\", res.id);",
+									"pm.test(\"OS Aberta com Sucesso\", () => pm.response.to.be.success);",
+									"pm.test(\"OS Já Retorna com o Serviço Informado\", () => pm.expect(res.servicos.length).to.equal(1));",
+									"pm.collectionVariables.set(\"serv_instance_id_fase2\", res.servicos[0].id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cliente_id\": \"{{cli_id}}\",\n    \"veiculo_id\": \"{{vei_id}}\",\n    \"descricao_problema\": \"Cliente já sabe o que precisa: troca de óleo\",\n    \"servicos\": [\n        {\n            \"servico_id\": \"{{serv_id}}\",\n            \"quantidade\": 1,\n            \"produtos\": [\n                {\n                    \"produto_id\": \"{{prod_id}}\",\n                    \"quantidade\": 1.0\n                }\n            ]\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens"
+							]
+						}
+					}
+				},
+				{
+					"name": "21.1. Listar Ordens - Validar Ordenação por Status e Exclusão de Finalizadas",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"var itens = res.itens;",
+									"",
+									"var osFase2 = itens.find(o => o.id === pm.collectionVariables.get(\"os_id_fase2\"));",
+									"pm.test(\"OS recém-aberta aparece na listagem\", () => pm.expect(osFase2).to.not.be.undefined);",
+									"",
+									"var osPrincipal = itens.find(o => o.id === pm.collectionVariables.get(\"os_id\"));",
+									"pm.test(\"OS já finalizada (paga) não aparece na listagem\", () => pm.expect(osPrincipal).to.be.undefined);",
+									"",
+									"var prioridade = { EM_EXECUCAO: 1, APROVADA: 2, AGUARDANDO_APROVACAO: 3, EM_DIAGNOSTICO: 4, ABERTA: 5, AGUARDANDO_PAGAMENTO: 6 };",
+									"var ordenado = true;",
+									"for (var i = 1; i < itens.length; i++) {",
+									"    var anterior = prioridade[itens[i - 1].status] !== undefined ? prioridade[itens[i - 1].status] : 99;",
+									"    var atual = prioridade[itens[i].status] !== undefined ? prioridade[itens[i].status] : 99;",
+									"    if (atual < anterior) { ordenado = false; }",
+									"}",
+									"pm.test(\"Listagem ordenada por prioridade de status\", () => pm.expect(ordenado).to.be.true);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens?tamanho=100",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens"
+							],
+							"query": [
+								{
+									"key": "tamanho",
+									"value": "100"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "21.2. Iniciar Diagnóstico (Fase 2)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id_fase2}}/iniciar-diagnostico",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id_fase2}}",
+								"iniciar-diagnostico"
+							]
+						}
+					}
+				},
+				{
+					"name": "21.3. Concluir Diagnóstico (Fase 2)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id_fase2}}/concluir-diagnostico",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id_fase2}}",
+								"concluir-diagnostico"
+							]
+						}
+					}
+				},
+				{
+					"name": "21.4. Aprovação Externa via Webhook - Secret Inválido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Retorna 401 sem secret válido\", () => pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Webhook-Secret",
+								"value": "secret-errado-de-proposito"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"servicosAprovados\": [\"{{serv_instance_id_fase2}}\"],\n    \"servicosRejeitados\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id_fase2}}/aprovacao-externa",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id_fase2}}",
+								"aprovacao-externa"
+							]
+						}
+					}
+				},
+				{
+					"name": "21.5. Aprovação Externa via Webhook - Sucesso",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Webhook aceito (204)\", () => pm.response.to.have.status(204));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Webhook-Secret",
+								"value": "{{webhookAprovacaoSecret}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"servicosAprovados\": [\"{{serv_instance_id_fase2}}\"],\n    \"servicosRejeitados\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id_fase2}}/aprovacao-externa",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id_fase2}}",
+								"aprovacao-externa"
+							]
+						}
+					}
+				},
+				{
+					"name": "21.6. Validar Status Aprovado Após Webhook",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.test(\"OS está APROVADA\", () => pm.expect(res.status).to.equal(\"APROVADA\"));",
+									"pm.test(\"Serviço está APROVADO\", () => pm.expect(res.servicos[0].status).to.equal(\"APROVADO\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens/{{os_id_fase2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens",
+								"{{os_id_fase2}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
 			"name": "Relatórios",
 			"item": [
 				{
@@ -1249,6 +1502,18 @@
 		{
 			"key": "baseUrl",
 			"value": "http://localhost:8080"
+		},
+		{
+			"key": "webhookAprovacaoSecret",
+			"value": "local-dev-secret-trocar-em-producao"
+		},
+		{
+			"key": "os_id_fase2",
+			"value": ""
+		},
+		{
+			"key": "serv_instance_id_fase2",
+			"value": ""
 		},
 		{
 			"key": "imagemAssinaturaBase64",

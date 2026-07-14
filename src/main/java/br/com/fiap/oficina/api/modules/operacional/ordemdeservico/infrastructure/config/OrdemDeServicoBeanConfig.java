@@ -20,8 +20,9 @@ public class OrdemDeServicoBeanConfig {
     public AbrirOrdemDeServicoUseCase abrirOrdemDeServicoUseCase(
             OrdemDeServicoRepository repository,
             AtendimentoGateway atendimentoGateway,
-            EventBus eventBus) {
-        return new AbrirOrdemDeServicoUseCaseImpl(repository, atendimentoGateway, eventBus);
+            EventBus eventBus,
+            AdicionarServicoOrdemDeServicoUseCase adicionarServicoUseCase) {
+        return new AbrirOrdemDeServicoUseCaseImpl(repository, atendimentoGateway, eventBus, adicionarServicoUseCase);
     }
 
     @Produces

@@ -47,3 +47,10 @@ smallrye:
       issuer: "oficina-api-interna"
       key:
         location: "publicKey.pem"
+
+# Secret compartilhado para endpoints de webhook (ex: notificação externa de
+# aprovação de orçamento). Trocar via WEBHOOK_APROVACAO_SECRET em qualquer
+# ambiente real — o default aqui só serve para desenvolvimento local.
+oficina:
+  webhook:
+    aprovacao-secret: ${WEBHOOK_APROVACAO_SECRET:local-dev-secret-trocar-em-producao}

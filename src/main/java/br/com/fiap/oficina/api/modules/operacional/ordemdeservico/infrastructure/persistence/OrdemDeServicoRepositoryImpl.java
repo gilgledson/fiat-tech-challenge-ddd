@@ -42,9 +42,21 @@ public class OrdemDeServicoRepositoryImpl
             condicoes.add("deletadoEm is null");
         }
 
-        String hql = String.join(" and ", condicoes);
+        // A listagem padrão de OS não mostra ordens já finalizadas (pagas) ou entregues,
+        // nem os caminhos alternativos (rejeitada/cancelada) — só o que ainda está em
+        // andamento no fluxo operacional.
+        condicoes.add("status not in ('PAGA', 'ENTREGUE', 'REJEITADA', 'CANCELADA')");
 
-        PanacheQuery<OrdemDeServicoJpaEntity> query = hql.isEmpty() ? findAll() : find(hql, parametros);
+        String hql = String.join(" and ", condicoes) +
+                " order by case status" +
+                " when 'EM_EXECUCAO' then 1" +
+                " when 'APROVADA' then 2" +
+                " when 'AGUARDANDO_APROVACAO' then 3" +
+                " when 'EM_DIAGNOSTICO' then 4" +
+                " when 'ABERTA' then 5" +
+                " else 6 end, dataAbertura asc";
+
+        PanacheQuery<OrdemDeServicoJpaEntity> query = find(hql, parametros);
 
         query.page(pagina, tamanho);
 

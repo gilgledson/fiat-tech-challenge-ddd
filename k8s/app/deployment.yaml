@@ -34,3 +34,8 @@ spec:
             secretKeyRef:
               name: oficina-db-app
               key: password
+        - name: WEBHOOK_APROVACAO_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: oficina-db-app
+              key: webhook-aprovacao-secret

@@ -31,6 +31,8 @@ public class OrdemDeServicoJpaEntity {
     private String descricaoProblema;
     @Column(name = "status")
     private String status;
+    @Column(name = "data_criacao")
+    private LocalDateTime dataAbertura;
     @Column(name = "data_inicio_execucao")
     private LocalDateTime dataInicioExecucao;
     @Column(name = "data_fim_execucao")
@@ -51,6 +53,7 @@ public class OrdemDeServicoJpaEntity {
         entity.setVeiculoId(veiculoId);
         entity.setDescricaoProblema(descricaoProblema);
         entity.setStatus(OrdemDeServicoStatus.fromString(status));
+        entity.setDataAbertura(dataAbertura);
         entity.setDataInicioExecucao(dataInicioExecucao);
         entity.setDataFimExecucao(dataFimExecucao);
         entity.setMotivoCancelamento(motivoCancelamento);
@@ -69,6 +72,7 @@ public class OrdemDeServicoJpaEntity {
         entity.setVeiculoId(domain.getVeiculoId());
         entity.setDescricaoProblema(domain.getDescricaoProblema());
         entity.setStatus(domain.getStatus().name());
+        entity.setDataAbertura(domain.getDataAbertura());
         entity.setDataInicioExecucao(domain.getDataInicioExecucao());
         entity.setDataFimExecucao(domain.getDataFimExecucao());
         entity.setMotivoCancelamento(domain.getMotivoCancelamento());

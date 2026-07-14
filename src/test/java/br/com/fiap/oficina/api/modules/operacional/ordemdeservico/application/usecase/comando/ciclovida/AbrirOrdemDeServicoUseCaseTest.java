@@ -4,6 +4,7 @@ import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dt
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.gateway.AtendimentoGateway;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dto.VeiculoSnapshotDTO;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.repository.OrdemDeServicoRepository;
+import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.usecase.comando.item.AdicionarServicoOrdemDeServicoUseCase;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServico;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServicoStatus;
 import io.vertx.core.eventbus.EventBus;
@@ -34,6 +35,9 @@ class AbrirOrdemDeServicoUseCaseTest {
     @Mock
     private EventBus eventBus;
 
+    @Mock
+    private AdicionarServicoOrdemDeServicoUseCase adicionarServicoUseCase;
+
     @InjectMocks
     private AbrirOrdemDeServicoUseCaseImpl useCase;
 
@@ -49,7 +53,7 @@ class AbrirOrdemDeServicoUseCaseTest {
         when(atendimentoGateway.buscarVeiculoPorId(veiculoId)).thenReturn(Optional.of(new VeiculoSnapshotDTO(veiculoId, clienteId, "ABC-1234", "Uno", "Fiat")));
 
         // Act
-        var output = useCase.executar(clienteId, veiculoId, descricao);
+        var output = useCase.executar(clienteId, veiculoId, descricao, null);
 
         // Assert
         assertNotNull(output.id());
@@ -57,9 +61,39 @@ class AbrirOrdemDeServicoUseCaseTest {
         assertEquals(veiculoId, output.veiculoId());
         assertEquals(descricao, output.descricaoProblema());
         assertEquals(OrdemDeServicoStatus.ABERTA, output.status());
-        
+
         verify(repository).salvar(any(OrdemDeServico.class));
         verify(eventBus).publish(anyString(), any());
+        verifyNoInteractions(adicionarServicoUseCase);
+    }
+
+    @Test
+    @DisplayName("Deve adicionar os serviços informados quando o cliente já chega com uma demanda específica")
+    void deveAdicionarServicosInformadosNaAbertura() {
+        // Arrange
+        UUID clienteId = UUID.randomUUID();
+        UUID veiculoId = UUID.randomUUID();
+        UUID servicoId = UUID.randomUUID();
+        String descricao = "Troca de óleo e revisão dos freios";
+
+        when(atendimentoGateway.buscarClientePorId(clienteId)).thenReturn(Optional.of(new ClienteSnapshotDTO(clienteId, "Joao", "123")));
+        when(atendimentoGateway.buscarVeiculoPorId(veiculoId)).thenReturn(Optional.of(new VeiculoSnapshotDTO(veiculoId, clienteId, "ABC-1234", "Uno", "Fiat")));
+
+        var servicoRequest = new br.com.fiap.oficina.api.modules.operacional.ordemdeservico.api.dto.AdicionarServicoRequest(
+                servicoId, 1, null);
+
+        var outputComServico = new br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dto.OrdemDeServicoOutput(
+                UUID.randomUUID(), clienteId, veiculoId, descricao, OrdemDeServicoStatus.ABERTA, null, null, null,
+                java.util.List.of());
+        when(adicionarServicoUseCase.executar(any(UUID.class), eq(servicoRequest))).thenReturn(outputComServico);
+
+        // Act
+        var output = useCase.executar(clienteId, veiculoId, descricao, java.util.List.of(servicoRequest));
+
+        // Assert
+        verify(repository).salvar(any(OrdemDeServico.class));
+        verify(adicionarServicoUseCase).executar(any(UUID.class), eq(servicoRequest));
+        assertEquals(outputComServico, output);
     }
 
     @Test
@@ -74,8 +108,8 @@ class AbrirOrdemDeServicoUseCaseTest {
         when(atendimentoGateway.buscarVeiculoPorId(veiculoId)).thenReturn(Optional.of(new VeiculoSnapshotDTO(veiculoId, outroClienteId, "ABC-1234", "Uno", "Fiat")));
 
         // Act & Assert
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> 
-            useCase.executar(clienteId, veiculoId, "Problema")
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+            useCase.executar(clienteId, veiculoId, "Problema", null)
         );
         assertEquals("O veículo informado não pertence ao cliente informado.", ex.getMessage());
     }
@@ -86,8 +120,8 @@ class AbrirOrdemDeServicoUseCaseTest {
         UUID clienteId = UUID.randomUUID();
         when(atendimentoGateway.buscarClientePorId(clienteId)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> 
-            useCase.executar(clienteId, UUID.randomUUID(), "Problema")
+        assertThrows(NotFoundException.class, () ->
+            useCase.executar(clienteId, UUID.randomUUID(), "Problema", null)
         );
     }
 }
