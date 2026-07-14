@@ -281,6 +281,18 @@ Os seguintes recursos são criados automaticamente na Azure:
 - **Resource Group:** Agrupamento lógico para todos os recursos da aplicação (`oficina-resources`).
 - **PostgreSQL Flexible Server:** Banco de dados gerenciado em nuvem (`database.tf`).
 - **Azure Kubernetes Service (AKS):** Cluster Kubernetes gerenciado para implantação da aplicação (`aks.tf`), configurado com um node pool econômico.
+- **Storage Account + Blob Container:** Armazenamento das assinaturas de aceite de orçamento (`storage.tf`), usado em produção. Disco local do pod é efêmero — some a cada restart/redeploy e não é compartilhado entre réplicas do HPA.
+
+#### Armazenamento de assinatura: local ou Azure Blob Storage
+
+A aplicação implementa `AssinaturaStorageService` de duas formas, e escolhe qual usar **em runtime** pela variável `STORAGE_TYPE` (ver `StorageServiceProducer`):
+
+| `STORAGE_TYPE` | Implementação | Onde roda |
+|---|---|---|
+| `local` (padrão) | `LocalFileStorageService` — grava em `uploads/assinaturas/` no disco do processo | Dev local — definido explicitamente no `docker-compose.yaml` |
+| `azure` | `AzureBlobStorageService` — grava no Storage Account provisionado via Terraform (`storage.tf`) | Produção (AKS) — definido em `k8s/app/configMap.yaml` |
+
+Para testar o modo Azure localmente, defina `STORAGE_TYPE=azure` e `AZURE_STORAGE_CONNECTION_STRING` (ex.: apontando para o emulador [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) ou para um Storage Account real).
 
 ### Como aplicar a infraestrutura
 
@@ -332,6 +344,7 @@ Depois que o AKS existe (via Terraform, passo anterior), a aplicação é implan
 | `AZURE_CREDENTIALS` | Autenticação no Azure (`azure/login`) |
 | `DB_APP_USERNAME` / `DB_APP_PASSWORD` | Credenciais que a API usa para conectar no Postgres Flexible Server (injetadas no `Secret` do K8s) |
 | `WEBHOOK_APROVACAO_SECRET` | Secret do endpoint `/api/ordens/{id}/aprovacao-externa` |
+| `AZURE_STORAGE_CONNECTION_STRING` | Connection string do Storage Account (assinaturas de orçamento) — saída sensível `storage_connection_string` do Terraform |
 
 > Os manifestos em `k8s/app/secret.yaml` usam placeholders `${...}` — a pipeline os preenche via `envsubst` antes do apply. **Nunca** commitar os valores reais no lugar dos placeholders.
 
@@ -343,6 +356,7 @@ Com o `kubectl` já apontando para o cluster (`az aks get-credentials --resource
 kubectl apply -f k8s/app/configMap.yaml
 
 DB_APP_USERNAME=app_user DB_APP_PASSWORD="sua-senha" WEBHOOK_APROVACAO_SECRET="seu-secret" \
+  AZURE_STORAGE_CONNECTION_STRING="sua-connection-string" \
   envsubst < k8s/app/secret.yaml | kubectl apply -f -
 
 kubectl apply -f k8s/app/deployment.yaml
