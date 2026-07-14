@@ -4,6 +4,7 @@ metadata:
   name: oficina-api-config
 data:
   QUARKUS_PROFILE: "prod"
+  STORAGE_TYPE: "azure"
   DB_USERNAME: "adminuser"
   DB_URL_RW: "jdbc:postgresql://oficina-postgres-server.postgres.database.azure.com:5432/postgres?sslmode=require"
   DB_URL_RO: "jdbc:postgresql://oficina-postgres-server.postgres.database.azure.com:5432/postgres?sslmode=require"

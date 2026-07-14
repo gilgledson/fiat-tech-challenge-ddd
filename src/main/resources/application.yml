@@ -55,9 +55,13 @@ oficina:
   webhook:
     aprovacao-secret: ${WEBHOOK_APROVACAO_SECRET:local-dev-secret-trocar-em-producao}
   storage:
+    # Implementação de armazenamento das assinaturas de aceite de orçamento:
+    # "local" (disco do pod — só serve pra dev, é efêmero) ou "azure" (Azure
+    # Blob Storage, provisionado via infra/storage.tf — padrão de produção).
+    # Ver StorageServiceProducer.
+    type: ${STORAGE_TYPE:local}
     azure:
-      # Assinaturas de aceite de orçamento (Azure Blob Storage, provisionado via
-      # infra/storage.tf). Trocar via AZURE_STORAGE_CONNECTION_STRING em produção.
+      # Trocar via AZURE_STORAGE_CONNECTION_STRING em produção.
       # O default abaixo é a connection string pública e bem conhecida do
       # emulador Azurite — só funciona se o Azurite estiver rodando localmente.
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;}

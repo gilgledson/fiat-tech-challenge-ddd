@@ -14,13 +14,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Armazena as assinaturas de aceite de orçamento no Azure Blob Storage.
- * Antes eram salvas no disco local do container (uploads/assinaturas/), que é
- * efêmero: some a cada restart/redeploy do pod e não é compartilhado entre
- * réplicas do HPA. O container de blobs já é provisionado via Terraform
- * (infra/storage.tf) — este serviço só faz upload/download.
+ * Alternativa a LocalFileStorageService (disco local do pod, que é efêmero:
+ * some a cada restart/redeploy e não é compartilhado entre réplicas do HPA).
+ * A escolha entre as duas é feita em runtime via oficina.storage.type
+ * (StorageServiceProducer). O container de blobs já é provisionado via
+ * Terraform (infra/storage.tf) — este serviço só faz upload/download.
  */
+@Azure
 @ApplicationScoped
-public class AzureBlobStorageService {
+public class AzureBlobStorageService implements AssinaturaStorageService {
 
     private final BlobContainerClient containerClient;
 
@@ -33,6 +35,7 @@ public class AzureBlobStorageService {
                 .getBlobContainerClient(containerName);
     }
 
+    @Override
     public String store(byte[] content, String originalFilename) {
         String extension = originalFilename.contains(".")
                 ? originalFilename.substring(originalFilename.lastIndexOf("."))
@@ -45,6 +48,7 @@ public class AzureBlobStorageService {
         return blobName;
     }
 
+    @Override
     public String storeBase64(String base64Content, String filenamePrefix) {
         String pureBase64 = base64Content.contains(",")
                 ? base64Content.split(",")[1]
@@ -54,6 +58,7 @@ public class AzureBlobStorageService {
         return store(decodedBytes, filenamePrefix + ".png");
     }
 
+    @Override
     public byte[] baixar(String blobName) {
         BlobClient blobClient = containerClient.getBlobClient(blobName);
         if (!blobClient.exists()) {

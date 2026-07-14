@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import br.com.fiap.oficina.api.modules.orcamento.application.usecase.comandos.AprovarOrcamentoManualUseCase;
-import br.com.fiap.oficina.api.modules.orcamento.infrastructure.storage.AzureBlobStorageService;
+import br.com.fiap.oficina.api.modules.orcamento.infrastructure.storage.AssinaturaStorageService;
 import io.vertx.core.json.JsonObject;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.UriInfo;
@@ -43,7 +43,7 @@ public class OrcamentoController {
 
     private final AprovarOrcamentoManualUseCase aprovarOrcamentoManualUseCase;
 
-    private final AzureBlobStorageService storageService;
+    private final AssinaturaStorageService storageService;
 
     @Context
     UriInfo uriInfo;
