@@ -39,3 +39,8 @@ spec:
             secretKeyRef:
               name: oficina-db-app
               key: webhook-aprovacao-secret
+        - name: AZURE_STORAGE_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: oficina-db-app
+              key: azure-storage-connection-string

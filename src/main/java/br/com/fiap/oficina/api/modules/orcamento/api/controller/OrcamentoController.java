@@ -22,11 +22,10 @@ import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import br.com.fiap.oficina.api.modules.orcamento.application.usecase.comandos.AprovarOrcamentoManualUseCase;
-import br.com.fiap.oficina.api.modules.orcamento.infrastructure.storage.LocalFileStorageService;
+import br.com.fiap.oficina.api.modules.orcamento.infrastructure.storage.AzureBlobStorageService;
 import io.vertx.core.json.JsonObject;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.UriInfo;
-import java.io.File;
 import java.util.UUID;
 
 @Path("/api/orcamentos")
@@ -44,7 +43,7 @@ public class OrcamentoController {
 
     private final AprovarOrcamentoManualUseCase aprovarOrcamentoManualUseCase;
 
-    private final LocalFileStorageService storageService;
+    private final AzureBlobStorageService storageService;
 
     @Context
     UriInfo uriInfo;
@@ -91,11 +90,11 @@ public class OrcamentoController {
     @Produces("image/png")
     @Operation(summary = "Obter imagem da assinatura")
     public Response obterAssinatura(@PathParam("filename") String filename) {
-        File file = new File("uploads/assinaturas/" + filename);
-        if (!file.exists()) {
+        byte[] conteudo = storageService.baixar(filename);
+        if (conteudo == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        return Response.ok(file).build();
+        return Response.ok(conteudo).build();
     }
 
     @GET
