@@ -19,7 +19,7 @@ jobs:
     - name: 1. Baixar o código do repositório
       uses: actions/checkout@v4
 
-    - name: 2. Configurar o Java (JDK 21)
+    - name: 2. Configurar o Java (JDK 17)
       uses: actions/setup-java@v4
       with:
         java-version: '17' 
@@ -45,3 +45,41 @@ jobs:
         git add .github/badges/jacoco.svg
         git commit -m "chore: Atualizando badge de cobertura de testes [skip ci]" || echo "Nenhuma mudança na cobertura"
         git push
+
+    - name: 6. Build da Aplicação (JAR)
+      run: ./mvnw clean package -DskipTests
+
+    - name: 7. Login no Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: 8. Build e Push da Imagem Docker
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: src/main/docker/Dockerfile.jvm
+        push: true
+        tags: gilgledson/oficina-api:latest
+
+    - name: 9. Autenticar no Azure
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 10. Configurar Contexto do AKS
+      uses: azure/aks-set-context@v3
+      with:
+        resource-group: oficina-resources
+        cluster-name: oficina-aks-cluster
+
+    - name: 11. Deploy no Kubernetes (AKS)
+      uses: Azure/k8s-deploy@v5
+      with:
+        manifests: |
+          k8s/app/configMap.yaml
+          k8s/app/secret.yaml
+          k8s/app/deployment.yaml
+          k8s/app/service.yaml
+          k8s/app/hpa.yaml

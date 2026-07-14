@@ -3,16 +3,22 @@ quarkus:
     always-include: true
   http:
     port: 8080
-
-  # Configurações do Banco de Dados (PostgreSQL)
   datasource:
     db-kind: postgresql
-    username: postgres
-    password: postgres
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     jdbc:
-      url: jdbc:postgresql://localhost:5432/oficina
-
-  # Configurações do Hibernate (Desativado para o Flyway assumir o controle)
+      url: ${DB_URL_RW}
+    ro:
+      db-kind: postgresql
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      jdbc:
+        url: ${DB_URL_RO}
+  fault-tolerance:
+    bulkhead:
+      max-concurrent-calls: 20
+      waiting-task-queue: 40
   hibernate-orm:
     log:
       sql: false

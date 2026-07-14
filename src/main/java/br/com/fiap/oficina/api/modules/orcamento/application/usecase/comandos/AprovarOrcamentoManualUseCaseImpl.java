@@ -22,7 +22,8 @@ public class AprovarOrcamentoManualUseCaseImpl implements AprovarOrcamentoManual
 
     @Override
     @Transactional
-    public void executar(UUID orcamentoId, String assinaturaUrl, List<UUID> servicosAceitos, List<UUID> servicosRejeitados) {
+    public void executar(UUID orcamentoId, String assinaturaUrl, List<UUID> servicosAceitos,
+            List<UUID> servicosRejeitados) {
         Orcamento orcamento = repository.buscarPorId(orcamentoId)
                 .orElseThrow(() -> new NotFoundException("Orcamento não encontrada"));
 
@@ -30,21 +31,16 @@ public class AprovarOrcamentoManualUseCaseImpl implements AprovarOrcamentoManual
         repository.atualizar(orcamento);
 
         if (servicosAceitos.isEmpty()) {
-            OrcamentoRejeitadoEvent rejectedEvent = new OrcamentoRejeitadoEvent(orcamento.getId(), orcamento.getOrdemServicoId());
+            OrcamentoRejeitadoEvent rejectedEvent = new OrcamentoRejeitadoEvent(orcamento.getId(),
+                    orcamento.getOrdemServicoId());
             System.out.println("📢 [orcamento] Publicando evento de rejeição manual: Orcamento " + orcamento.getId());
             eventBus.publish(OrcamentoRejeitadoEvent.TOPICO, rejectedEvent.toJson());
         } else {
-            OrcamentoAceitoEvent acceptedEvent = new OrcamentoAceitoEvent(orcamento.getId(), orcamento.getOrdemServicoId(), servicosAceitos, servicosRejeitados);
-            System.out.println("📢 [orcamento] Publicando evento de aceite manual: Orcamento " + orcamento.getId() + " com " + servicosAceitos.size() + " aprovados e " + servicosRejeitados.size() + " rejeitados.");
+            OrcamentoAceitoEvent acceptedEvent = new OrcamentoAceitoEvent(orcamento.getId(),
+                    orcamento.getOrdemServicoId(), servicosAceitos, servicosRejeitados);
+            System.out.println("📢 [orcamento] Publicando evento de aceite manual: Orcamento " + orcamento.getId()
+                    + " com " + servicosAceitos.size() + " aprovados e " + servicosRejeitados.size() + " rejeitados.");
             eventBus.publish(OrcamentoAceitoEvent.TOPICO, acceptedEvent.toJson());
         }
     }
 }
-
-
-
-
-
-
-
-

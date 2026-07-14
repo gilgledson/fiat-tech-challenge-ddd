@@ -23,10 +23,12 @@ public class DatabaseSeeder {
         if (!"prod".equals(profile)) {
             log.info("Iniciando semeadura do banco de dados (Profile: {})...", profile);
 
-            seeders.stream().forEach(seeder -> {
-                log.info("Executando seeder: {}", seeder.getClass().getSimpleName());
-                seeder.execute();
-            });
+            seeders.stream()
+                    .sorted(java.util.Comparator.comparingInt(Seeder::ordem))
+                    .forEach(seeder -> {
+                        log.info("Executando seeder: {}", seeder.getClass().getSimpleName());
+                        seeder.execute();
+                    });
 
             log.info("Semeadura concluída com sucesso.");
         } else {

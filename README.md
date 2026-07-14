@@ -200,6 +200,14 @@ A Ordem de Serviço (OS) segue uma transição estrita de estados para garantir 
 - **EM_EXECUCAO**: Fase onde os mecânicos iniciam e finalizam tarefas em tempo real, acompanhando a duração exata de cada intervenção.
 - **CONCLUIDA**: Encerra a OS. Aciona eventos no EventBus que disparam a baixa de estoque e preparam os dados para faturamento automático.
 
+### 📝 Decisão de Design: Abertura da OS em Fluxo Incremental
+
+O enunciado do Tech Challenge (Fase 2) descreve a API de abertura de OS como recebendo "dados do cliente, veículo, serviços e peças" em uma única chamada. Optamos por **manter o fluxo incremental** já existente (`POST /api/ordens` recebe apenas `clienteId`, `veiculoId` e `descricaoProblema`; serviços e produtos são adicionados posteriormente via `POST /api/ordens/{id}/servicos` e `POST /api/ordens/{id}/produtos`).
+
+**Motivo**: no processo real da oficina, o atendente que abre a OS **não tem como saber** quais serviços e peças serão necessários — essa informação só é levantada pelo mecânico durante a etapa de diagnóstico (`EM_DIAGNOSTICO`). Exigir serviços/peças já na abertura inverteria a ordem lógica do atendimento e forçaria dados fictícios ou vazios no momento da criação da OS.
+
+**Como o fluxo cobre o requisito**: a "identificação única da OS" é retornada imediatamente na abertura (`POST /api/ordens`), e os serviços/peças entram no mesmo agregado (mesma OS) nas etapas seguintes do ciclo de vida, antes do envio do orçamento para aprovação (`AGUARDANDO_APROVACAO`). O resultado funcional — uma OS com cliente, veículo, serviços e peças associados — é o mesmo, apenas construído em etapas que refletem o processo real da oficina em vez de uma única chamada.
+
 ### 📄 Faturamento e Geração de Documentos
 O módulo de faturamento é totalmente assíncrono e dissociado:
 - **Separação de Módulos**: Ele coleta dados via "Gateways" (Padrão Adapter), sem referenciar diretamente as tabelas de outros contextos.
@@ -238,6 +246,146 @@ docker-compose up -d
 
 A documentação completa da API pode ser acessada em:
 [http://localhost:8383/q/swagger-ui/#/](http://localhost:8383/q/swagger-ui/#/)
+
+---
+
+## ☸️ Kubernetes & GitOps (Minikube + ArgoCD)
+
+Para simular a orquestração completa em Kubernetes localmente, usamos **Minikube** como cluster local e **ArgoCD** para o fluxo de GitOps (o ArgoCD roda dentro do próprio cluster — não faz sentido rodá-lo via `docker-compose`, já que ele depende da API do Kubernetes para armazenar seus próprios recursos).
+
+### Pré-requisitos
+
+- Docker (ou outro driver suportado pelo Minikube)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- [Minikube](https://minikube.sigs.k8s.io/docs/start/)
+
+### 1. Instalar o kubectl
+
+```bash
+# Windows (Chocolatey)
+choco install kubernetes-cli
+
+# macOS (Homebrew)
+brew install kubectl
+
+# Linux
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+```
+
+Verifique a instalação:
+
+```bash
+kubectl version --client
+```
+
+### 2. Instalar o Minikube
+
+```bash
+# Windows (Chocolatey)
+choco install minikube
+
+# macOS (Homebrew)
+brew install minikube
+
+# Linux
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+```
+
+### 3. Iniciar o cluster local
+
+```bash
+minikube start
+
+# Necessário para o Horizontal Pod Autoscaler (HPA) conseguir ler métricas de CPU/memória
+minikube addons enable metrics-server
+```
+
+### 4. Instalar o ArgoCD no cluster
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl get pods -n argocd
+```
+
+Aguarde até que todos os pods do namespace `argocd` estejam com status `Running`.
+
+### 5. Acessar a UI do ArgoCD
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Acesse [https://localhost:8080](https://localhost:8080) (aceite o certificado autoassinado). O usuário é `admin` e a senha inicial fica armazenada em um Secret do cluster:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"
+```
+
+Esse comando retorna a senha em **Base64** — decodifique com um dos comandos abaixo para obter a senha em texto puro:
+
+```bash
+# Linux/macOS
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+# Windows (PowerShell)
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}")))
+```
+
+### 6. Instalar o operador CloudNativePG
+
+Em vez de um Deployment "cru" de PostgreSQL, o banco de dados no cluster Kubernetes é provisionado e gerenciado pelo **[CloudNativePG](https://cloudnative-pg.io/)** (CNPG) — um operador que trata o Postgres como um recurso nativo do Kubernetes (`Cluster`), cuidando de criação de réplicas, failover, backups e da geração automática dos Secrets de credenciais que a API consome.
+
+```bash
+kubectl apply --server-side -f \
+  https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.30/releases/cnpg-1.30.0.yaml
+
+kubectl rollout status deployment -n cnpg-system cnpg-controller-manager
+```
+
+> A partir daqui, os próximos passos (o `Cluster` do CloudNativePG, build da imagem da aplicação, carregamento no Minikube e bootstrap do `Application` do ArgoCD que sincroniza os manifestos de `/k8s`) estão descritos na seção seguinte.
+
+---
+
+## ☁️ Infraestrutura como Código (Terraform)
+
+Para provisionar o ambiente na nuvem (Azure), o projeto inclui scripts automatizados utilizando **Terraform**. Os arquivos de configuração estão localizados na pasta `/infra`.
+
+### Recursos Provisionados
+Os seguintes recursos são criados automaticamente na Azure:
+- **Resource Group:** Agrupamento lógico para todos os recursos da aplicação (`oficina-resources`).
+- **PostgreSQL Flexible Server:** Banco de dados gerenciado em nuvem (`database.tf`).
+- **Azure Kubernetes Service (AKS):** Cluster Kubernetes gerenciado para implantação da aplicação (`aks.tf`), configurado com um node pool econômico.
+
+### Como aplicar a infraestrutura
+
+**Pré-requisitos:**
+- [Terraform CLI](https://developer.hashicorp.com/terraform/downloads) instalado.
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) instalada e autenticada (`az login`).
+
+**Passos:**
+1. Navegue até o diretório de infraestrutura:
+   ```bash
+   cd infra
+   ```
+2. Inicialize o Terraform para baixar os provedores necessários:
+   ```bash
+   terraform init
+   ```
+3. Visualize o plano de execução para revisar os recursos que serão criados:
+   ```bash
+   terraform plan
+   ```
+4. Aplique as configurações para provisionar os recursos (confirme com `yes`):
+   ```bash
+   terraform apply
+   ```
+5. Para destruir a infraestrutura posteriormente (evitar custos adicionais):
+   ```bash
+   terraform destroy
+   ```
 
 ---
 
@@ -378,7 +526,7 @@ Para validar o fluxo completo do Monolito Modular (Identidade -> Atendimento -> 
 Com a aplicação rodando (`docker-compose up` ou `mvn quarkus:dev`), execute o comando abaixo na raiz do projeto:
 
 ```bash
-newman run docs/postman_collection.json --env-var "baseUrl=http://localhost:8383"
+newman run docs/postman_collection.json --env-var "baseUrl=http://localhost:8080"
 ```
 
 **Para gerar um relatório HTML detalhado:**

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oficina-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oficina-api
+  template:
+    metadata:
+      labels:
+        app: oficina-api
+    spec:
+      containers:
+      - name: oficina-api
+        image: docker.io/gilgledson/oficina-api:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: oficina-api-config
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: oficina-db-app
+              key: password

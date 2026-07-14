@@ -36,6 +36,13 @@ public class OrdemServicoSeeder implements Seeder {
     private final FuncionarioRepository funcionarioRepository;
 
     @Override
+    public int ordem() {
+        // Depende de clientes/veículos (AtendimentoSeeder), produtos/serviços
+        // (CatalogoSeeder) e funcionários (FuncionarioSeeder) já existirem.
+        return 100;
+    }
+
+    @Override
     public void execute() {
         if ("prod".equals(ambiente)) {
             return;
@@ -51,7 +58,7 @@ public class OrdemServicoSeeder implements Seeder {
                 return;
             }
 
-            java.util.Random random = new java.util.Random();
+            java.security.SecureRandom random = new java.security.SecureRandom();
             
             // Gera 50 ordens de serviço distribuídas nos últimos 90 dias
             for (int i = 0; i < 50; i++) {

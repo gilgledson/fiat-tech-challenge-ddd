@@ -1,0 +1,14 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: oficina-db
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:15
+  primaryUpdateStrategy: unsupervised
+  bootstrap:
+    initdb:
+      database: oficina
+      owner: app_user
+  storage:
+    size: 1Gi

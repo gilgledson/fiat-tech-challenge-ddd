@@ -1248,7 +1248,7 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:8383"
+			"value": "http://localhost:8080"
 		},
 		{
 			"key": "imagemAssinaturaBase64",
