@@ -13,4 +13,6 @@ resource "azurerm_kubernetes_cluster" "oficina_aks" {
   identity {
     type = "SystemAssigned"
   }
+
+  oidc_issuer_enabled = true
 }
