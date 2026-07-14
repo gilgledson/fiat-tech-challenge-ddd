@@ -21,8 +21,10 @@ graph TB
         TF_RG["azurerm_resource_group<br/>oficina-resources"]
         TF_AKS["azurerm_kubernetes_cluster<br/>oficina-aks-cluster"]
         TF_DB["azurerm_postgresql_flexible_server<br/>oficina-postgres-server"]
+        TF_STORAGE["azurerm_storage_account +<br/>azurerm_storage_container<br/>oficinasign* / assinaturas"]
         TF_RG --> TF_AKS
         TF_RG --> TF_DB
+        TF_RG --> TF_STORAGE
     end
 
     subgraph AKS["Azure Kubernetes Service - Produção"]
@@ -39,11 +41,14 @@ graph TB
     end
 
     PGFLEX[("Azure Postgres<br/>Flexible Server<br/>(gerenciado)")]
+    STORAGE[("Azure Blob Storage<br/>container assinaturas<br/>(assinaturas de orçamento)")]
 
     TF_AKS -.provisiona.-> AKS
     TF_DB -.provisiona.-> PGFLEX
+    TF_STORAGE -.provisiona.-> STORAGE
     CI_DEPLOY -->|"aplica manifestos /k8s/app"| AKS
     API_AKS -->|"JDBC + SSL"| PGFLEX
+    API_AKS -->|"upload/download<br/>(SDK azure-storage-blob)"| STORAGE
 
     CLIENTE["Cliente / Testes<br/>Postman · Newman · k6 · Swagger UI"]
     CLIENTE -->|"HTTP"| SVC_AKS
@@ -52,4 +57,5 @@ graph TB
     style TF fill:#f0fdf4,stroke:#34a853
     style CI fill:#fce8e6,stroke:#ea4335
     style PGFLEX fill:#e8f0fe,stroke:#4285f4
+    style STORAGE fill:#e8f0fe,stroke:#4285f4
     style DOCKERHUB fill:#eef2ff,stroke:#1d63ed
