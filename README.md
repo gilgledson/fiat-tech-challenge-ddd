@@ -16,6 +16,7 @@
 - [Tecnologias](#-tecnologias)
 - [Banco de Dados](#-banco-de-dados)
 - [Como Executar](#-como-executar)
+- [Arquitetura de Infraestrutura e Deploy (Fase 2)](#-arquitetura-de-infraestrutura-e-deploy-fase-2)
 - [Endpoints](#-endpoints)
 - [Testes](#-testes)
 - [Cobertura de Código](#-cobertura-de-código)
@@ -249,103 +250,25 @@ A documentação completa da API pode ser acessada em:
 
 ---
 
-## ☸️ Kubernetes & GitOps (Minikube + ArgoCD)
+## 🏗️ Arquitetura de Infraestrutura e Deploy (Fase 2)
 
-Para simular a orquestração completa em Kubernetes localmente, usamos **Minikube** como cluster local e **ArgoCD** para o fluxo de GitOps (o ArgoCD roda dentro do próprio cluster — não faz sentido rodá-lo via `docker-compose`, já que ele depende da API do Kubernetes para armazenar seus próprios recursos).
+### Objetivo desta fase
 
-### Pré-requisitos
+A Fase 2 do Tech Challenge evolui a aplicação da Fase 1 para garantir **qualidade, resiliência e escalabilidade**, incorporando infraestrutura como código, conteinerização, orquestração via Kubernetes e automação de CI/CD — preparando a oficina para suportar picos de demanda com escalabilidade dinâmica.
 
-- Docker (ou outro driver suportado pelo Minikube)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- [Minikube](https://minikube.sigs.k8s.io/docs/start/)
+### Componentes, infraestrutura provisionada e fluxo de deploy
 
-### 1. Instalar o kubectl
+A infraestrutura roda inteiramente na nuvem (Azure), provisionada via **Terraform** (`/infra`):
 
-```bash
-# Windows (Chocolatey)
-choco install kubernetes-cli
+- **Resource Group** (`oficina-resources`), **AKS** (`oficina-aks-cluster`) e **Postgres Flexible Server** (`oficina-postgres-server`, banco gerenciado).
+- O **deploy** é feito diretamente pelo **GitHub Actions** a cada push na `main`: build da aplicação, execução dos testes (JUnit5/Mockito/JaCoCo), build da imagem Docker, **push da imagem para o Docker Hub** (`docker.io/gilgledson/oficina-api`) e aplicação dos manifestos de `/k8s/app` no AKS via `kubectl`/`azure k8s-deploy`.
+- O `Deployment oficina-api` no AKS referencia essa mesma imagem do Docker Hub (`imagePullPolicy: Always`) — o cluster sempre puxa a versão mais recente publicada a cada deploy.
+- No cluster, o **HPA** escala o `Deployment oficina-api` com base em uso de CPU (alvo 70%), e a configuração/credenciais são injetadas via `ConfigMap`/`Secret`, nunca hardcoded no código-fonte.
+- A aplicação conecta no Postgres Flexible Server via JDBC com SSL.
 
-# macOS (Homebrew)
-brew install kubectl
+![Diagrama de Arquitetura de Infraestrutura](docs/diagrama-arquitetura-infraestrutura.png)
 
-# Linux
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-```
-
-Verifique a instalação:
-
-```bash
-kubectl version --client
-```
-
-### 2. Instalar o Minikube
-
-```bash
-# Windows (Chocolatey)
-choco install minikube
-
-# macOS (Homebrew)
-brew install minikube
-
-# Linux
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-sudo install minikube-linux-amd64 /usr/local/bin/minikube
-```
-
-### 3. Iniciar o cluster local
-
-```bash
-minikube start
-
-# Necessário para o Horizontal Pod Autoscaler (HPA) conseguir ler métricas de CPU/memória
-minikube addons enable metrics-server
-```
-
-### 4. Instalar o ArgoCD no cluster
-
-```bash
-kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-kubectl get pods -n argocd
-```
-
-Aguarde até que todos os pods do namespace `argocd` estejam com status `Running`.
-
-### 5. Acessar a UI do ArgoCD
-
-```bash
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-```
-
-Acesse [https://localhost:8080](https://localhost:8080) (aceite o certificado autoassinado). O usuário é `admin` e a senha inicial fica armazenada em um Secret do cluster:
-
-```bash
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"
-```
-
-Esse comando retorna a senha em **Base64** — decodifique com um dos comandos abaixo para obter a senha em texto puro:
-
-```bash
-# Linux/macOS
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-
-# Windows (PowerShell)
-[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}")))
-```
-
-### 6. Instalar o operador CloudNativePG
-
-Em vez de um Deployment "cru" de PostgreSQL, o banco de dados no cluster Kubernetes é provisionado e gerenciado pelo **[CloudNativePG](https://cloudnative-pg.io/)** (CNPG) — um operador que trata o Postgres como um recurso nativo do Kubernetes (`Cluster`), cuidando de criação de réplicas, failover, backups e da geração automática dos Secrets de credenciais que a API consome.
-
-```bash
-kubectl apply --server-side -f \
-  https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.30/releases/cnpg-1.30.0.yaml
-
-kubectl rollout status deployment -n cnpg-system cnpg-controller-manager
-```
-
-> A partir daqui, os próximos passos (o `Cluster` do CloudNativePG, build da imagem da aplicação, carregamento no Minikube e bootstrap do `Application` do ArgoCD que sincroniza os manifestos de `/k8s`) estão descritos na seção seguinte.
+> Fonte editável: [docs/diagrama-arquitetura-infraestrutura.mmd](docs/diagrama-arquitetura-infraestrutura.mmd) (Mermaid).
 
 ---
 

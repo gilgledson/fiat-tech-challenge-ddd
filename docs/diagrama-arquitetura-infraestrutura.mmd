@@ -1,0 +1,55 @@
+graph TB
+    DEV["Desenvolvedor"] -->|"git push"| GH["Repositório GitHub"]
+
+    subgraph CI["GitHub Actions - CI/CD"]
+        direction TB
+        CI_TEST["Build + Testes<br/>JUnit5 / Mockito / JaCoCo"]
+        CI_DOCKER["Build imagem Docker<br/>(Dockerfile.jvm)"]
+        CI_PUSH["Push da imagem<br/>docker.io/gilgledson/oficina-api"]
+        CI_DEPLOY["Deploy: kubectl apply /<br/>azure k8s-deploy action"]
+        CI_TEST --> CI_DOCKER --> CI_PUSH --> CI_DEPLOY
+    end
+
+    GH -->|"trigger em push/PR na main"| CI_TEST
+
+    DOCKERHUB[("Docker Hub<br/>gilgledson/oficina-api")]
+    CI_PUSH -->|"docker push"| DOCKERHUB
+    DOCKERHUB -.->|"docker pull<br/>(imagePullPolicy: Always)"| API_AKS
+
+    subgraph TF["Infraestrutura como Código - Terraform (/infra)"]
+        direction TB
+        TF_RG["azurerm_resource_group<br/>oficina-resources"]
+        TF_AKS["azurerm_kubernetes_cluster<br/>oficina-aks-cluster"]
+        TF_DB["azurerm_postgresql_flexible_server<br/>oficina-postgres-server"]
+        TF_RG --> TF_AKS
+        TF_RG --> TF_DB
+    end
+
+    subgraph AKS["Azure Kubernetes Service - Produção"]
+        direction TB
+        SVC_AKS["Service :8080"]
+        API_AKS["Deployment oficina-api<br/>(N réplicas)"]
+        HPA_AKS["HPA<br/>alvo: CPU 70%"]
+        CM_AKS["ConfigMap<br/>oficina-api-config"]
+        SEC_AKS["Secret<br/>oficina-db-app"]
+        SVC_AKS --> API_AKS
+        HPA_AKS -.escala.-> API_AKS
+        CM_AKS -.injeta config.-> API_AKS
+        SEC_AKS -.injeta credenciais.-> API_AKS
+    end
+
+    PGFLEX[("Azure Postgres<br/>Flexible Server<br/>(gerenciado)")]
+
+    TF_AKS -.provisiona.-> AKS
+    TF_DB -.provisiona.-> PGFLEX
+    CI_DEPLOY -->|"aplica manifestos /k8s/app"| AKS
+    API_AKS -->|"JDBC + SSL"| PGFLEX
+
+    CLIENTE["Cliente / Testes<br/>Postman · Newman · k6 · Swagger UI"]
+    CLIENTE -->|"HTTP"| SVC_AKS
+
+    style AKS fill:#e8f0fe,stroke:#4285f4
+    style TF fill:#f0fdf4,stroke:#34a853
+    style CI fill:#fce8e6,stroke:#ea4335
+    style PGFLEX fill:#e8f0fe,stroke:#4285f4
+    style DOCKERHUB fill:#eef2ff,stroke:#1d63ed

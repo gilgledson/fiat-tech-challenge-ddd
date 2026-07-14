@@ -9,7 +9,7 @@ resource "azurerm_postgresql_flexible_server" "oficina_db" {
   location               = azurerm_resource_group.oficina_rg.location
   version                = "13"
   administrator_login    = "adminuser"
-  administrator_password = "Password123!" # Em produção, use o Key Vault!
+  administrator_password = var.db_admin_password
   sku_name               = "B_Standard_B1ms"
   zone                   = "1"
 }
