@@ -102,7 +102,17 @@ jobs:
         envsubst < k8s/app/secret.yaml > k8s/app/secret.rendered.yaml
         mv k8s/app/secret.rendered.yaml k8s/app/secret.yaml
 
-    - name: 8. Deploy no Kubernetes (AKS)
+    - name: 8. Deploy do API Gateway (Traefik) no Kubernetes (AKS)
+      uses: Azure/k8s-deploy@v5
+      with:
+        manifests: |
+          k8s/gateway/namespace.yaml
+          k8s/gateway/rbac.yaml
+          k8s/gateway/ingressclass.yaml
+          k8s/gateway/deployment.yaml
+          k8s/gateway/service.yaml
+
+    - name: 9. Deploy no Kubernetes (AKS)
       uses: Azure/k8s-deploy@v5
       with:
         manifests: |
@@ -111,3 +121,4 @@ jobs:
           k8s/app/deployment.yaml
           k8s/app/service.yaml
           k8s/app/hpa.yaml
+          k8s/gateway/ingress.yaml
