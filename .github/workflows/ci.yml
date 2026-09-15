@@ -92,7 +92,10 @@ jobs:
         resource-group: oficina-resources
         cluster-name: oficina-aks-cluster
 
-    - name: 7.5. Preencher credenciais do Secret a partir dos GitHub Secrets
+    - name: 7.5. Gerar o Secret a partir dos GitHub Secrets
+      # kubectl create secret --from-literal (em vez de envsubst sobre YAML):
+      # evita quebrar o parser quando algum valor tem caractere especial de
+      # YAML (":", "#", aspas etc), que já causou falha de deploy antes.
       env:
         DB_APP_USERNAME: ${{ secrets.DB_APP_USERNAME }}
         DB_APP_PASSWORD: ${{ secrets.DB_APP_PASSWORD }}
@@ -100,8 +103,13 @@ jobs:
         AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
       run: |
-        envsubst < k8s/app/secret.yaml > k8s/app/secret.rendered.yaml
-        mv k8s/app/secret.rendered.yaml k8s/app/secret.yaml
+        kubectl create secret generic oficina-db-app \
+          --from-literal=username="$DB_APP_USERNAME" \
+          --from-literal=password="$DB_APP_PASSWORD" \
+          --from-literal=webhook-aprovacao-secret="$WEBHOOK_APROVACAO_SECRET" \
+          --from-literal=azure-storage-connection-string="$AZURE_STORAGE_CONNECTION_STRING" \
+          --from-literal=new-relic-license-key="$NEW_RELIC_LICENSE_KEY" \
+          --dry-run=client -o yaml > k8s/app/secret.yaml
 
     - name: 8. Deploy do API Gateway (Traefik) no Kubernetes (AKS)
       uses: Azure/k8s-deploy@v5
