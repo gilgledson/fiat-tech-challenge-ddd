@@ -96,12 +96,13 @@ de deploy já implementados).
       dashboard "Oficina API - Visão Geral" renderizando com dado real
       (latência, uptime). Link:
       `one.newrelic.com/redirect/entity/ODUxMzk4OXxWSVp8REFTSEJPQVJEfGRhOjEzMTc0NzA2`
-- [ ] Monitorar consumo de recursos do Kubernetes (CPU, memória) — chart Helm
+- [x] Monitorar consumo de recursos do Kubernetes (CPU, memória) — chart Helm
       oficial `newrelic/nri-bundle`, values em
       [k8s/observability/newrelic-values.yaml](k8s/observability/newrelic-values.yaml).
       Instalação é passo manual (como o `terraform apply`), não entrou no
-      `ci.yml`. **Ainda não instalado** no cluster — único item pendente
-      desta seção.
+      `ci.yml`. **Instalado e validado**: 6 pods `Running` no namespace
+      `newrelic` (Infrastructure Agent, kube-state-metrics, nri-kube-events,
+      nri-metadata-injection, Fluent Bit), sem erro de autenticação nos logs.
 
 **Bugs reais encontrados e corrigidos durante a validação em produção**
 (nenhum deles estava relacionado ao código da observabilidade em si — todos
