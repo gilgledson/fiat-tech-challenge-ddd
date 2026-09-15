@@ -19,6 +19,8 @@
 - [Arquitetura de Infraestrutura e Deploy (Fase 2)](#-arquitetura-de-infraestrutura-e-deploy-fase-2)
 - [Infraestrutura como Código (Terraform)](#-infraestrutura-como-código-terraform)
 - [Deploy em Kubernetes](#-deploy-em-kubernetes)
+- [API Gateway (Traefik)](#-api-gateway-traefik)
+- [Observabilidade (New Relic)](#-observabilidade-new-relic)
 - [Endpoints](#-endpoints)
 - [Testes](#-testes)
 - [Cobertura de Código](#-cobertura-de-código)
@@ -268,7 +270,7 @@ A infraestrutura roda inteiramente na nuvem (Azure), provisionada via **Terrafor
 
 - **Collection completa das APIs (Postman):** [docs/postman_collection.json](docs/postman_collection.json)
 - **Documentação interativa (Swagger UI):** disponível em `/q/swagger-ui/#/` após subir a aplicação
-- **Vídeo demonstrativo (até 15 min):** _TODO — adicionar link do YouTube/Vimeo antes da entrega_ (roteiro de gravação: [docs/roteiro-video-apresentacao.md](docs/roteiro-video-apresentacao.md))
+- **Vídeo demonstrativo (até 15 min):** [Assista aqui](https://drive.google.com/file/d/1TqMzNbciNb-3_zPpxVR6hI0vbInDfhIA/view?usp=sharing) (roteiro de gravação: [docs/roteiro-video-apresentacao.md](docs/roteiro-video-apresentacao.md))
 
 ---
 
@@ -309,13 +311,19 @@ Para testar o modo Azure localmente, defina `STORAGE_TYPE=azure` e `AZURE_STORAG
    ```bash
    terraform init
    ```
-3. Defina a senha do administrador do Postgres (obrigatória — a variável não tem default por segurança, mínimo 12 caracteres):
+3. Defina as variáveis sensíveis obrigatórias (nenhuma tem default, por segurança):
    ```bash
    # Linux/macOS
-   export TF_VAR_db_admin_password="uma-senha-forte-aqui"
+   export TF_VAR_db_admin_password="uma-senha-forte-aqui"           # Postgres, mínimo 12 caracteres
+   export TF_VAR_jwt_private_key_pem="$(cat ../src/main/resources/privateKey.pem)"  # Function de auth por CPF
+   export TF_VAR_newrelic_account_id="sua-account-id"                # one.newrelic.com > Account Settings
+   export TF_VAR_newrelic_api_key="sua-user-api-key"                 # NRAK-..., não é a license key do agent
 
    # Windows (PowerShell)
    $env:TF_VAR_db_admin_password = "uma-senha-forte-aqui"
+   $env:TF_VAR_jwt_private_key_pem = Get-Content ..\src\main\resources\privateKey.pem -Raw
+   $env:TF_VAR_newrelic_account_id = "sua-account-id"
+   $env:TF_VAR_newrelic_api_key = "sua-user-api-key"
    ```
 4. Visualize o plano de execução para revisar os recursos que serão criados:
    ```bash
@@ -345,6 +353,7 @@ Depois que o AKS existe (via Terraform, passo anterior), a aplicação é implan
 | `DB_APP_USERNAME` / `DB_APP_PASSWORD` | Credenciais que a API usa para conectar no Postgres Flexible Server (injetadas no `Secret` do K8s) |
 | `WEBHOOK_APROVACAO_SECRET` | Secret do endpoint `/api/ordens/{id}/aprovacao-externa` |
 | `AZURE_STORAGE_CONNECTION_STRING` | Connection string do Storage Account (assinaturas de orçamento) — saída sensível `storage_connection_string` do Terraform |
+| `NEW_RELIC_LICENSE_KEY` | License key do New Relic (APM) — injetada no `Secret` do K8s e lida pelo New Relic Java Agent |
 
 > Os manifestos em `k8s/app/secret.yaml` usam placeholders `${...}` — a pipeline os preenche via `envsubst` antes do apply. **Nunca** commitar os valores reais no lugar dos placeholders.
 
@@ -355,16 +364,140 @@ Com o `kubectl` já apontando para o cluster (`az aks get-credentials --resource
 ```bash
 kubectl apply -f k8s/app/configMap.yaml
 
-DB_APP_USERNAME=app_user DB_APP_PASSWORD="sua-senha" WEBHOOK_APROVACAO_SECRET="seu-secret" \
-  AZURE_STORAGE_CONNECTION_STRING="sua-connection-string" \
-  envsubst < k8s/app/secret.yaml | kubectl apply -f -
+kubectl create secret generic oficina-db-app \
+  --from-literal=username=adminuser \
+  --from-literal=password="sua-senha" \
+  --from-literal=webhook-aprovacao-secret="seu-secret" \
+  --from-literal=azure-storage-connection-string="sua-connection-string" \
+  --from-literal=new-relic-license-key="sua-license-key" \
+  --dry-run=client -o yaml | kubectl apply -f -
 
 kubectl apply -f k8s/app/deployment.yaml
 kubectl apply -f k8s/app/service.yaml
 kubectl apply -f k8s/app/hpa.yaml
 
+kubectl apply -f k8s/gateway/ingress.yaml
+
 kubectl rollout status deployment/oficina-api
 ```
+
+> O `oficina-api-service` agora é `ClusterIP` (sem IP público próprio). O acesso
+> externo é feito através do **API Gateway** — veja a seção seguinte.
+
+---
+
+## 🚪 API Gateway (Traefik)
+
+A aplicação não é mais exposta diretamente ao público. Todo o tráfego externo
+passa por um **API Gateway** ([Traefik](https://traefik.io/)) implantado no
+próprio cluster AKS, responsável pelo roteamento e controle de acesso às APIs.
+
+```
+Internet → Service traefik (LoadBalancer, :80) → Traefik (Ingress Controller)
+         → Ingress oficina-api-ingress → Service oficina-api-service (ClusterIP, :8080)
+         → Pods oficina-api
+```
+
+Manifestos em [`k8s/gateway`](k8s/gateway):
+
+| Arquivo | Recurso | Função |
+|---|---|---|
+| `namespace.yaml` | `Namespace: gateway` | Isola os recursos do gateway |
+| `rbac.yaml` | `ServiceAccount` / `ClusterRole` / `ClusterRoleBinding` | Permite o Traefik observar `Ingress`, `Service`, `Endpoints` e `Secret` no cluster |
+| `ingressclass.yaml` | `IngressClass: traefik` | Registra o Traefik como controller de Ingress |
+| `deployment.yaml` | `Deployment: traefik` | Roda o Traefik (provider `kubernetesingress`) |
+| `service.yaml` | `Service: traefik` (LoadBalancer, porta 80) + `Service: traefik-dashboard` (ClusterIP, porta 8080) | Expõe o gateway publicamente e o dashboard só internamente |
+| `ingress.yaml` | `Ingress: oficina-api-ingress` (namespace `default`) | Roteia todo o tráfego (`/`) para `oficina-api-service:8080` |
+
+Esses manifestos são aplicados automaticamente pelo job `build-and-deploy` do
+[ci.yml](.github/workflows/ci.yml) antes do deploy da aplicação.
+
+### Como acessar a API pelo gateway
+
+```bash
+# IP público do gateway (pode levar alguns minutos até o Azure provisionar)
+kubectl get service traefik -n gateway
+
+# Exemplo de chamada, já passando pelo API Gateway
+curl http://<EXTERNAL-IP>/api/produtos
+curl http://<EXTERNAL-IP>/q/swagger-ui/
+```
+
+### Dashboard do Traefik (uso local, não exposto publicamente)
+
+```bash
+kubectl port-forward -n gateway svc/traefik-dashboard 8080:8080
+# abrir http://localhost:8080/dashboard/
+```
+
+---
+
+## 📊 Observabilidade (New Relic)
+
+### Logs estruturados em JSON com correlação entre requisições
+
+Todo log vai pro stdout já em JSON (extensão `quarkus-logging-json`). Um
+[`CorrelationIdFilter`](src/main/java/br/com/fiap/oficina/api/shared/infrastructure/web/CorrelationIdFilter.java)
+gera (ou reaproveita, se o cliente já mandou) um `X-Correlation-Id` por
+requisição, coloca no MDC — aparece em todo log daquela requisição — e devolve
+no header de resposta, pra permitir correlacionar com outros serviços na
+mesma cadeia de chamadas. O próprio filtro loga uma linha por requisição
+(método, path, status, duração):
+
+```json
+{"timestamp":"...","loggerName":"...CorrelationIdFilter","level":"INFO","message":"POST /api/usuarios/login -> 200 (216ms)","mdc":{"correlationId":"82b63b79-..."}}
+```
+
+### APM (latência, erros, throughput)
+
+O [Dockerfile.jvm](src/main/docker/Dockerfile.jvm) baixa o **New Relic Java
+Agent** na build e anexa via `-javaagent`. Ele instrumenta JAX-RS/JDBC
+automaticamente — sem precisar de código customizado — reportando latência,
+throughput e erros por endpoint. Sem a env var `NEW_RELIC_LICENSE_KEY`
+configurada, o agent detecta e se desliga sozinho (loga um erro, mas não
+derruba a aplicação — testado localmente).
+
+### Consumo de recursos do Kubernetes (CPU, memória) + logs do cluster
+
+Provisionado via o chart oficial `newrelic/nri-bundle` (Helm) — **passo manual**,
+como o `terraform apply`, não faz parte do `ci.yml`:
+
+```bash
+helm repo add newrelic https://helm-charts.newrelic.com
+helm repo update
+helm upgrade --install newrelic-bundle newrelic/nri-bundle \
+  --namespace newrelic --create-namespace \
+  --set global.licenseKey=<sua-license-key> \
+  -f k8s/observability/newrelic-values.yaml
+```
+
+Isso instala o Infrastructure Agent (CPU/memória de nós e pods),
+kube-state-metrics, forwarding de eventos do cluster e do stdout dos
+containers (inclui os logs JSON da aplicação) pro New Relic. Ver
+[k8s/observability/newrelic-values.yaml](k8s/observability/newrelic-values.yaml).
+
+### Alertas e Dashboard como código
+
+Provisionados via Terraform em [`infra/newrelic.tf`](infra/newrelic.tf)
+(junto com o resto da infra, `terraform apply` de dentro de `infra/`):
+
+- **Alert policy** com 2 condições NRQL: falhas no processamento de ordens de
+  serviço, e latência média das APIs acima do esperado. Canal de notificação
+  por e-mail é opcional (`TF_VAR_alert_notification_email`) — sem ele, as
+  condições só mudam de estado dentro do New Relic, sem avisar ninguém.
+- **Dashboard** ("Oficina API - Visão Geral") com: volume diário de OS
+  abertas, tempo médio por transição de status, latência média das APIs,
+  erros/falhas por endpoint, e uptime do healthcheck. Construído a partir dos
+  dados de transação que o Java Agent já captura automaticamente (não
+  instrumenta eventos de negócio customizados).
+
+> ⚠️ Validado localmente: JSON logs + correlation-id + agent não travando a
+> app sem license key. **Não validado contra uma conta New Relic real** (não
+> tenho acesso à conta/API key) — as queries NRQL e o schema Terraform foram
+> conferidos com `terraform validate`/`plan` contra o provider oficial, mas o
+> dashboard e os alertas em si só podem ser confirmados após um
+> `terraform apply` com credenciais reais e a aplicação rodando com a license
+> key configurada.
 
 ---
 
@@ -514,6 +647,17 @@ newman run docs/postman_collection.json --env-var "baseUrl=http://localhost:8080
 newman run docs/postman_collection.json --env-var "baseUrl=http://localhost:8383" -r htmlextra
 ```
 *O relatório será gerado na pasta `newman/`.*
+
+**Pasta "Fase 3 - Autenticação CPF (Function Serverless)":** cobre o login por
+CPF de ponta a ponta — cria um cliente com CPF válido, autentica na Azure
+Function ([`azure-function-auth-cpf/`](azure-function-auth-cpf)), usa o token
+emitido para chamar a API principal (rota permitida e rota restrita, para
+validar a role `CLIENTE`), e casos negativos (CPF inválido, cliente não
+encontrado, sem token). Precisa da Function rodando localmente
+(`cd azure-function-auth-cpf && npm start`, porta padrão `7071`) — a variável
+de collection `cpfAuthUrl` já aponta para `http://localhost:7071/api/auth/cpf`
+por padrão; sobrescreva com `--env-var "cpfAuthUrl=..."` para testar contra
+uma Function já implantada.
 
 #### 🧪 O que é testado?
 

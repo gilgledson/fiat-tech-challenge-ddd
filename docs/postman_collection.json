@@ -1496,6 +1496,393 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "Fase 3 - Autenticação CPF (Function Serverless)",
+			"item": [
+				{
+					"name": "22. Login Admin (Setup Fase 3)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"admin_token_fase3\", res.access_token);",
+									"pm.test(\"Login Admin Sucesso\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@oficina.com.br\",\n    \"senha\": \"admin123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/usuarios/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"usuarios",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "22.1. Criar Cliente com CPF Válido",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function gerarCpfValido() {",
+									"    const gerarBaseAleatoria = () => Array.from({ length: 9 }, () => Math.floor(Math.random() * 9));",
+									"    const calcularDigito = (base, pesoInicial) => {",
+									"        let soma = 0;",
+									"        for (let i = 0; i < base.length; i++) {",
+									"            soma += base[i] * (pesoInicial - i);",
+									"        }",
+									"        const resto = (soma * 10) % 11;",
+									"        return resto === 10 ? 0 : resto;",
+									"    };",
+									"    const base = gerarBaseAleatoria();",
+									"    const d1 = calcularDigito(base, 10);",
+									"    const d2 = calcularDigito([...base, d1], 11);",
+									"    return [...base, d1, d2].join(\"\");",
+									"}",
+									"pm.collectionVariables.set(\"cliente_cpf\", gerarCpfValido());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"cliente_fase3_id\", res.id);",
+									"pm.test(\"Cliente Criado\", () => pm.response.to.be.success);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token_fase3}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Cliente Autenticacao CPF {{$randomInt}}\",\n    \"email\": \"cliente.cpf.{{$randomInt}}@email.com\",\n    \"cpf_cnpj\": \"{{cliente_cpf}}\",\n    \"telefone\": \"11999999999\",\n    \"endereco\": {\n        \"logradouro\": \"Rua Teste\",\n        \"numero\": \"1\",\n        \"bairro\": \"Centro\",\n        \"cidade\": \"Sao Paulo\",\n        \"estado\": \"SP\",\n        \"cep\": \"01234567\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes"
+							]
+						}
+					}
+				},
+				{
+					"name": "22.2. Login via CPF - Sucesso",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var res = pm.response.json();",
+									"pm.collectionVariables.set(\"cliente_token\", res.access_token);",
+									"pm.test(\"Login via CPF Sucesso\", () => pm.response.to.be.success);",
+									"pm.test(\"Retorna token_type Bearer\", () => pm.expect(res.token_type).to.eql(\"Bearer\"));",
+									"pm.test(\"Retorna expires_in\", () => pm.expect(res.expires_in).to.be.a(\"number\"));",
+									"",
+									"var payloadBase64 = res.access_token.split(\".\")[1];",
+									"var payload = JSON.parse(Buffer.from(payloadBase64, \"base64\").toString(\"utf-8\"));",
+									"pm.test(\"Token emitido com role CLIENTE\", () => pm.expect(payload.groups).to.include(\"CLIENTE\"));",
+									"pm.test(\"Token emitido pelo issuer correto\", () => pm.expect(payload.iss).to.eql(\"oficina-api-interna\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"{{cliente_cpf}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{cpfAuthUrl}}",
+							"host": [
+								"{{cpfAuthUrl}}"
+							],
+							"path": []
+						}
+					}
+				},
+				{
+					"name": "22.3. Consultar Ordens com Token do Cliente (Autorizado)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Token do CPF é aceito pela API principal\", () => pm.response.to.have.status(200));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{cliente_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens"
+							]
+						}
+					}
+				},
+				{
+					"name": "22.4. Acessar Rota Restrita a Staff com Token do Cliente (Esperado 403)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"CLIENTE não acessa listagem de clientes (staff-only)\", () => pm.response.to.have.status(403));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{cliente_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes"
+							]
+						}
+					}
+				},
+				{
+					"name": "22.5. Login via CPF - CPF Inválido (Formato)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"CPF inválido retorna 400\", () => pm.response.to.have.status(400));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{cpfAuthUrl}}",
+							"host": [
+								"{{cpfAuthUrl}}"
+							],
+							"path": []
+						}
+					}
+				},
+				{
+					"name": "22.6. Login via CPF - Cliente Não Encontrado",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"function gerarCpfValido() {",
+									"    const gerarBaseAleatoria = () => Array.from({ length: 9 }, () => Math.floor(Math.random() * 9));",
+									"    const calcularDigito = (base, pesoInicial) => {",
+									"        let soma = 0;",
+									"        for (let i = 0; i < base.length; i++) {",
+									"            soma += base[i] * (pesoInicial - i);",
+									"        }",
+									"        const resto = (soma * 10) % 11;",
+									"        return resto === 10 ? 0 : resto;",
+									"    };",
+									"    const base = gerarBaseAleatoria();",
+									"    const d1 = calcularDigito(base, 10);",
+									"    const d2 = calcularDigito([...base, d1], 11);",
+									"    return [...base, d1, d2].join(\"\");",
+									"}",
+									"pm.collectionVariables.set(\"cpf_nao_cadastrado\", gerarCpfValido());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Cliente não encontrado retorna 404\", () => pm.response.to.have.status(404));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"{{cpf_nao_cadastrado}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{cpfAuthUrl}}",
+							"host": [
+								"{{cpfAuthUrl}}"
+							],
+							"path": []
+						}
+					}
+				},
+				{
+					"name": "22.7. Acessar Rota Protegida Sem Token (Esperado 401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Sem token retorna 401\", () => pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/ordens",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"ordens"
+							]
+						}
+					}
+				}
+			]
 		}
 	],
 	"variable": [
@@ -1581,6 +1968,30 @@
 		},
 		{
 			"key": "serv_corretivo_instance_id",
+			"value": ""
+		},
+		{
+			"key": "cpfAuthUrl",
+			"value": "http://localhost:7071/api/auth/cpf"
+		},
+		{
+			"key": "admin_token_fase3",
+			"value": ""
+		},
+		{
+			"key": "cliente_cpf",
+			"value": ""
+		},
+		{
+			"key": "cliente_fase3_id",
+			"value": ""
+		},
+		{
+			"key": "cliente_token",
+			"value": ""
+		},
+		{
+			"key": "cpf_nao_cadastrado",
 			"value": ""
 		}
 	]

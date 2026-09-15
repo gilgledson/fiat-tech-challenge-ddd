@@ -34,9 +34,25 @@ COPY --chown=185 target/quarkus-app/*.jar /deployments/
 COPY --chown=185 target/quarkus-app/app/ /deployments/app/
 COPY --chown=185 target/quarkus-app/quarkus/ /deployments/quarkus/
 
+# A imagem UBI da Red Hat usada anteriormente deixava /deployments gravável
+# pelo grupo 0 (convenção do OpenShift para suportar UID arbitrário);
+# eclipse-temurin não segue essa convenção. O container roda com um UID
+# numérico (185) e GID 0, e o app grava localmente em ./uploads/assinaturas
+# (fallback de STORAGE_TYPE=local) — sem isso, a criação do diretório falha
+# com Permission Denied.
+RUN chmod -R g+rwX /deployments
+
+# New Relic Java Agent (APM): baixa o jar oficial (sem precisar de unzip —
+# o endpoint "current/newrelic.jar" já serve o jar puro) e usa a config
+# mínima do repo. A license key nunca fica no arquivo — vem da env var
+# NEW_RELIC_LICENSE_KEY, lida automaticamente pelo agent.
+ADD https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.jar /opt/newrelic/newrelic.jar
+COPY src/main/docker/newrelic.yml /opt/newrelic/newrelic.yml
+RUN chmod -R g+rwX /opt/newrelic
+
 EXPOSE 8080
 USER 185
-ENV JAVA_OPTS_APPEND="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -XX:MaxRAMPercentage=50"
+ENV JAVA_OPTS_APPEND="-javaagent:/opt/newrelic/newrelic.jar -Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -XX:MaxRAMPercentage=50"
 ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
 
 ENTRYPOINT exec java $JAVA_OPTS_APPEND -jar $JAVA_APP_JAR

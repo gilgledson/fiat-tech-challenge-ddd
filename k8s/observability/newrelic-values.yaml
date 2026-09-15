@@ -1,0 +1,53 @@
+# Values do Helm chart oficial newrelic/nri-bundle — integração de
+# Kubernetes do New Relic (CPU/memória do cluster e dos pods, eventos do
+# K8s, e forwarding dos logs de container pro New Relic Logs).
+#
+# A license key NUNCA fica aqui — é passada na hora do `helm install/upgrade`
+# via --set global.licenseKey=..., nunca commitada.
+#
+# Instalação (passo manual, como o `terraform apply` — não faz parte do
+# ci.yml):
+#
+#   helm repo add newrelic https://helm-charts.newrelic.com
+#   helm repo update
+#   helm upgrade --install newrelic-bundle newrelic/nri-bundle \
+#     --namespace newrelic --create-namespace \
+#     --set global.licenseKey=<sua-license-key> \
+#     -f k8s/observability/newrelic-values.yaml
+
+global:
+  cluster: oficina-aks-cluster
+  # licenseKey: passado via --set na instalação, não aqui.
+
+# Infrastructure agent (DaemonSet): coleta CPU/memória de nós e pods.
+newrelic-infrastructure:
+  enabled: true
+  privileged: true
+  verboseLog: false
+
+# kube-state-metrics: estado dos objetos do Kubernetes (Deployments, HPA,
+# Pods pendentes/falhando, etc) — complementa o Infrastructure agent.
+kube-state-metrics:
+  enabled: true
+
+# Eventos do cluster (restarts, scheduling failures, etc) — ajuda a
+# correlacionar quedas de healthcheck/uptime com o que aconteceu no K8s.
+kubeEvents:
+  enabled: true
+
+# Fluent Bit: encaminha o stdout dos containers (inclui os logs JSON
+# estruturados da oficina-api, com o correlationId) pro New Relic Logs.
+logging:
+  enabled: true
+
+# Não usamos métricas Prometheus customizadas na aplicação — desabilitado
+# pra não adicionar complexidade sem necessidade.
+prometheus:
+  enabled: false
+
+# Métricas de baixo nível (kernel/eBPF) não são necessárias pro escopo
+# deste projeto.
+newrelic-pixie:
+  enabled: false
+pixie-chart:
+  enabled: false

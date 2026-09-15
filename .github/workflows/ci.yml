@@ -98,6 +98,7 @@ jobs:
         DB_APP_PASSWORD: ${{ secrets.DB_APP_PASSWORD }}
         WEBHOOK_APROVACAO_SECRET: ${{ secrets.WEBHOOK_APROVACAO_SECRET }}
         AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
       run: |
         envsubst < k8s/app/secret.yaml > k8s/app/secret.rendered.yaml
         mv k8s/app/secret.rendered.yaml k8s/app/secret.yaml

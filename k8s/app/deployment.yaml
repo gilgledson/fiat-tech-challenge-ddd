@@ -25,6 +25,28 @@ spec:
             memory: "512Mi"
         ports:
         - containerPort: 8080
+        # A app pode levar até ~1min pra subir (Flyway rodando todas as
+        # migrations + seed em dev). O startupProbe segura o liveness/readiness
+        # até a app realmente iniciar, evitando restart em loop por causa de
+        # uma inicialização lenta sendo confundida com falha de saúde.
+        startupProbe:
+          httpGet:
+            path: /q/health/started
+            port: 8080
+          periodSeconds: 5
+          failureThreshold: 30
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready
+            port: 8080
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+            port: 8080
+          periodSeconds: 15
+          failureThreshold: 3
         envFrom:
         - configMapRef:
             name: oficina-api-config
@@ -44,3 +66,8 @@ spec:
             secretKeyRef:
               name: oficina-db-app
               key: azure-storage-connection-string
+        - name: NEW_RELIC_LICENSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: oficina-db-app
+              key: new-relic-license-key

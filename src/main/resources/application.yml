@@ -26,6 +26,8 @@ quarkus:
     category:
       "org.hibernate":
         level: WARN
+    console:
+      json: true
 
   # Configurações do Flyway (Migrações)
   flyway:
