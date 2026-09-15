@@ -67,53 +67,58 @@ de deploy já implementados).
 
 ## Monitoramento e Observabilidade
 
-- [x] Integrar uma ferramenta de observabilidade — **New Relic** escolhido
-      (free tier, nativo em OTel, setup mais simples que Datadog pro cluster
-      pequeno atual).
+- [x] Integrar uma ferramenta de observabilidade — **New Relic**. **Validado
+      em produção**: Java Agent conectado em `collector.newrelic.com` no
+      cluster AKS real, reportando dados de verdade.
 - [x] Implementar logs estruturados em JSON com correlação entre requisições
       — extensão `quarkus-logging-json` +
-      [`CorrelationIdFilter`](src/main/java/br/com/fiap/oficina/api/shared/infrastructure/web/CorrelationIdFilter.java)
-      (gera/propaga `X-Correlation-Id`, popula o MDC, loga método+path+status+duração
-      por requisição). **Validado localmente**: JSON válido, `correlationId`
-      aparece no MDC, header devolvido na resposta. Limitação conhecida: não
-      aparece em respostas 401 de autenticação (rejeitadas antes da cadeia de
-      filtros JAX-RS completar) — baixo impacto, não persegui.
+      [`CorrelationIdFilter`](src/main/java/br/com/fiap/oficina/api/shared/infrastructure/web/CorrelationIdFilter.java).
+      **Validado em produção**: `correlationId` aparece no MDC do log real,
+      header devolvido na resposta. Limitação conhecida: não aparece em
+      respostas 401 de autenticação — baixo impacto, não persegui.
 - [x] Monitorar latência das APIs — New Relic Java Agent
-      ([Dockerfile.jvm](src/main/docker/Dockerfile.jvm), baixado na build,
-      anexado via `-javaagent`) instrumenta JAX-RS/JDBC automaticamente.
-      **Validado localmente**: agent carrega, detecta ausência de
-      `NEW_RELIC_LICENSE_KEY` e se desliga sozinho sem derrubar a app — dado
-      real de latência só aparece com uma conta/license key de verdade.
-- [x] Monitorar consumo de recursos do Kubernetes (CPU, memória) — chart Helm
+      ([Dockerfile.jvm](src/main/docker/Dockerfile.jvm)) instrumenta
+      JAX-RS/JDBC automaticamente. **Validado em produção**: widget de
+      latência do dashboard com dado real ao vivo.
+- [x] Monitorar healthchecks e uptime — `startupProbe`/`readinessProbe`/
+      `livenessProbe` em [k8s/app/deployment.yaml](k8s/app/deployment.yaml)
+      (não existiam antes, achado durante a sessão do Gateway). **Validado
+      em produção**: widget "Uptime do Healthcheck" mostrando 100%.
+- [x] Configurar alertas para falhas no processamento de ordens de serviço —
+      `newrelic_alert_policy` + 2 `newrelic_nrql_alert_condition` em
+      [infra/newrelic.tf](infra/newrelic.tf). **Aplicado de verdade** na
+      conta New Relic (`terraform apply`), 4 recursos criados. Canal de
+      notificação por e-mail continua opcional
+      (`TF_VAR_alert_notification_email`).
+- [x] Expor dashboards com volume diário de OS, tempo médio por status e
+      erros/falhas por endpoint — `newrelic_one_dashboard` em
+      [infra/newrelic.tf](infra/newrelic.tf). **Aplicado e validado**:
+      dashboard "Oficina API - Visão Geral" renderizando com dado real
+      (latência, uptime). Link:
+      `one.newrelic.com/redirect/entity/ODUxMzk4OXxWSVp8REFTSEJPQVJEfGRhOjEzMTc0NzA2`
+- [ ] Monitorar consumo de recursos do Kubernetes (CPU, memória) — chart Helm
       oficial `newrelic/nri-bundle`, values em
       [k8s/observability/newrelic-values.yaml](k8s/observability/newrelic-values.yaml).
       Instalação é passo manual (como o `terraform apply`), não entrou no
-      `ci.yml`. **Não testado contra cluster real** (Helm não usado em
-      nenhum outro lugar do projeto; YAML validado só sintaticamente).
-- [x] Monitorar healthchecks e uptime — endpoints `/q/health/{started,live,ready}`
-      já existiam (SmallRye Health) mas **não tinham probes no K8s** (achado
-      durante a sessão do Gateway); adicionei `startupProbe`/`readinessProbe`/
-      `livenessProbe` em [k8s/app/deployment.yaml](k8s/app/deployment.yaml).
-      **Validado localmente**: os 3 endpoints respondem 200.
-- [x] Configurar alertas para falhas no processamento de ordens de serviço —
-      `newrelic_alert_policy` + 2 `newrelic_nrql_alert_condition` (falhas em
-      `/api/ordens`, latência alta) em [infra/newrelic.tf](infra/newrelic.tf).
-      Canal de notificação por e-mail é opcional
-      (`TF_VAR_alert_notification_email`). **Validado com
-      `terraform validate`/`plan`** contra o provider real (schema correto),
-      não aplicado numa conta de verdade.
-- [x] Expor dashboards com volume diário de OS, tempo médio por status
-      (aproximado via latência das transições de status — não são eventos de
-      negócio customizados) e erros/falhas por endpoint —
-      `newrelic_one_dashboard` em [infra/newrelic.tf](infra/newrelic.tf).
-      Mesma ressalva de validação acima.
-- **Pendente geral**: nada disso foi testado contra uma conta New Relic real
-  (não tenho acesso a credenciais) nem contra o cluster AKS — validação foi
-  toda local (docker-compose) + `terraform validate`/`plan` com credenciais
-  fake. Antes de gravar o vídeo de demonstração, alguém com a conta New
-  Relic precisa: (1) setar `NEW_RELIC_LICENSE_KEY` no GitHub Secrets e no
-  cluster, (2) rodar `terraform apply` com `TF_VAR_newrelic_account_id` e
-  `TF_VAR_newrelic_api_key`, (3) instalar o Helm chart no cluster.
+      `ci.yml`. **Ainda não instalado** no cluster — único item pendente
+      desta seção.
+
+**Bugs reais encontrados e corrigidos durante a validação em produção**
+(nenhum deles estava relacionado ao código da observabilidade em si — todos
+eram credenciais dessincronizadas entre Terraform/GitHub Secrets/cluster,
+categoria de bug que já tinha aparecido antes com `DB_APP_PASSWORD`):
+1. `ci.yml` ainda usava `envsubst` sobre YAML pra gerar o `Secret` —
+   corrigido pra `kubectl create secret --from-literal`.
+2. `AZURE_STORAGE_CONNECTION_STRING` desatualizada (Storage Account recriado
+   nesta sessão, secret não acompanhou) — causava 403 no aceite de
+   orçamento, com efeito cascata em 8 testes da collection Newman.
+3. `NEW_RELIC_LICENSE_KEY` no cluster estava com a **User API Key**
+   (`NRAK-...`) em vez da **License Key** (termina em `NRAL`) — o agent
+   tentava conectar num host inexistente derivado da chave errada e nunca
+   reportava dado nenhum.
+4. Query do widget "Uptime do Healthcheck" filtrava por `request.uri` (nunca
+   populado pelas rotas de health do SmallRye) — trocada pra filtrar pelo
+   nome real da transação (`health/ready`).
 
 ## Documentação da Arquitetura
 

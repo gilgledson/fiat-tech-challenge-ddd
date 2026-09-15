@@ -200,7 +200,11 @@ resource "newrelic_one_dashboard" "oficina" {
 
       nrql_query {
         account_id = var.newrelic_account_id
-        query      = "SELECT filter(count(*), WHERE request.uri = '/q/health' AND httpResponseCode = '200') / count(*) * 100 AS 'Uptime %' FROM Transaction WHERE appName = '${var.newrelic_app_name}' SINCE 5 minutes ago"
+        # O readinessProbe do K8s bate em /q/health/ready a cada 10s — a
+        # transação é nomeada "q//health/ready" pelo agent (rota do
+        # SmallRye Health, não um recurso JAX-RS comum, então request.uri
+        # não fica populado aqui; usamos o nome da transação em vez disso).
+        query = "SELECT filter(count(*), WHERE name LIKE '%health/ready%' AND httpResponseCode = '200') / filter(count(*), WHERE name LIKE '%health/ready%') * 100 AS 'Uptime %' FROM Transaction WHERE appName = '${var.newrelic_app_name}' SINCE 5 minutes ago"
       }
     }
   }
