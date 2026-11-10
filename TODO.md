@@ -1,4 +1,48 @@
-# TODO — Tech Challenge Fase 3
+# TODO — Tech Challenge Fase 4
+
+Estado da refatoração para microsserviços (`SOAT - Fase 4 - Tech challenge.pdf`).
+Este repositório virou o **OS Service**; os outros dois serviços estão em
+[oficina-billing-service](https://github.com/gilgledson/oficina-billing-service) e
+[oficina-execution-service](https://github.com/gilgledson/oficina-execution-service).
+
+## Feito
+
+- [x] Três microsserviços, cada um com repositório, banco e pipeline próprios.
+- [x] Banco relacional (PostgreSQL no OS e no Billing) e NoSQL (MongoDB no Execution).
+- [x] Mensageria com RabbitMQ e Saga coreografada, com compensações.
+- [x] Comunicação síncrona só do Billing para o OS Service (`/api/integracao`).
+- [x] Testes unitários e cobertura acima de 80% nos três serviços.
+- [x] SonarCloud no pipeline dos três serviços, opcional: só roda com o
+      `SONAR_TOKEN` configurado. Sem ele, rodar o Sonar localmente e anexar o
+      relatório como evidência.
+
+## Falta
+
+- [ ] **Rodar o fluxo de ponta a ponta** com Postgres, MongoDB e RabbitMQ reais.
+      Até aqui a validação é de compilação e testes unitários.
+- [ ] **Mercado Pago** no Billing Service (hoje o pagamento é confirmado manualmente).
+- [ ] **BDD**: um fluxo completo da OS com Cucumber, incluindo um caminho de falha.
+- [ ] **Secrets e variables** nos três repositórios: SonarCloud, Docker Hub, Azure,
+      New Relic, RabbitMQ e os bancos do Billing e do Execution.
+- [ ] **Proteção da `main`** nos três repositórios (PR obrigatório e checagem do pipeline).
+- [ ] **Provisionar** o database `billing` no Postgres e um MongoDB para o Execution.
+- [ ] **Migrar dados**: orçamentos, funcionários e tempos de execução que estão no
+      banco deste serviço. Só depois remover as tabelas `ORCAMENTO` e
+      `FUNCIONARIOS` e as views de relatório.
+- [ ] **Function de login por CPF**: ela consulta o Postgres direto, o que fere a
+      regra de não acessar o banco de outro serviço. Passar a chamar o OS Service.
+- [ ] **Collection do Postman / Newman**: atualizar para as rotas novas
+      (`/api/execucoes/...`) e para os três serviços.
+- [ ] **Outbox do OS Service**: gravar o evento na mesma transação da OS (hoje é
+      logo depois; ver "Limitação conhecida" no README).
+- [ ] **Rastreamento distribuído**: propagar o `correlationId` nos eventos que
+      saem do OS Service (o Billing e o Execution já propagam).
+- [ ] Evidências de cobertura no README de cada repositório, diagrama final,
+      vídeo e PDF de entrega.
+
+---
+
+# TODO — Tech Challenge Fase 3 (histórico)
 
 Checklist do que ainda falta para atender aos requisitos obrigatórios da Fase 3
 (`13SOAT - Fase 3 - Tech Challenge.pdf`), com base no estado atual do repositório

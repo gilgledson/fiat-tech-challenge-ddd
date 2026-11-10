@@ -1,0 +1,98 @@
+# RabbitMQ da Saga, compartilhado pelo OS Service, Billing Service e Execution
+# Service (exchange "oficina.events"). Fica neste repositório porque o OS
+# Service é o primeiro a ser implantado; é candidato a ir para o repositório de
+# infraestrutura Kubernetes.
+#
+# Instância única com volume persistente: suficiente para o projeto. Em
+# produção de verdade, usar cluster (RabbitMQ Cluster Operator) ou um broker
+# gerenciado.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rabbitmq-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # o volume é ReadWriteOnce: não pode haver dois pods ao mesmo tempo
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3.13-management-alpine
+        ports:
+        - name: amqp
+          containerPort: 5672
+        - name: management
+          containerPort: 15672
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          valueFrom:
+            secretKeyRef:
+              name: oficina-db-app
+              key: rabbitmq-username
+        - name: RABBITMQ_DEFAULT_PASS
+          valueFrom:
+            secretKeyRef:
+              name: oficina-db-app
+              key: rabbitmq-password
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        readinessProbe:
+          exec:
+            command: [ "rabbitmq-diagnostics", "-q", "ping" ]
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          timeoutSeconds: 10
+        livenessProbe:
+          exec:
+            command: [ "rabbitmq-diagnostics", "-q", "ping" ]
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/rabbitmq
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: rabbitmq-data
+---
+# Só dentro do cluster. Para abrir o painel de administração:
+#   kubectl port-forward svc/rabbitmq 15672:15672
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: 5672
+    - name: management
+      port: 15672
+      targetPort: 15672
+  type: ClusterIP

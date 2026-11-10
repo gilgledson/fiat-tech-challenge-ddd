@@ -56,15 +56,37 @@ smallrye:
 oficina:
   webhook:
     aprovacao-secret: ${WEBHOOK_APROVACAO_SECRET:local-dev-secret-trocar-em-producao}
-  storage:
-    # Implementação de armazenamento das assinaturas de aceite de orçamento:
-    # "local" (disco do pod — só serve pra dev, é efêmero) ou "azure" (Azure
-    # Blob Storage, provisionado via infra/storage.tf — padrão de produção).
-    # Ver StorageServiceProducer.
-    type: ${STORAGE_TYPE:local}
-    azure:
-      # Trocar via AZURE_STORAGE_CONNECTION_STRING em produção.
-      # O default abaixo é a connection string pública e bem conhecida do
-      # emulador Azurite — só funciona se o Azurite estiver rodando localmente.
-      connection-string: ${AZURE_STORAGE_CONNECTION_STRING:DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;}
-      container: ${AZURE_STORAGE_CONTAINER:assinaturas}
+  outbox:
+    # Intervalo de entrega dos eventos pendentes da outbox ao RabbitMQ.
+    intervalo: 2s
+
+# Mensageria da Saga (RabbitMQ). A exchange (topic) é compartilhada pelos
+# microsserviços; a fila é do OS Service.
+mp:
+  messaging:
+    # Eventos do Billing Service e do Execution Service que a OS consome.
+    incoming:
+      eventos-externos:
+        connector: smallrye-rabbitmq
+        exchange:
+          name: oficina.events
+          type: topic
+        queue:
+          name: os.eventos
+        routing-keys: billing.orcamento-aceito,billing.orcamento-rejeitado,billing.orcamento-falhou,billing.pagamento-confirmado,execucao.diagnostico-iniciado,execucao.diagnostico-concluido,execucao.iniciada,execucao.servico-iniciado,execucao.servico-finalizado,execucao.concluida,execucao.falhou
+        # Mensagem que falha vai para a fila os.eventos.dlq.
+        failure-strategy: reject
+        auto-bind-dlq: true
+    # Eventos que o OS Service publica (routing key definida por mensagem).
+    outgoing:
+      os-events:
+        connector: smallrye-rabbitmq
+        exchange:
+          name: oficina.events
+          type: topic
+        publish-confirms: true
+
+rabbitmq-host: ${RABBITMQ_HOST:localhost}
+rabbitmq-port: ${RABBITMQ_PORT:5672}
+rabbitmq-username: ${RABBITMQ_USERNAME:guest}
+rabbitmq-password: ${RABBITMQ_PASSWORD:guest}

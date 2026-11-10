@@ -3,7 +3,6 @@ package br.com.fiap.oficina.api.modules.operacional.ordemdeservico.infrastructur
 import br.com.fiap.oficina.api.modules.catalogo.produto.domain.entity.Produto;
 import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.Servico;
 import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.TipoServico;
-import br.com.fiap.oficina.api.modules.operacional.funcionario.domain.entity.Funcionario;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import net.datafaker.Faker;
@@ -19,7 +18,7 @@ public class OrdemServicoFactory {
 
     private static final Faker faker = new Faker();
 
-    public OrdemDeServico create(UUID clienteId, UUID veiculoId, List<Servico> servicosDisponiveis, List<Produto> produtosDisponiveis, List<Funcionario> funcionarios, LocalDateTime dataAbertura) {
+    public OrdemDeServico create(UUID clienteId, UUID veiculoId, List<Servico> servicosDisponiveis, List<Produto> produtosDisponiveis, List<UUID> executores, LocalDateTime dataAbertura) {
         OrdemDeServico os = new OrdemDeServico();
         os.setId(UUID.randomUUID());
         os.setClienteId(clienteId);
@@ -57,10 +56,9 @@ public class OrdemServicoFactory {
             );
             oss.setId(UUID.randomUUID());
 
-            // Define executor aleatório se houver funcionários
-            if (funcionarios != null && !funcionarios.isEmpty()) {
-                Funcionario executor = funcionarios.get(faker.number().numberBetween(0, funcionarios.size()));
-                oss.setUsuarioExecutorId(executor.getUsuarioId());
+            // Define executor aleatório se houver usuários executores
+            if (executores != null && !executores.isEmpty()) {
+                oss.setUsuarioExecutorId(executores.get(faker.number().numberBetween(0, executores.size())));
             }
 
             // Durações variadas (30 min a 6 horas)

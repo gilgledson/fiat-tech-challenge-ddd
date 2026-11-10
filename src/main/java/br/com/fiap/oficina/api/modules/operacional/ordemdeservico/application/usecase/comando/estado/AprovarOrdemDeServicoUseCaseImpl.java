@@ -82,7 +82,14 @@ public class AprovarOrdemDeServicoUseCaseImpl implements AprovarOrdemDeServicoUs
             }
             repository.atualizar(ordem);
 
-            OrdemServicoAprovada event = new OrdemServicoAprovada(ordem.getId());
+            // O evento leva os serviços aprovados: é com eles que o Execution
+            // Service monta a fila de execução.
+            OrdemServicoAprovada event = new OrdemServicoAprovada(ordem.getId(),
+                    ordem.getServicos().stream()
+                            .filter(s -> s.getStatus() == OrdemDeServicoServicoStatus.APROVADO)
+                            .map(s -> new OrdemServicoAprovada.ServicoAprovado(s.getId(), s.getServicoId(),
+                                    s.getNome()))
+                            .toList());
             eventBus.publish(OrdemServicoAprovada.TOPICO, event.toJson());
         } else {
             // Se já estava APROVADA ou EM_EXECUCAO, não muda para REJEITADA (pois há itens
