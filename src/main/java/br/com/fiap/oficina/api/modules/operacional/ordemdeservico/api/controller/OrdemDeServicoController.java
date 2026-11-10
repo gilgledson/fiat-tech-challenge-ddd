@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.util.UUID;
 
@@ -32,24 +31,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrdemDeServicoController {
 
-    private final JsonWebToken jwt;
 
     private final AbrirOrdemDeServicoUseCase abrirOrdemDeServicoUseCase;
     private final BuscarOrdemDeServicoUseCase buscarOrdemDeServicoUseCase;
     private final ListarOrdensDeServicoUseCase listarOrdensDeServicoUseCase;
-    private final IniciarDiagnosticoUseCase iniciarDiagnosticoUseCase;
-    private final ConcluirDiagnosticoUseCase concluirDiagnosticoUseCase;
     private final RejeitarOrcamentoUseCase rejeitarOrcamentoUseCase;
     private final AdicionarServicoOrdemDeServicoUseCase adicionarServicoUseCase;
     private final RemoverProdutoOrdemDeServicoUseCase removerProdutoUseCase;
     private final RemoverServicoOrdemDeServicoUseCase removerServicoUseCase;
-    private final IniciarExecucaoServicoUseCase iniciarExecucaoServicoUseCase;
-    private final FinalizarExecucaoServicoUseCase finalizarExecucaoServicoUseCase;
 
     // UseCases da Máquina de Estados (Task-Based)
     private final AprovarOrdemDeServicoUseCase aprovarOrdemDeServicoUseCase;
-    private final IniciarExecucaoOsUseCase iniciarExecucaoOsUseCase;
-    private final ConcluirExecucaoOrdemDeServicoUseCase concluirExecucaoOrdemDeServicoUseCase;
     private final CancelarOrdemDeServicoUseCase cancelarOrdemDeServicoUseCase;
     private final EntregarVeiculoUseCase entregarVeiculoUseCase;
     private final WebhookAuthValidator webhookAuthValidator;
@@ -125,24 +117,6 @@ public class OrdemDeServicoController {
         return Response.ok(OrdemDeServicoResponse.fromOutput(output)).build();
     }
 
-    @POST
-    @Path("/{id}/iniciar-diagnostico")
-    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
-    @Operation(summary = "Iniciar diagnóstico do veículo")
-    public Response iniciarDiagnostico(@PathParam("id") UUID id) {
-        var output = iniciarDiagnosticoUseCase.executar(id);
-        return Response.ok(OrdemDeServicoResponse.fromOutput(output)).build();
-    }
-
-    @POST
-    @Path("/{id}/concluir-diagnostico")
-    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
-    @Operation(summary = "Concluir diagnóstico e enviar para aprovação do cliente")
-    public Response concluirDiagnostico(@PathParam("id") UUID id) {
-        var output = concluirDiagnosticoUseCase.executar(id);
-        return Response.ok(OrdemDeServicoResponse.fromOutput(output)).build();
-    }
-
     // =======================================================
     // MAQUINA DE ESTADOS (TASK-BASED REST) E CANCELAMENTO
     // =======================================================
@@ -180,48 +154,6 @@ public class OrdemDeServicoController {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
         aprovarOrdemDeServicoUseCase.executar(id, request);
-        return Response.noContent().build();
-    }
-
-    @POST
-    @Path("/{id}/iniciar-execucao")
-    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
-    @Operation(summary = "Mudar status para Em Execução (Carro no elevador)")
-    public Response iniciarExecucao(@PathParam("id") UUID id) {
-        iniciarExecucaoOsUseCase.executar(id);
-        return Response.noContent().build();
-    }
-
-    @POST
-    @Path("/{id}/concluir-execucao")
-    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
-    @Operation(summary = "Concluir Execucao da Ordem de Servico (Pronto para orcamento)")
-    public Response concluirExecucao(@PathParam("id") UUID id) {
-        concluirExecucaoOrdemDeServicoUseCase.executar(id);
-        return Response.noContent().build();
-    }
-
-    @POST
-    @Path("/{id}/servicos/{servicoId}/iniciar-execucao")
-    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
-    @Operation(summary = "Iniciar execução de um serviço específico")
-    public Response iniciarExecucaoServico(
-            @PathParam("id") UUID id,
-            @PathParam("servicoId") UUID servicoId) {
-        String usuarioIdStr = jwt.getClaim("usuario_id");
-        UUID usuarioId = usuarioIdStr != null ? UUID.fromString(usuarioIdStr) : null;
-        iniciarExecucaoServicoUseCase.executar(id, servicoId, usuarioId);
-        return Response.noContent().build();
-    }
-
-    @POST
-    @Path("/{id}/servicos/{servicoId}/finalizar-execucao")
-    @RolesAllowed({ PerfilUsuario.Constants.ADMIN, PerfilUsuario.Constants.MECANICO })
-    @Operation(summary = "Finalizar execução de um serviço específico")
-    public Response finalizarExecucaoServico(
-            @PathParam("id") UUID id,
-            @PathParam("servicoId") UUID servicoId) {
-        finalizarExecucaoServicoUseCase.executar(id, servicoId);
         return Response.noContent().build();
     }
 

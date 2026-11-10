@@ -13,6 +13,7 @@
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
     <quarkus.platform.version>3.15.1</quarkus.platform.version>
     <skipITs>true</skipITs>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     <surefire-plugin.version>3.5.4</surefire-plugin.version>
   </properties>
   <dependencyManagement>
@@ -126,17 +127,11 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-qute</artifactId>
+      <artifactId>quarkus-messaging-rabbitmq</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.xhtmlrenderer</groupId>
-      <artifactId>flying-saucer-pdf-openpdf</artifactId>
-      <version>9.1.22</version>
-    </dependency>
-    <dependency>
-      <groupId>com.azure</groupId>
-      <artifactId>azure-storage-blob</artifactId>
-      <version>12.30.0</version>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-scheduler</artifactId>
     </dependency>
   </dependencies>
   <build>
@@ -242,7 +237,6 @@
             <!-- seeders/factories de dados fictícios: fora da métrica de cobertura -->
             <exclude>**/seeder/**</exclude>
             <exclude>**/infrastructure/gateway/**</exclude>
-            <exclude>**/infrastructure/storage/**</exclude>
             <exclude>**/infrastructure/security/**</exclude>
           </excludes>
         </configuration>

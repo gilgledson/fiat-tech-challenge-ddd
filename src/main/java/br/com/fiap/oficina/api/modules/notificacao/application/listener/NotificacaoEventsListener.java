@@ -4,9 +4,6 @@ import br.com.fiap.oficina.api.modules.notificacao.application.gateway.Operacion
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.dto.NotificacaoSnapshotDTO;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.gateway.NotificacaoGateway;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.event.*;
-import br.com.fiap.oficina.api.modules.orcamento.application.event.OrcamentoAceitoEvent;
-import br.com.fiap.oficina.api.modules.orcamento.application.event.OrcamentoPagoEvent;
-import br.com.fiap.oficina.api.modules.orcamento.application.event.OrcamentoRejeitadoEvent;
 import io.quarkus.vertx.ConsumeEvent;
 import io.smallrye.common.annotation.Blocking;
 import io.vertx.core.json.JsonObject;
@@ -49,7 +46,7 @@ public class NotificacaoEventsListener {
         ));
     }
 
-    @ConsumeEvent(OrcamentoAceitoEvent.TOPICO)
+    @ConsumeEvent(EventosExternos.ORCAMENTO_ACEITO)
     @Blocking
     public void onOrcamentoAceito(JsonObject json) {
         UUID osId = UUID.fromString(json.getString("ordemServicoId"));
@@ -77,7 +74,7 @@ public class NotificacaoEventsListener {
         ));
     }
 
-    @ConsumeEvent(OrcamentoPagoEvent.TOPICO)
+    @ConsumeEvent(EventosExternos.ORCAMENTO_PAGO)
     @Blocking
     public void onOrcamentoPago(JsonObject json) {
         UUID osId = UUID.fromString(json.getString("ordemServicoId"));
@@ -120,7 +117,7 @@ public class NotificacaoEventsListener {
         }
     }
 
-    @ConsumeEvent(OrcamentoRejeitadoEvent.TOPICO)
+    @ConsumeEvent(EventosExternos.ORCAMENTO_REJEITADO)
     @Blocking
     public void onOrcamentoRejeitado(JsonObject json) {
         UUID osId = UUID.fromString(json.getString("ordemServicoId"));

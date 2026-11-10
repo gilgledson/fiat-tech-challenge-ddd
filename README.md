@@ -10,6 +10,7 @@
 
 ## 📋 Sumário
 
+- [Fase 4 — Microsserviços e Saga](#-fase-4--microsserviços-e-saga)
 - [Sobre o Projeto](#-sobre-o-projeto)
 - [Arquitetura](#-arquitetura)
 - [Módulos](#-módulos)
@@ -24,6 +25,84 @@
 - [Endpoints](#-endpoints)
 - [Testes](#-testes)
 - [Cobertura de Código](#-cobertura-de-código)
+
+---
+
+## 🧩 Fase 4 — Microsserviços e Saga
+
+Na Fase 4 a aplicação foi dividida em três microsserviços, cada um com repositório, banco e pipeline próprios. **Este repositório passou a ser o OS Service.**
+
+| Serviço | Repositório | Banco | Responsabilidade |
+|---|---|---|---|
+| **OS Service** | este | PostgreSQL | Abertura, itens, status e histórico da OS; clientes, veículos, catálogo, estoque e login |
+| **Billing Service** | [oficina-billing-service](https://github.com/gilgledson/oficina-billing-service) | PostgreSQL | Orçamento, aceite com assinatura e pagamento |
+| **Execution Service** | [oficina-execution-service](https://github.com/gilgledson/oficina-execution-service) | MongoDB | Fila de diagnóstico e execução, tempos, relatórios e funcionários |
+
+```mermaid
+flowchart LR
+    GW[API Gateway<br/>Traefik]
+    GW --> OS[OS Service]
+    GW -->|/api/orcamentos| B[Billing Service]
+    GW -->|/api/execucoes<br/>/api/relatorios<br/>/api/funcionarios| E[Execution Service]
+    OS --> PG1[(PostgreSQL)]
+    B --> PG2[(PostgreSQL)]
+    E --> MG[(MongoDB)]
+    OS <-->|os.*| MQ{{RabbitMQ<br/>exchange oficina.events}}
+    B <-->|billing.*| MQ
+    E <-->|execucao.*| MQ
+    B -.->|REST /api/integracao| OS
+```
+
+### Por que essa divisão
+
+- **OS Service** ficou com o agregado `OrdemDeServico` inteiro (itens, preços e reserva de estoque), porque essas regras mudam juntas e parti-las exigiria transações distribuídas a cada item adicionado.
+- **Billing** foi separado porque orçamento e pagamento têm ciclo próprio e vão integrar com um provedor externo de pagamento.
+- **Execution** foi separado porque a fila da oficina e os tempos de execução são dados de outra natureza (um documento por OS, com histórico), usados pelos mecânicos e pelos relatórios.
+
+Nenhum serviço acessa o banco de outro. A única chamada síncrona é do Billing para o OS Service, para montar o PDF do orçamento.
+
+### Saga coreografada
+
+O fluxo da OS é uma **Saga coreografada** sobre RabbitMQ: não há orquestrador central; cada serviço reage aos eventos dos outros e publica os seus.
+
+A escolha foi pela coreografia porque o monólito já funcionava por eventos entre módulos (barramento em memória), então trocar o barramento por um broker preservou o desenho e os testes. Com três serviços e um fluxo linear, um orquestrador seria mais um componente para implantar e manter no ar. O custo é que o fluxo não está escrito em um único lugar: a tabela abaixo é essa documentação, e o `correlationId` permite seguir uma OS pelos logs dos três serviços.
+
+| Passo | Evento | Quem publica | Quem reage e o que faz |
+|---|---|---|---|
+| 1 | `os.aberta` | OS | Execution coloca a OS na fila de diagnóstico |
+| 2 | `execucao.diagnostico-iniciado` | Execution | OS passa para `EM_DIAGNOSTICO` |
+| 3 | `execucao.diagnostico-concluido` | Execution | OS passa para `AGUARDANDO_APROVACAO` |
+| 4 | `os.diagnostico-concluido` | OS | Billing gera o orçamento (`billing.orcamento-gerado`) |
+| 5 | `billing.orcamento-aceito` | Billing | OS aprova os serviços aceitos e passa para `APROVADA` |
+| 6 | `os.aprovada` | OS | Execution coloca a OS na fila de execução |
+| 7 | `execucao.iniciada`, `execucao.servico-iniciado`, `execucao.servico-finalizado` | Execution | OS acompanha: `EM_EXECUCAO` e status de cada serviço |
+| 8 | `execucao.concluida` | Execution | OS baixa o estoque e passa para `AGUARDANDO_PAGAMENTO` |
+| 9 | `os.execucao-concluida` | OS | Billing atualiza o orçamento com o valor final |
+| 10 | `billing.pagamento-confirmado` | Billing | OS passa para `PAGA` e pode ser entregue |
+
+Compensações (rollback):
+
+| Falha | Evento | O que é desfeito |
+|---|---|---|
+| Cliente rejeita o orçamento | `billing.orcamento-rejeitado` | OS libera o estoque reservado e vai para `REJEITADA`; Execution tira a OS da fila |
+| Billing não consegue gerar o orçamento | `billing.orcamento-falhou` | OS libera o estoque e é cancelada; Execution tira a OS da fila |
+| Oficina não consegue concluir a OS | `execucao.falhou` | OS libera o estoque e é cancelada; Billing cancela o orçamento |
+| OS cancelada pelo atendente ou por qualquer falha acima | `os.cancelada` | Billing cancela o orçamento (sinalizando estorno se já estava pago); Execution tira a OS da fila |
+
+### Como o OS Service participa
+
+- **Publicação:** os casos de uso continuam publicando no barramento interno (Vert.x EventBus), como antes. O `EventosIntegracaoBridge` grava na tabela `outbox_evento` os eventos que interessam aos outros serviços, e o `OutboxRelay` os entrega ao RabbitMQ, só marcando como publicados depois da confirmação do broker.
+- **Consumo:** o `EventosExternosConsumer` lê a fila `os.eventos` e entrega ao `SagaEventosListener`, que aplica cada passo só se a OS estiver no status esperado. Assim, mensagem repetida ou atrasada é ignorada. Mensagem que falha vai para `os.eventos.dlq`.
+- **Limitação conhecida:** a gravação na outbox acontece logo depois da gravação da OS, não na mesma transação. Se o processo cair entre as duas, o evento se perde. No Billing e no Execution a outbox é gravada junto com o dado.
+
+### O que mudou neste repositório
+
+- Saíram os módulos `orcamento`, `relatorios` e `operacional/funcionario`, com suas rotas (`/api/orcamentos`, `/api/relatorios`, `/api/funcionarios`).
+- Saíram de `/api/ordens/{id}` as rotas de diagnóstico e execução (`iniciar-diagnostico`, `concluir-diagnostico`, `iniciar-execucao`, `concluir-execucao` e as de serviço). Elas agora são comandadas em `/api/execucoes/{osId}/...` no Execution Service.
+- Entrou `/api/integracao/*`, usada pelo Billing.
+- As tabelas `ORCAMENTO` e `FUNCIONARIOS` e as views de relatório continuam no banco até os dados serem migrados para os novos serviços.
+
+> As seções abaixo que falam de orçamento em PDF, armazenamento de assinatura, relatórios e funcionários descrevem as Fases 1 a 3. Hoje essas partes vivem no Billing Service e no Execution Service.
 
 ---
 
@@ -67,10 +146,9 @@ src/main/java/.../modules/<contexto>/<agregado>/
 | `catalogo` | `produto`, `servico` |
 | `atendimento` | `cliente`, `veiculo` |
 | `identidade` | *(autenticação via JWT)* |
-| `operacional` | `ordemdeservico`, `funcionario` |
-| `orcamento` | `orcamento` |
+| `operacional` | `ordemdeservico` |
 | `notificacao` | `envio de mensagens` |
-| `relatorios` | `métricas operacionais` |
+| `integracao` | *(dados da OS para o Billing Service)* |
 
 ---
 
@@ -94,19 +172,11 @@ src/main/java/.../modules/<contexto>/<agregado>/
 
 | Recurso | Descrição |
 |---|---|
-| **Ordem de Serviço** | Ciclo de vida completo (Diagnóstico -> Execução -> Entrega) com controle de esforço e itens |
-| **Funcionário** | Cadastro de mecânicos e atendentes vinculados a usuários do sistema |
+| **Ordem de Serviço** | Ciclo de vida completo (Diagnóstico -> Execução -> Entrega) com controle de itens; o andamento na oficina vem do Execution Service por eventos |
 
-### 💰 Orçamento
+> Orçamento, relatórios e funcionários saíram deste serviço na Fase 4 (ver [Fase 4](#-fase-4--microsserviços-e-saga)).
 
-| Recurso | Descrição |
-|---|---|
-| **Orçamento** | Geração de orçamentos em PDF (Qute), aprovação manual com assinatura e gestão de faturamento |
-
-### 📊 Relatórios
-
-| Recurso | Descrição |
-|---|---|
+---|---|
 | **Esforço por OS** | Cálculo automático do tempo total de intervenção (minutos) em cada Ordem de Serviço finalizada |
 | **Tempo Médio** | Média histórica de execução de cada tipo de serviço para otimização de agenda e custos |
 
@@ -352,7 +422,8 @@ Depois que o AKS existe (via Terraform, passo anterior), a aplicação é implan
 | `AZURE_CREDENTIALS` | Autenticação no Azure (`azure/login`) |
 | `DB_APP_USERNAME` / `DB_APP_PASSWORD` | Credenciais que a API usa para conectar no Postgres Flexible Server (injetadas no `Secret` do K8s) |
 | `WEBHOOK_APROVACAO_SECRET` | Secret do endpoint `/api/ordens/{id}/aprovacao-externa` |
-| `AZURE_STORAGE_CONNECTION_STRING` | Connection string do Storage Account (assinaturas de orçamento) — saída sensível `storage_connection_string` do Terraform |
+| `RABBITMQ_USERNAME` / `RABBITMQ_PASSWORD` | Usuário e senha do RabbitMQ: usados para criar o broker no cluster e pela API para conectar nele |
+| `SONAR_TOKEN` | Token do SonarCloud (análise de qualidade no CI); requer também as variables `SONAR_ORGANIZATION` e `SONAR_PROJECT_KEY` |
 | `NEW_RELIC_LICENSE_KEY` | License key do New Relic (APM) — injetada no `Secret` do K8s e lida pelo New Relic Java Agent |
 
 > Os manifestos em `k8s/app/secret.yaml` usam placeholders `${...}` — a pipeline os preenche via `envsubst` antes do apply. **Nunca** commitar os valores reais no lugar dos placeholders.
@@ -368,7 +439,8 @@ kubectl create secret generic oficina-db-app \
   --from-literal=username=adminuser \
   --from-literal=password="sua-senha" \
   --from-literal=webhook-aprovacao-secret="seu-secret" \
-  --from-literal=azure-storage-connection-string="sua-connection-string" \
+  --from-literal=rabbitmq-username="usuario-do-rabbitmq" \
+  --from-literal=rabbitmq-password="senha-do-rabbitmq" \
   --from-literal=new-relic-license-key="sua-license-key" \
   --dry-run=client -o yaml | kubectl apply -f -
 
@@ -543,29 +615,19 @@ A documentação interativa completa está disponível no Swagger UI após subir
 | `POST` | `/api/ordens` | Abrir nova OS (cliente, veículo e, opcionalmente, serviços/peças já identificados) | `ADMIN`, `ATENDENTE` |
 | `GET` | `/api/ordens/{id}` | Detalhes da OS | `ADMIN`, `MECANICO`, `ATENDENTE`, `CLIENTE` |
 | `POST` | `/api/ordens/{id}/servicos` | Adicionar serviço à OS (quando não informado já na abertura) | `ADMIN`, `MECANICO` |
-| `POST` | `/api/ordens/{id}/iniciar-diagnostico` | Iniciar diagnóstico | `ADMIN`, `MECANICO` |
-| `POST` | `/api/ordens/{id}/concluir-diagnostico` | Finalizar diagnóstico | `ADMIN`, `MECANICO` |
 | `POST` | `/api/ordens/{id}/aprovar` | Aprovar orçamento | `ADMIN`, `ATENDENTE`, `CLIENTE` |
 | `POST` | `/api/ordens/{id}/aprovacao-externa` | Webhook para aprovação/recusa externa do orçamento (ex: portal do cliente, gateway de pagamento). Autenticado por secret compartilhado no header `X-Webhook-Secret`, **não** por JWT de usuário. | *(sem role — auth por secret)* |
-| `POST` | `/api/ordens/{id}/iniciar-execucao` | Iniciar execução (OS) | `ADMIN`, `MECANICO` |
-| `POST` | `/api/ordens/{id}/concluir-execucao` | Concluir execução (OS) | `ADMIN`, `MECANICO` |
 | `POST` | `/api/ordens/{id}/entregar` | Entrega do veículo | `ADMIN`, `ATENDENTE` |
 
-### Orçamentos
+> Diagnóstico e execução são comandados no Execution Service (`/api/execucoes/{osId}/...`); orçamentos (`/api/orcamentos`), relatórios (`/api/relatorios`) e funcionários (`/api/funcionarios`) também saíram daqui. O API Gateway roteia cada prefixo para o serviço certo.
+
+### Integração (uso do Billing Service)
 
 | Método | Endpoint | Descrição | Roles |
 |---|---|---|---|
-| `GET` | `/api/orcamentos/{id}` | Baixar orçamento (PDF) | `ADMIN`, `ATENDENTE` |
-| `POST` | `/api/orcamentos/{id}/aceitar` | Aceitar com assinatura (Base64) | `ADMIN`, `ATENDENTE` |
-| `POST` | `/api/orcamentos/{id}/confirmar-pagamento` | Baixa financeira | `ADMIN`, `ATENDENTE` |
-| `GET` | `/api/orcamentos/ordem-servico/{id}/json` | Dados do orçamento | `ADMIN`, `ATENDENTE` |
-
-### Relatórios
-
-| Método | Endpoint | Descrição | Roles |
-|---|---|---|---|
-| `GET` | `/api/relatorios/esforco-os/{osId}` | Esforço total de uma OS específica | `ADMIN`, `MECANICO` |
-| `GET` | `/api/relatorios/tempo-medio-servicos` | Média histórica de tempo por serviço | `ADMIN` |
+| `GET` | `/api/integracao/ordens/{id}/orcamento` | Itens aprovados e valor total da OS | `ADMIN`, `ATENDENTE` |
+| `GET` | `/api/integracao/clientes/{id}` | Dados do cliente para o orçamento | `ADMIN`, `ATENDENTE` |
+| `GET` | `/api/integracao/veiculos/{id}` | Dados do veículo para o orçamento | `ADMIN`, `ATENDENTE` |
 
 ### Paginação
 

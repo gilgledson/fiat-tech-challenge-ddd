@@ -31,6 +31,27 @@ services:
       - oficina-network
 
   # 2. A sua API Quarkus
+  # Broker da Saga. Os microsserviços usam a mesma exchange (oficina.events).
+  # Painel: http://localhost:15672 (oficina/oficina)
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: oficina-rabbitmq
+    environment:
+      # O usuário padrão "guest" só é aceito a partir de localhost; os
+      # serviços conectam de outros containers, então usam este.
+      - RABBITMQ_DEFAULT_USER=oficina
+      - RABBITMQ_DEFAULT_PASS=oficina
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - oficina-network
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   oficina-api:
     build:
       context: .
@@ -44,10 +65,14 @@ services:
       - DB_USERNAME=postgres
       - DB_PASSWORD=postgres
       - QUARKUS_PROFILE=dev
-      - STORAGE_TYPE=local
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=oficina
+      - RABBITMQ_PASSWORD=oficina
     depends_on:
       postgres-db:
         condition: service_healthy # Só sobe a API se o banco estiver 100% pronto
+      rabbitmq:
+        condition: service_healthy
     networks:
       - oficina-network
 

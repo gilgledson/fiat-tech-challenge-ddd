@@ -61,11 +61,16 @@ spec:
             secretKeyRef:
               name: oficina-db-app
               key: webhook-aprovacao-secret
-        - name: AZURE_STORAGE_CONNECTION_STRING
+        - name: RABBITMQ_USERNAME
           valueFrom:
             secretKeyRef:
               name: oficina-db-app
-              key: azure-storage-connection-string
+              key: rabbitmq-username
+        - name: RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: oficina-db-app
+              key: rabbitmq-password
         - name: NEW_RELIC_LICENSE_KEY
           valueFrom:
             secretKeyRef:

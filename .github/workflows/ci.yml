@@ -18,6 +18,8 @@ jobs:
     steps:
     - name: 1. Baixar o código do repositório
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # o SonarCloud precisa do histórico para atribuir as linhas
 
     - name: 2. Configurar o Java (JDK 17)
       uses: actions/setup-java@v4
@@ -26,8 +28,22 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: 3. Rodar Testes e Gerar Relatório JaCoCo
-      run: mvn clean test
+    # verify = testes + relatório JaCoCo + falha se a cobertura de linhas
+    # ficar abaixo de 80% (regra do JaCoCo no pom.xml).
+    - name: 3. Rodar Testes, Gerar Relatório JaCoCo e Exigir 80% de Cobertura
+      run: mvn -B clean verify
+
+    # Requer o secret SONAR_TOKEN e as variables SONAR_ORGANIZATION e
+    # SONAR_PROJECT_KEY configurados no repositório.
+    - name: 3.5. Análise de Qualidade (SonarCloud)
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }} \
+          -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
+          -Dsonar.qualitygate.wait=true
 
     - name: 4. Ler o JaCoCo e Gerar a Medalha (Badge)
       id: jacoco
@@ -100,14 +116,16 @@ jobs:
         DB_APP_USERNAME: ${{ secrets.DB_APP_USERNAME }}
         DB_APP_PASSWORD: ${{ secrets.DB_APP_PASSWORD }}
         WEBHOOK_APROVACAO_SECRET: ${{ secrets.WEBHOOK_APROVACAO_SECRET }}
-        AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+        RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
         NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
       run: |
         kubectl create secret generic oficina-db-app \
           --from-literal=username="$DB_APP_USERNAME" \
           --from-literal=password="$DB_APP_PASSWORD" \
           --from-literal=webhook-aprovacao-secret="$WEBHOOK_APROVACAO_SECRET" \
-          --from-literal=azure-storage-connection-string="$AZURE_STORAGE_CONNECTION_STRING" \
+          --from-literal=rabbitmq-username="$RABBITMQ_USERNAME" \
+          --from-literal=rabbitmq-password="$RABBITMQ_PASSWORD" \
           --from-literal=new-relic-license-key="$NEW_RELIC_LICENSE_KEY" \
           --dry-run=client -o yaml > k8s/app/secret.yaml
 
@@ -120,6 +138,13 @@ jobs:
           k8s/gateway/ingressclass.yaml
           k8s/gateway/deployment.yaml
           k8s/gateway/service.yaml
+
+    # Broker compartilhado pelos três microsserviços. Usa as credenciais do
+    # Secret oficina-db-app, aplicado no passo seguinte junto com a aplicação.
+    - name: 8.5. Deploy do RabbitMQ (mensageria da Saga) no Kubernetes (AKS)
+      run: |
+        kubectl apply -f k8s/app/secret.yaml
+        kubectl apply -f k8s/messaging/rabbitmq.yaml
 
     - name: 9. Deploy no Kubernetes (AKS)
       uses: Azure/k8s-deploy@v5

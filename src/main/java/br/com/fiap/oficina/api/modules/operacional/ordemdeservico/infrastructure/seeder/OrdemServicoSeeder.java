@@ -8,8 +8,6 @@ import br.com.fiap.oficina.api.modules.catalogo.produto.application.repository.P
 import br.com.fiap.oficina.api.modules.catalogo.produto.domain.entity.Produto;
 import br.com.fiap.oficina.api.modules.catalogo.servico.application.repository.ServicoRepository;
 import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.Servico;
-import br.com.fiap.oficina.api.modules.operacional.funcionario.application.repository.FuncionarioRepository;
-import br.com.fiap.oficina.api.modules.operacional.funcionario.domain.entity.Funcionario;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.application.repository.OrdemDeServicoRepository;
 import br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity.OrdemDeServico;
 import br.com.fiap.oficina.api.shared.infrastructure.seeder.Seeder;
@@ -33,12 +31,12 @@ public class OrdemServicoSeeder implements Seeder {
     private final VeiculoRepository veiculoRepository;
     private final ProdutoRepository produtoRepository;
     private final ServicoRepository servicoRepository;
-    private final FuncionarioRepository funcionarioRepository;
 
     @Override
     public int ordem() {
         // Depende de clientes/veículos (AtendimentoSeeder), produtos/serviços
-        // (CatalogoSeeder) e funcionários (FuncionarioSeeder) já existirem.
+        // (CatalogoSeeder) já existirem. Os funcionários agora vivem no Execution
+        // Service, então as OS de exemplo são geradas sem executor.
         return 100;
     }
 
@@ -52,7 +50,6 @@ public class OrdemServicoSeeder implements Seeder {
             List<Cliente> clientes = clienteRepository.listarTodos(0, 50, false).itens();
             List<Produto> produtos = produtoRepository.listarTodos(0, 100, false).itens();
             List<Servico> servicos = servicoRepository.listarTodos(0, 100, false).itens();
-            List<Funcionario> funcionarios = funcionarioRepository.listarTodos(0, 50, false).itens();
 
             if (clientes.isEmpty() || produtos.isEmpty() || servicos.isEmpty()) {
                 return;
@@ -80,7 +77,7 @@ public class OrdemServicoSeeder implements Seeder {
                     veiculo.getId(), 
                     servicos, 
                     produtos, 
-                    funcionarios, 
+                    List.of(), 
                     dataAbertura
                 );
                 
