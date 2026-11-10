@@ -1,0 +1,437 @@
+newman
+
+Oficina - Fluxo Completo OS (Microsserviços)
+
+❏ Identidade
+↳ 0. Login Admin
+  POST http://gateway/api/usuarios/login [200 OK, 1.62kB, 86ms]
+  ✓  Login Admin Sucesso
+
+↳ 1. Criar Usuário
+  POST http://gateway/api/usuarios [201 Created, 416B, 61ms]
+  ✓  Usuário Criado
+
+↳ 1.1. Login Novo Usuário
+  POST http://gateway/api/usuarios/login [200 OK, 1.63kB, 61ms]
+  ✓  Login Novo Usuário Sucesso
+
+❏ Atendimento
+↳ 2. Criar Cliente
+  POST http://gateway/api/clientes [201 Created, 603B, 6ms]
+  ✓  Cliente Criado
+
+↳ 3. Criar Veículo
+  POST http://gateway/api/veiculos [201 Created, 402B, 5ms]
+  ✓  Veículo Criado
+
+❏ Catálogo
+↳ 4. Criar Produto (Estoque)
+  POST http://gateway/api/produtos [201 Created, 462B, 4ms]
+  ✓  Produto Criado
+
+↳ 5. Criar Serviço
+  POST http://gateway/api/servicos [201 Created, 391B, 4ms]
+  ✓  Serviço Criado
+
+↳ 5.1. Criar Serviço Corretivo
+  POST http://gateway/api/servicos [201 Created, 382B, 4ms]
+  ✓  Serviço Corretivo Criado
+
+❏ Operacional e Execução
+↳ 1.2. Criar Funcionário
+  POST http://gateway/api/funcionarios [201 Created, 468B, 6ms]
+  ✓  Funcionário Criado
+
+↳ 6. Abrir Ordem de Serviço
+  POST http://gateway/api/ordens [201 Created, 560B, 6ms]
+  ✓  OS Aberta
+
+↳ 6.1. Iniciar Diagnóstico
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/iniciar-diagnostico [404 Not Found, 396B, 4ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 6.1. Iniciar Diagnóstico
+
+↳ 6.1. Iniciar Diagnóstico
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/iniciar-diagnostico [200 OK, 711B, 14ms]
+  ✓  Comando aceito pelo Execution Service
+  ✓  Fase da execução: EM_DIAGNOSTICO
+
+↳ 8. Adicionar Serviço à OS
+  POST http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos [200 OK, 1.04kB, 13ms]
+  ✓  Serviço Adicionado
+
+↳ 7.1. Verificar Reserva de Estoque
+  GET http://gateway/api/produtos/9d58fc36-a063-442d-ab43-5a350146ab0b [200 OK, 464B, 4ms]
+  ✓  Estoque Reservado com Sucesso
+  ✓  Estoque Físico Mantido
+
+↳ 8.1. Adicionar Serviço Corretivo à OS
+  POST http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos [200 OK, 1.37kB, 8ms]
+  ✓  Serviço Corretivo Adicionado
+
+↳ 9. Concluir Diagnóstico
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/concluir-diagnostico [200 OK, 854B, 6ms]
+  ✓  Comando aceito pelo Execution Service
+  ✓  Fase da execução: AGUARDANDO_APROVACAO
+
+↳ 9.1. Obter Orcamento por OS ID (JSON)
+  GET http://gateway/api/orcamentos/ordem-servico/06cd1414-f83f-4482-ac6f-612b10537cbd/json [404 Not Found, 410B, 5ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 9.1. Obter Orcamento por OS ID (JSON)
+
+↳ 9.1. Obter Orcamento por OS ID (JSON)
+  GET http://gateway/api/orcamentos/ordem-servico/06cd1414-f83f-4482-ac6f-612b10537cbd/json [404 Not Found, 410B, 8ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 9.1. Obter Orcamento por OS ID (JSON)
+
+↳ 9.1. Obter Orcamento por OS ID (JSON)
+  GET http://gateway/api/orcamentos/ordem-servico/06cd1414-f83f-4482-ac6f-612b10537cbd/json [200 OK, 467B, 7ms]
+  ✓  Orçamento gerado pelo Billing após o diagnóstico
+  ✓  Valor do Orçamento
+
+↳ 9.2. Aceitar Orçamento Manualmente (Assinatura)
+  POST http://gateway/api/orcamentos/cd995f32-0658-45d2-aa5f-52db1ed42e91/aceitar [200 OK, 327B, 9ms]
+  ✓  Aceite Manual Sucesso
+
+↳ 10. Validar Bloqueio Rejeição Corretivo
+  POST http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd/aprovar [400 Bad Request, 389B, 5ms]
+  ✓  Deve retornar erro ao rejeitar corretivo
+  ✓  Mensagem de erro contém 'corretivo'
+
+↳ 10.1. Validar Status da OS (Aprovada Automaticamente)
+  GET http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd [200 OK, 1.39kB, 4ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 10.1. Validar Status da OS (Aprovada Automaticamente)
+
+↳ 10.1. Validar Status da OS (Aprovada Automaticamente)
+  GET http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd [200 OK, 1.37kB, 9ms]
+  ✓  OS deve estar APROVADA
+  ✓  Serviços devem estar APROVADOS
+
+↳ 11. Iniciar Execução OS
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/iniciar-execucao [409 Conflict, 417B, 7ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 11. Iniciar Execução OS
+
+↳ 11. Iniciar Execução OS
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/iniciar-execucao [200 OK, 1.45kB, 6ms]
+  ✓  Comando aceito pelo Execution Service
+  ✓  Fase da execução: EM_EXECUCAO
+
+↳ 12. Iniciar Execução do Serviço
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos/dcc9e793-b3ed-48df-86fa-731dca77d3bf/iniciar [200 OK, 1.5kB, 6ms]
+  ✓  Serviço iniciado
+
+↳ 13. Finalizar Execução do Serviço
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos/dcc9e793-b3ed-48df-86fa-731dca77d3bf/finalizar [200 OK, 1.52kB, 6ms]
+  ✓  Serviço finalizado
+
+↳ 13.1. Iniciar Execução do Serviço Corretivo
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos/f68ef2ef-52ff-4cc4-b17c-b0456084c88e/iniciar [200 OK, 1.58kB, 5ms]
+  ✓  Serviço corretivo iniciado
+
+↳ 13.2. Finalizar Execução do Serviço Corretivo
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos/f68ef2ef-52ff-4cc4-b17c-b0456084c88e/finalizar [200 OK, 1.6kB, 6ms]
+  ✓  Serviço corretivo finalizado
+
+↳ 13.2.1. Aguardar OS Refletir a Execução dos Serviços
+  GET http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd [200 OK, 1.37kB, 5ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 13.2.1. Aguardar OS Refletir a Execução dos Serviços
+
+↳ 13.2.1. Aguardar OS Refletir a Execução dos Serviços
+  GET http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd [200 OK, 1.58kB, 16ms]
+  ✓  OS Service recebeu os eventos do Execution: OS em execução
+  ✓  Os dois serviços aparecem como FINALIZADO na OS
+
+↳ 13.3. Adicionar Serviço Extra (Em Execução)
+  POST http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos [200 OK, 1.92kB, 15ms]
+  ✓  Serviço Extra Adicionado com Sucesso
+
+↳ 13.4. Validar Bloqueio Início Sem Aprovação
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos/f620b6a0-da68-40d3-bcfc-68bab21a2a31/iniciar [400 Bad Request, 378B, 7ms]
+  ✓  Deve bloquear início de serviço extra sem aprovação
+  ✓  Mensagem de erro cita os serviços aprovados
+
+↳ 13.5. Aprovar Serviço Extra
+  POST http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd/aprovar [204 No Content, 166B, 7ms]
+  ✓  Aprovação de serviço extra sucesso
+
+↳ 13.6. Iniciar Execução do Serviço Extra
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos/f620b6a0-da68-40d3-bcfc-68bab21a2a31/iniciar [400 Bad Request, 378B, 4ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 13.6. Iniciar Execução do Serviço Extra
+
+↳ 13.6. Iniciar Execução do Serviço Extra
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos/f620b6a0-da68-40d3-bcfc-68bab21a2a31/iniciar [200 OK, 1.86kB, 17ms]
+  ✓  Serviço extra iniciado após a aprovação chegar ao Execution
+
+↳ 13.7. Finalizar Execução do Serviço Extra
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/servicos/f620b6a0-da68-40d3-bcfc-68bab21a2a31/finalizar [200 OK, 1.88kB, 7ms]
+  ✓  Serviço extra finalizado
+
+↳ 14. Finalizar OS (Baixa Estoque)
+  POST http://gateway/api/execucoes/06cd1414-f83f-4482-ac6f-612b10537cbd/concluir-execucao [200 OK, 2.01kB, 5ms]
+  ✓  Comando aceito pelo Execution Service
+  ✓  Fase da execução: CONCLUIDA
+
+↳ 15. Verificar Estoque Final
+  GET http://gateway/api/produtos/9d58fc36-a063-442d-ab43-5a350146ab0b [200 OK, 464B, 4ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 15. Verificar Estoque Final
+
+↳ 15. Verificar Estoque Final
+  GET http://gateway/api/produtos/9d58fc36-a063-442d-ab43-5a350146ab0b [200 OK, 463B, 10ms]
+  ✓  Estoque Físico Baixado
+  ✓  Reserva Zerada
+
+❏ Orçamento
+↳ 16. Validar Valor Final da Orcamento (Pós Execução)
+  GET http://gateway/api/orcamentos/ordem-servico/06cd1414-f83f-4482-ac6f-612b10537cbd/json [200 OK, 547B, 5ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 16. Validar Valor Final da Orcamento (Pós Execução)
+
+↳ 16. Validar Valor Final da Orcamento (Pós Execução)
+  GET http://gateway/api/orcamentos/ordem-servico/06cd1414-f83f-4482-ac6f-612b10537cbd/json [200 OK, 547B, 18ms]
+  ✓  Orcamento Final Encontrada
+  ✓  Valor final deve considerar itens extras
+
+↳ 17. Confirmar Pagamento
+  POST http://gateway/api/orcamentos/cd995f32-0658-45d2-aa5f-52db1ed42e91/confirmar-pagamento [204 No Content, 166B, 12ms]
+  ✓  Pagamento confirmado no Billing
+
+↳ 17.1. Validar OS Paga (Fim da Saga)
+  GET http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd [200 OK, 2.04kB, 9ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 17.1. Validar OS Paga (Fim da Saga)
+
+↳ 17.1. Validar OS Paga (Fim da Saga)
+  GET http://gateway/api/ordens/06cd1414-f83f-4482-ac6f-612b10537cbd [200 OK, 2.03kB, 16ms]
+  ✓  OS Service recebeu o pagamento do Billing: OS PAGA
+
+↳ 18. Baixar PDF da Orcamento
+  GET http://gateway/api/orcamentos/cd995f32-0658-45d2-aa5f-52db1ed42e91 [200 OK, 3.25kB, 51ms]
+  ✓  PDF Baixado com Sucesso
+  ✓  ContentType é PDF
+
+❏ Fase 2 - Novos Endpoints
+↳ 21. Abrir OS com Serviço e Peça na Abertura
+  POST http://gateway/api/ordens [201 Created, 1.07kB, 12ms]
+  ✓  OS Aberta com Sucesso
+  ✓  OS Já Retorna com o Serviço Informado
+
+↳ 21.1. Listar Ordens - Validar Ordenação por Status e Exclusão de Finalizadas
+  GET http://gateway/api/ordens?tamanho=100 [200 OK, 11.38kB, 10ms]
+  ✓  OS recém-aberta aparece na listagem
+  ✓  OS já finalizada (paga) não aparece na listagem
+  ✓  Listagem ordenada por prioridade de status
+
+↳ 21.2. Iniciar Diagnóstico (Fase 2)
+  POST http://gateway/api/execucoes/df052942-7557-4036-a667-95bea630eb6a/iniciar-diagnostico [404 Not Found, 396B, 6ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 21.2. Iniciar Diagnóstico (Fase 2)
+
+↳ 21.2. Iniciar Diagnóstico (Fase 2)
+  POST http://gateway/api/execucoes/df052942-7557-4036-a667-95bea630eb6a/iniciar-diagnostico [200 OK, 711B, 22ms]
+  ✓  Comando aceito pelo Execution Service
+  ✓  Fase da execução: EM_DIAGNOSTICO
+
+↳ 21.3. Concluir Diagnóstico (Fase 2)
+  POST http://gateway/api/execucoes/df052942-7557-4036-a667-95bea630eb6a/concluir-diagnostico [200 OK, 854B, 12ms]
+  ✓  Comando aceito pelo Execution Service
+  ✓  Fase da execução: AGUARDANDO_APROVACAO
+
+↳ 21.4. Aprovação Externa via Webhook - Secret Inválido
+  POST http://gateway/api/ordens/df052942-7557-4036-a667-95bea630eb6a/aprovacao-externa [401 Unauthorized, 187B, 6ms]
+  ✓  Retorna 401 sem secret válido
+
+↳ 21.5. Aprovação Externa via Webhook - Sucesso
+  POST http://gateway/api/ordens/df052942-7557-4036-a667-95bea630eb6a/aprovacao-externa [400 Bad Request, 407B, 16ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 21.5. Aprovação Externa via Webhook - Sucesso
+
+↳ 21.5. Aprovação Externa via Webhook - Sucesso
+  POST http://gateway/api/ordens/df052942-7557-4036-a667-95bea630eb6a/aprovacao-externa [204 No Content, 166B, 9ms]
+  ✓  Webhook aceito (204)
+
+↳ 21.6. Validar Status Aprovado Após Webhook
+  GET http://gateway/api/ordens/df052942-7557-4036-a667-95bea630eb6a [200 OK, 1.06kB, 4ms]
+  ✓  OS está APROVADA
+  ✓  Serviço está APROVADO
+
+❏ Relatórios
+↳ 19. Obter Esforço da OS
+  GET http://gateway/api/relatorios/esforco-os/06cd1414-f83f-4482-ac6f-612b10537cbd [200 OK, 336B, 4ms]
+  ✓  Relatório de Esforço Encontrado
+  ✓  OS ID está correto
+  ✓  Total de serviços realizados deve ser 3
+
+↳ 20. Obter Tempo Médio dos Serviços
+  GET http://gateway/api/relatorios/tempo-medio-servicos [200 OK, 810B, 4ms]
+  ✓  Relatório de Tempos Médios Sucesso
+  ✓  Deve retornar uma lista de serviços
+
+❏ Fase 4 - Saga (compensação)
+↳ 23. Login Admin (Setup Saga)
+  POST http://gateway/api/usuarios/login [200 OK, 1.62kB, 65ms]
+  ✓  Login Admin Sucesso
+
+↳ 23.1. Estoque Reservado Antes da OS
+  GET http://gateway/api/produtos/9d58fc36-a063-442d-ab43-5a350146ab0b [200 OK, 463B, 4ms]
+  ✓  Produto encontrado
+
+↳ 23.2. Abrir OS com Peça (reserva estoque)
+  POST http://gateway/api/ordens [201 Created, 1.06kB, 9ms]
+  ✓  OS aberta
+
+↳ 23.3. Estoque Reservado Pela OS
+  GET http://gateway/api/produtos/9d58fc36-a063-442d-ab43-5a350146ab0b [200 OK, 463B, 4ms]
+  ✓  A OS reservou uma unidade
+
+↳ 23.4. Iniciar Diagnóstico
+  POST http://gateway/api/execucoes/74494d40-add9-4acb-a8fc-7e51c94fc628/iniciar-diagnostico [404 Not Found, 396B, 7ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 23.4. Iniciar Diagnóstico
+
+↳ 23.4. Iniciar Diagnóstico
+  POST http://gateway/api/execucoes/74494d40-add9-4acb-a8fc-7e51c94fc628/iniciar-diagnostico [200 OK, 711B, 13ms]
+  ✓  Comando aceito pelo Execution Service
+  ✓  Fase da execução: EM_DIAGNOSTICO
+
+↳ 23.5. Concluir Diagnóstico
+  POST http://gateway/api/execucoes/74494d40-add9-4acb-a8fc-7e51c94fc628/concluir-diagnostico [200 OK, 854B, 11ms]
+  ✓  Comando aceito pelo Execution Service
+  ✓  Fase da execução: AGUARDANDO_APROVACAO
+
+↳ 23.6. Orçamento Gerado pelo Billing
+  GET http://gateway/api/orcamentos/ordem-servico/74494d40-add9-4acb-a8fc-7e51c94fc628/json [404 Not Found, 410B, 7ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 23.6. Orçamento Gerado pelo Billing
+
+↳ 23.6. Orçamento Gerado pelo Billing
+  GET http://gateway/api/orcamentos/ordem-servico/74494d40-add9-4acb-a8fc-7e51c94fc628/json [404 Not Found, 410B, 11ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 23.6. Orçamento Gerado pelo Billing
+
+↳ 23.6. Orçamento Gerado pelo Billing
+  GET http://gateway/api/orcamentos/ordem-servico/74494d40-add9-4acb-a8fc-7e51c94fc628/json [200 OK, 467B, 12ms]
+  ✓  Orçamento gerado e pendente
+
+↳ 23.7. Reportar Falha na Execução
+  POST http://gateway/api/execucoes/74494d40-add9-4acb-a8fc-7e51c94fc628/falha [200 OK, 966B, 11ms]
+  ✓  Comando aceito pelo Execution Service
+  ✓  Fase da execução: FALHOU
+
+↳ 23.8. Compensação no OS Service: OS Cancelada
+  GET http://gateway/api/ordens/74494d40-add9-4acb-a8fc-7e51c94fc628 [200 OK, 1.07kB, 5ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 23.8. Compensação no OS Service: OS Cancelada
+
+↳ 23.8. Compensação no OS Service: OS Cancelada
+  GET http://gateway/api/ordens/74494d40-add9-4acb-a8fc-7e51c94fc628 [200 OK, 1.06kB, 14ms]
+  ✓  OS cancelada pela compensação
+
+↳ 23.9. Compensação no OS Service: Estoque Liberado
+  GET http://gateway/api/produtos/9d58fc36-a063-442d-ab43-5a350146ab0b [200 OK, 463B, 8ms]
+  ✓  Reserva de estoque desfeita
+
+↳ 23.10. Compensação no Billing: Orçamento Cancelado
+  GET http://gateway/api/orcamentos/ordem-servico/74494d40-add9-4acb-a8fc-7e51c94fc628/json [200 OK, 467B, 6ms]
+  ┌
+  │ 'Using "postman.setNextRequest" is deprecated. Use "pm
+  │ .execution.setNextRequest()" instead.'
+  └
+
+Attempting to set next request to 23.10. Compensação no Billing: Orçamento Cancelado
+
+↳ 23.10. Compensação no Billing: Orçamento Cancelado
+  GET http://gateway/api/orcamentos/ordem-servico/74494d40-add9-4acb-a8fc-7e51c94fc628/json [200 OK, 468B, 10ms]
+  ✓  Orçamento cancelado pela compensação
+
+↳ 23.11. Execução Encerrada como Falha
+  GET http://gateway/api/execucoes/74494d40-add9-4acb-a8fc-7e51c94fc628 [200 OK, 960B, 7ms]
+  ✓  Execução registrada como FALHOU, com o motivo
+
+┌─────────────────────────┬──────────────────┬──────────────────┐
+│                         │         executed │           failed │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│              iterations │                1 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│                requests │               74 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│            test-scripts │               74 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│      prerequest-scripts │                1 │                0 │
+├─────────────────────────┼──────────────────┼──────────────────┤
+│              assertions │               82 │                0 │
+├─────────────────────────┴──────────────────┴──────────────────┤
+│ total run duration: 19s                                       │
+├───────────────────────────────────────────────────────────────┤
+│ total data received: 58.65kB (approx)                         │
+├───────────────────────────────────────────────────────────────┤
+│ average response time: 12ms [min: 4ms, max: 86ms, s.d.: 15ms] │
+└───────────────────────────────────────────────────────────────┘
