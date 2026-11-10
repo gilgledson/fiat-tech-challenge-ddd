@@ -12,7 +12,9 @@ Este repositório virou o **OS Service**; os outros dois serviços estão em
 - [x] Mensageria com RabbitMQ e Saga coreografada, com compensações.
 - [x] Comunicação síncrona só do Billing para o OS Service (`/api/integracao`).
 - [x] Testes unitários e cobertura acima de 80% nos três serviços.
-- [x] SonarCloud no pipeline dos três serviços (falta configurar os tokens).
+- [x] SonarCloud no pipeline dos três serviços, opcional: só roda com o
+      `SONAR_TOKEN` configurado. Sem ele, rodar o Sonar localmente e anexar o
+      relatório como evidência.
 
 ## Falta
 

@@ -423,7 +423,7 @@ Depois que o AKS existe (via Terraform, passo anterior), a aplicação é implan
 | `DB_APP_USERNAME` / `DB_APP_PASSWORD` | Credenciais que a API usa para conectar no Postgres Flexible Server (injetadas no `Secret` do K8s) |
 | `WEBHOOK_APROVACAO_SECRET` | Secret do endpoint `/api/ordens/{id}/aprovacao-externa` |
 | `RABBITMQ_USERNAME` / `RABBITMQ_PASSWORD` | Usuário e senha do RabbitMQ: usados para criar o broker no cluster e pela API para conectar nele |
-| `SONAR_TOKEN` | Token do SonarCloud (análise de qualidade no CI); requer também as variables `SONAR_ORGANIZATION` e `SONAR_PROJECT_KEY` |
+| `SONAR_TOKEN` | **Opcional.** Token do SonarCloud; com ele (e as variables `SONAR_ORGANIZATION` e `SONAR_PROJECT_KEY`) a análise de qualidade roda no CI. Sem ele, a etapa é pulada e a análise é feita localmente |
 | `NEW_RELIC_LICENSE_KEY` | License key do New Relic (APM) — injetada no `Secret` do K8s e lida pelo New Relic Java Agent |
 
 > Os manifestos em `k8s/app/secret.yaml` usam placeholders `${...}` — a pipeline os preenche via `envsubst` antes do apply. **Nunca** commitar os valores reais no lugar dos placeholders.

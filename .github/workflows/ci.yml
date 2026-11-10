@@ -14,6 +14,10 @@ permissions:
 jobs:
   test-and-coverage:
     runs-on: ubuntu-latest
+    env:
+      # No nível do job para poder ser usado no "if" da etapa do SonarCloud
+      # (o contexto "secrets" não é aceito em condições).
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     steps:
     - name: 1. Baixar o código do repositório
@@ -33,11 +37,11 @@ jobs:
     - name: 3. Rodar Testes, Gerar Relatório JaCoCo e Exigir 80% de Cobertura
       run: mvn -B clean verify
 
-    # Requer o secret SONAR_TOKEN e as variables SONAR_ORGANIZATION e
-    # SONAR_PROJECT_KEY configurados no repositório.
+    # Opcional: só roda se o secret SONAR_TOKEN estiver configurado (junto com
+    # as variables SONAR_ORGANIZATION e SONAR_PROJECT_KEY). Sem o token, a
+    # análise é feita localmente e o relatório vai como evidência no README.
     - name: 3.5. Análise de Qualidade (SonarCloud)
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      if: env.SONAR_TOKEN != ''
       run: |
         mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           -Dsonar.host.url=https://sonarcloud.io \
