@@ -38,6 +38,13 @@ docker compose up -d --build
 | API (gateway único para os três serviços) | `http://localhost:8080` |
 | Painel do RabbitMQ | `http://localhost:15672` (`oficina` / `oficina`) |
 
+O ambiente inclui um **Mercado Pago simulado** (WireMock, em
+[mercadopago-fake](mercadopago-fake)), para o Billing criar a cobrança e
+consultar pagamentos sem credenciais reais. O ID do pagamento notificado
+decide a resposta: `aprovado-<ID do orçamento>` ou `recusado-<ID do orçamento>`.
+O token e a chave do webhook no [docker-compose.yaml](docker-compose.yaml) são
+fictícios.
+
 O gateway ([gateway.conf](gateway.conf)) roteia como o Traefik em produção:
 `/api/orcamentos` vai para o Billing; `/api/execucoes`, `/api/relatorios` e
 `/api/funcionarios` vão para o Execution; o resto vai para o OS Service.
@@ -79,8 +86,9 @@ cancelada, o estoque reservado foi liberado e o orçamento foi cancelado.
 
 Os cenários em Gherkin ficam em
 [bdd/src/test/resources/features](bdd/src/test/resources/features) e cobrem o
-fluxo completo da OS, a falha na execução com compensação e a rejeição do
-orçamento. A partir da raiz do repositório, com o ambiente no ar:
+fluxo completo da OS com pagamento pelo Mercado Pago, a falha na execução com
+compensação, a rejeição do orçamento, o pagamento recusado, a notificação com
+assinatura inválida e o pagamento no balcão. A partir da raiz do repositório, com o ambiente no ar:
 
 ```bash
 ./mvnw -f e2e/bdd/pom.xml test

@@ -18,11 +18,12 @@ Cenário: A OS percorre diagnóstico, orçamento, execução e pagamento        
   Quando o mecânico executa o serviço e conclui a execução
   Então a ordem de serviço fica com o status "AGUARDANDO_PAGAMENTO"
   E a peça fica com 9 unidades em estoque e 0 reservadas
-  Quando o pagamento do orçamento é confirmado
+  E o orçamento tem um link de pagamento do Mercado Pago
+  Quando o Mercado Pago notifica o pagamento aprovado
   Então a ordem de serviço fica com o status "PAGA"
   E o orçamento fica com o status "PAGO"
 
-Cenário: Falha na execução desfaz a reserva de estoque e o orçamento                    # features/ordem_de_servico.feature:30
+Cenário: Falha na execução desfaz a reserva de estoque e o orçamento                    # features/ordem_de_servico.feature:31
   Dado um atendente autenticado
   E um cliente com um veículo cadastrado
   E uma peça com 10 unidades em estoque
@@ -36,7 +37,7 @@ Cenário: Falha na execução desfaz a reserva de estoque e o orçamento        
   E a peça fica com 10 unidades em estoque e 0 reservadas
   E o orçamento fica com o status "CANCELADA"
 
-Cenário: Cliente rejeita o orçamento e a OS é encerrada sem execução       # features/ordem_de_servico.feature:40
+Cenário: Cliente rejeita o orçamento e a OS é encerrada sem execução       # features/ordem_de_servico.feature:41
   Dado um atendente autenticado
   E um cliente com um veículo cadastrado
   E uma peça com 10 unidades em estoque
@@ -48,15 +49,51 @@ Cenário: Cliente rejeita o orçamento e a OS é encerrada sem execução       
   E a ordem de serviço fica com o status "REJEITADA"
   E a execução fica na fase "CANCELADA"
   E a peça fica com 10 unidades em estoque e 0 reservadas
-[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.91 s -- in br.com.fiap.oficina.bdd.RunCucumberTest
+
+Cenário: Pagamento recusado mantém a OS aguardando até o cliente pagar     # features/ordem_de_servico.feature:50
+  Dado um atendente autenticado
+  E um cliente com um veículo cadastrado
+  E uma peça com 10 unidades em estoque
+  E um serviço preventivo de 120.00 que consome 1 unidade da peça de 65.00
+  Dado uma ordem de serviço aberta com o serviço
+  E que a ordem de serviço foi executada e aguarda pagamento
+  Quando o Mercado Pago notifica o pagamento recusado
+  Então o orçamento fica com o status "PENDENTE"
+  E a ordem de serviço fica com o status "AGUARDANDO_PAGAMENTO"
+  Quando o Mercado Pago notifica o pagamento aprovado
+  Então a ordem de serviço fica com o status "PAGA"
+  E o orçamento fica com o status "PAGO"
+
+Cenário: Notificação de pagamento com assinatura inválida não paga o orçamento # features/ordem_de_servico.feature:60
+  Dado um atendente autenticado
+  E um cliente com um veículo cadastrado
+  E uma peça com 10 unidades em estoque
+  E um serviço preventivo de 120.00 que consome 1 unidade da peça de 65.00
+  Dado uma ordem de serviço aberta com o serviço
+  E que a ordem de serviço foi executada e aguarda pagamento
+  Quando chega uma notificação de pagamento aprovado com assinatura inválida
+  Então a notificação é recusada
+  E o orçamento fica com o status "PENDENTE"
+
+Cenário: Pagamento no balcão é registrado pelo atendente                   # features/ordem_de_servico.feature:67
+  Dado um atendente autenticado
+  E um cliente com um veículo cadastrado
+  E uma peça com 10 unidades em estoque
+  E um serviço preventivo de 120.00 que consome 1 unidade da peça de 65.00
+  Dado uma ordem de serviço aberta com o serviço
+  E que a ordem de serviço foi executada e aguarda pagamento
+  Quando o pagamento do orçamento é confirmado
+  Então a ordem de serviço fica com o status "PAGA"
+  E o orçamento fica com o status "PAGO"
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 46.86 s -- in br.com.fiap.oficina.bdd.RunCucumberTest
 [INFO] 
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  21.476 s
-[INFO] Finished at: 2026-11-10T22:32:25-03:00
+[INFO] Total time:  47.536 s
+[INFO] Finished at: 2026-11-11T04:04:53-03:00
 [INFO] ------------------------------------------------------------------------

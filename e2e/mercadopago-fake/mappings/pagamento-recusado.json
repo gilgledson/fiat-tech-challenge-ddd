@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/v1/payments/recusado-[0-9a-f-]{36}",
+    "headers": {
+      "Authorization": { "matches": "Bearer .+" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "body": "{\"id\": \"{{request.pathSegments.[2]}}\", \"status\": \"rejected\", \"status_detail\": \"cc_rejected_insufficient_amount\", \"external_reference\": \"{{substring request.pathSegments.[2] 9}}\", \"payment_type_id\": \"credit_card\", \"transaction_amount\": 100000.00}",
+    "transformers": ["response-template"]
+  }
+}

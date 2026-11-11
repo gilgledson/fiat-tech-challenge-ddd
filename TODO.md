@@ -16,7 +16,8 @@ Este repositório virou o **OS Service**; os outros dois serviços estão em
       reais) e Newman: 82 verificações passando, incluindo um caminho de
       compensação da Saga. Ver [e2e/README.md](e2e/README.md).
 - [x] BDD com Cucumber em [e2e/bdd](e2e/bdd): fluxo completo da OS, falha na
-      execução com compensação e rejeição do orçamento. Roda contra o ambiente
+      execução com compensação, rejeição do orçamento e pagamento pelo
+      Mercado Pago (aprovado, recusado e notificação forjada). Roda contra o ambiente
       Docker; ainda não roda no pipeline.
 - [x] Collection do Postman atualizada para as rotas novas e os três serviços.
 - [x] SonarCloud no pipeline dos três serviços, opcional: só roda com o
@@ -25,7 +26,10 @@ Este repositório virou o **OS Service**; os outros dois serviços estão em
 
 ## Falta
 
-- [ ] **Mercado Pago** no Billing Service (hoje o pagamento é confirmado manualmente).
+- [ ] **Mercado Pago com credenciais reais**: a integração (Checkout Pro e
+      webhook) está no Billing Service e passa no ambiente integrado contra um
+      Mercado Pago simulado. Falta criar a aplicação de teste, cadastrar o
+      access token e a chave do webhook como secrets e pagar uma OS de verdade.
 - [ ] **Secrets e variables** nos três repositórios: SonarCloud, Docker Hub, Azure,
       New Relic, RabbitMQ e os bancos do Billing e do Execution.
 - [ ] **Proteção da `main`** nos três repositórios (PR obrigatório e checagem do pipeline).

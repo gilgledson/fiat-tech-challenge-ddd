@@ -7,15 +7,22 @@ import io.cucumber.java.pt.Então;
 import io.cucumber.java.pt.Quando;
 import io.restassured.response.Response;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 public class OrdemDeServicoSteps {
 
     /** PNG de 1x1 pixel, usado como assinatura do cliente no aceite do orçamento. */
     private static final String ASSINATURA =
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+
+    /** Chave do webhook configurada no Billing do ambiente e2e (docker-compose.yaml). */
+    private static final String SEGREDO_WEBHOOK = System.getProperty("webhookSecret", "segredo-webhook-e2e");
 
     private final Api api = new Api();
 
@@ -28,6 +35,7 @@ public class OrdemDeServicoSteps {
     private String ordemId;
     private String servicoDaOrdemId;
     private String orcamentoId;
+    private Response ultimaNotificacao;
 
     // ---------- Contexto ----------
 
@@ -177,6 +185,16 @@ public class OrdemDeServicoSteps {
         assertThat(conclusao.jsonPath().getString("fase")).isEqualTo("CONCLUIDA");
     }
 
+    @Dado("que a ordem de serviço foi executada e aguarda pagamento")
+    public void queAOrdemDeServicoFoiExecutadaEAguardaPagamento() {
+        queODiagnosticoFoiConcluidoEOOrcamentoFoiGerado();
+        oClienteAceitaOOrcamento();
+        aOrdemDeServicoFicaComOStatus("APROVADA");
+        oMecanicoExecutaOServicoEConcluiAExecucao();
+        aOrdemDeServicoFicaComOStatus("AGUARDANDO_PAGAMENTO");
+        oOrcamentoTemUmLinkDePagamentoDoMercadoPago();
+    }
+
     @Quando("a oficina reporta a falha {string}")
     public void aOficinaReportaAFalha(String motivo) {
         Response resposta = api.post("/api/execucoes/" + ordemId + "/falha", Map.of("motivo", motivo));
@@ -213,6 +231,66 @@ public class OrdemDeServicoSteps {
     @Quando("o cliente rejeita o orçamento")
     public void oClienteRejeitaOOrcamento() {
         responderOrcamento(List.of(), List.of(servicoDaOrdemId));
+    }
+
+    // ---------- Mercado Pago ----------
+
+    @Então("o orçamento tem um link de pagamento do Mercado Pago")
+    public void oOrcamentoTemUmLinkDePagamentoDoMercadoPago() {
+        // A cobrança é criada quando o evento os.execucao-concluida chega ao Billing.
+        Response orcamento = api.aguardar("link de pagamento gerado a partir de os.execucao-concluida",
+                () -> api.get("/api/orcamentos/ordem-servico/" + ordemId + "/json"),
+                r -> r.statusCode() == 200 && r.jsonPath().getString("linkPagamento") != null);
+        assertThat(orcamento.jsonPath().getString("linkPagamento")).contains("mercadopago");
+        assertThat(orcamento.jsonPath().getString("pagamentoExternoId")).isNotBlank();
+    }
+
+    @Quando("o Mercado Pago notifica o pagamento aprovado")
+    public void oMercadoPagoNotificaOPagamentoAprovado() {
+        notificar("aprovado-" + orcamentoId, true);
+        assertSucesso(ultimaNotificacao);
+    }
+
+    @Quando("o Mercado Pago notifica o pagamento recusado")
+    public void oMercadoPagoNotificaOPagamentoRecusado() {
+        notificar("recusado-" + orcamentoId, true);
+        assertSucesso(ultimaNotificacao);
+    }
+
+    @Quando("chega uma notificação de pagamento aprovado com assinatura inválida")
+    public void chegaUmaNotificacaoDePagamentoAprovadoComAssinaturaInvalida() {
+        notificar("aprovado-" + orcamentoId, false);
+    }
+
+    @Então("a notificação é recusada")
+    public void aNotificacaoERecusada() {
+        assertThat(ultimaNotificacao.statusCode()).isEqualTo(401);
+    }
+
+    /**
+     * Chama o webhook como o Mercado Pago chama: sem JWT, com o ID do pagamento
+     * e o header x-signature (HMAC-SHA256 com a chave secreta do webhook).
+     */
+    private void notificar(String pagamentoId, boolean assinaturaValida) {
+        String ts = Long.toString(System.currentTimeMillis() / 1000);
+        String requestId = "bdd-" + sufixo();
+        String chave = assinaturaValida ? SEGREDO_WEBHOOK : "chave-errada";
+        String v1 = hmac("id:" + pagamentoId + ";request-id:" + requestId + ";ts:" + ts + ";", chave);
+
+        ultimaNotificacao = api.postPublico(
+                "/api/orcamentos/webhooks/mercadopago?type=payment&data.id=" + pagamentoId,
+                Map.of("x-signature", "ts=" + ts + ",v1=" + v1, "x-request-id", requestId),
+                Map.of("action", "payment.updated", "type", "payment", "data", Map.of("id", pagamentoId)));
+    }
+
+    private static String hmac(String mensagem, String chave) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(chave.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            return HexFormat.of().formatHex(mac.doFinal(mensagem.getBytes(StandardCharsets.UTF_8)));
+        } catch (java.security.GeneralSecurityException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Quando("o pagamento do orçamento é confirmado")
