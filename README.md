@@ -687,9 +687,15 @@ O fluxo da OS pelos três microsserviços está descrito em Gherkin, em portugu�
 
 | Cenário | O que confere |
 |---|---|
-| A OS percorre diagnóstico, orçamento, execução e pagamento | Caminho feliz da Saga, da abertura até a OS paga, com baixa do estoque |
+| A OS percorre diagnóstico, orçamento, execução e pagamento | Caminho feliz da Saga, da abertura até a OS paga pelo Mercado Pago, com baixa do estoque |
 | Falha na execução desfaz a reserva de estoque e o orçamento | Compensação: OS cancelada, estoque liberado e orçamento cancelado |
 | Cliente rejeita o orçamento e a OS é encerrada sem execução | Compensação: orçamento cancelado, OS rejeitada, execução cancelada e estoque liberado |
+| Pagamento recusado mantém a OS aguardando até o cliente pagar | Recusa no Mercado Pago não paga nem cancela; a aprovação seguinte paga |
+| Notificação de pagamento com assinatura inválida não paga o orçamento | O webhook responde 401 e o orçamento continua pendente |
+| Pagamento no balcão é registrado pelo atendente | Confirmação manual continua valendo |
+| Gerar o link de pagamento de novo não cria uma segunda cobrança | A preferência é atualizada e o link continua o mesmo |
+
+Nesses cenários o Mercado Pago é simulado por um WireMock que sobe junto com o ambiente; os serviços, os bancos e o RabbitMQ são reais.
 
 Os cenários rodam contra o ambiente integrado em Docker (ver [e2e/README.md](e2e/README.md)):
 
@@ -697,7 +703,7 @@ Os cenários rodam contra o ambiente integrado em Docker (ver [e2e/README.md](e2
 ./mvnw -f e2e/bdd/pom.xml test
 ```
 
-Última execução: [e2e/bdd/evidencias/](e2e/bdd/evidencias) (3 cenários, nenhuma falha).
+Última execução: [e2e/bdd/evidencias/](e2e/bdd/evidencias) (7 cenários, nenhuma falha).
 
 ---
 

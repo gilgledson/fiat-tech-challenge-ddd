@@ -23,7 +23,8 @@ Funcionalidade: Ciclo de vida da ordem de serviço entre os microsserviços
     Quando o mecânico executa o serviço e conclui a execução
     Então a ordem de serviço fica com o status "AGUARDANDO_PAGAMENTO"
     E a peça fica com 9 unidades em estoque e 0 reservadas
-    Quando o pagamento do orçamento é confirmado
+    E o orçamento tem um link de pagamento do Mercado Pago
+    Quando o Mercado Pago notifica o pagamento aprovado
     Então a ordem de serviço fica com o status "PAGA"
     E o orçamento fica com o status "PAGO"
 
@@ -45,3 +46,34 @@ Funcionalidade: Ciclo de vida da ordem de serviço entre os microsserviços
     E a ordem de serviço fica com o status "REJEITADA"
     E a execução fica na fase "CANCELADA"
     E a peça fica com 10 unidades em estoque e 0 reservadas
+
+  Cenário: Pagamento recusado mantém a OS aguardando até o cliente pagar
+    Dado uma ordem de serviço aberta com o serviço
+    E que a ordem de serviço foi executada e aguarda pagamento
+    Quando o Mercado Pago notifica o pagamento recusado
+    Então o orçamento fica com o status "PENDENTE"
+    E a ordem de serviço fica com o status "AGUARDANDO_PAGAMENTO"
+    Quando o Mercado Pago notifica o pagamento aprovado
+    Então a ordem de serviço fica com o status "PAGA"
+    E o orçamento fica com o status "PAGO"
+
+  Cenário: Notificação de pagamento com assinatura inválida não paga o orçamento
+    Dado uma ordem de serviço aberta com o serviço
+    E que a ordem de serviço foi executada e aguarda pagamento
+    Quando chega uma notificação de pagamento aprovado com assinatura inválida
+    Então a notificação é recusada
+    E o orçamento fica com o status "PENDENTE"
+
+  Cenário: Pagamento no balcão é registrado pelo atendente
+    Dado uma ordem de serviço aberta com o serviço
+    E que a ordem de serviço foi executada e aguarda pagamento
+    Quando o pagamento do orçamento é confirmado
+    Então a ordem de serviço fica com o status "PAGA"
+    E o orçamento fica com o status "PAGO"
+
+  Cenário: Gerar o link de pagamento de novo não cria uma segunda cobrança
+    Dado uma ordem de serviço aberta com o serviço
+    E que a ordem de serviço foi executada e aguarda pagamento
+    Quando o atendente gera o link de pagamento de novo
+    Então o link de pagamento continua o mesmo
+    E o orçamento fica com o status "PENDENTE"

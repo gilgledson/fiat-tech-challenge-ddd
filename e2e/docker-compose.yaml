@@ -56,6 +56,14 @@ services:
       timeout: 5s
       retries: 20
 
+  # Simula a API do Mercado Pago (WireMock): cria preferências e responde à
+  # consulta de pagamentos. O ID do pagamento decide o resultado:
+  # "aprovado-<ID do orçamento>" ou "recusado-<ID do orçamento>".
+  mercadopago-fake:
+    image: wiremock/wiremock:3.9.1
+    volumes:
+      - ./mercadopago-fake/mappings:/home/wiremock/mappings:ro
+
   os-service:
     build:
       context: ..
@@ -93,7 +101,15 @@ services:
       - STORAGE_TYPE=local
       - OFICINA_OUTBOX_INTERVALO=1s
       - NEW_RELIC_AGENT_ENABLED=false
+      # Mercado Pago simulado (serviço mercadopago-fake). O token e a chave
+      # abaixo são fictícios e só valem neste ambiente.
+      - MERCADOPAGO_API_URL=http://mercadopago-fake:8080
+      - MERCADOPAGO_ACCESS_TOKEN=TEST-token-ficticio-e2e
+      - MERCADOPAGO_WEBHOOK_SECRET=segredo-webhook-e2e
+      - MERCADOPAGO_NOTIFICATION_URL=http://gateway/api/orcamentos/webhooks/mercadopago
     depends_on:
+      mercadopago-fake:
+        condition: service_started
       billing-db:
         condition: service_healthy
       rabbitmq:

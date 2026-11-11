@@ -6,6 +6,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import java.time.Duration;
+import java.util.Map;
 import java.util.function.Predicate;
 import org.awaitility.Awaitility;
 
@@ -35,6 +36,11 @@ final class Api {
 
     Response post(String caminho, Object corpo) {
         return requisicao().contentType(ContentType.JSON).body(corpo).post(caminho);
+    }
+
+    /** Chamada sem JWT, como a de um sistema externo (o webhook do Mercado Pago). */
+    Response postPublico(String caminho, Map<String, String> headers, Object corpo) {
+        return given().baseUri(BASE_URL).headers(headers).contentType(ContentType.JSON).body(corpo).post(caminho);
     }
 
     /**
