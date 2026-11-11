@@ -36,6 +36,7 @@ public class OrdemDeServicoSteps {
     private String servicoDaOrdemId;
     private String orcamentoId;
     private Response ultimaNotificacao;
+    private String linkPagamento;
 
     // ---------- Contexto ----------
 
@@ -243,6 +244,18 @@ public class OrdemDeServicoSteps {
                 r -> r.statusCode() == 200 && r.jsonPath().getString("linkPagamento") != null);
         assertThat(orcamento.jsonPath().getString("linkPagamento")).contains("mercadopago");
         assertThat(orcamento.jsonPath().getString("pagamentoExternoId")).isNotBlank();
+        linkPagamento = orcamento.jsonPath().getString("linkPagamento");
+    }
+
+    @Quando("o atendente gera o link de pagamento de novo")
+    public void oAtendenteGeraOLinkDePagamentoDeNovo() {
+        ultimaNotificacao = api.post("/api/orcamentos/" + orcamentoId + "/pagamento");
+        assertSucesso(ultimaNotificacao);
+    }
+
+    @Então("o link de pagamento continua o mesmo")
+    public void oLinkDePagamentoContinuaOMesmo() {
+        assertThat(ultimaNotificacao.jsonPath().getString("linkPagamento")).isEqualTo(linkPagamento);
     }
 
     @Quando("o Mercado Pago notifica o pagamento aprovado")

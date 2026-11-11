@@ -70,3 +70,10 @@ Funcionalidade: Ciclo de vida da ordem de serviço entre os microsserviços
     Quando o pagamento do orçamento é confirmado
     Então a ordem de serviço fica com o status "PAGA"
     E o orçamento fica com o status "PAGO"
+
+  Cenário: Gerar o link de pagamento de novo não cria uma segunda cobrança
+    Dado uma ordem de serviço aberta com o serviço
+    E que a ordem de serviço foi executada e aguarda pagamento
+    Quando o atendente gera o link de pagamento de novo
+    Então o link de pagamento continua o mesmo
+    E o orçamento fica com o status "PENDENTE"

@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPathPattern": "/checkout/preferences/pref-[0-9a-f-]{36}",
+    "headers": {
+      "Authorization": { "matches": "Bearer .+" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "body": "{\"id\": \"{{request.pathSegments.[2]}}\", \"init_point\": \"https://www.mercadopago.com.br/checkout/v1/redirect?pref_id={{request.pathSegments.[2]}}\"}",
+    "transformers": ["response-template"]
+  }
+}

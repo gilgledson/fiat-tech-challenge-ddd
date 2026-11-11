@@ -85,15 +85,26 @@ Cenário: Pagamento no balcão é registrado pelo atendente                   # 
   Quando o pagamento do orçamento é confirmado
   Então a ordem de serviço fica com o status "PAGA"
   E o orçamento fica com o status "PAGO"
-[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 46.86 s -- in br.com.fiap.oficina.bdd.RunCucumberTest
+
+Cenário: Gerar o link de pagamento de novo não cria uma segunda cobrança   # features/ordem_de_servico.feature:74
+  Dado um atendente autenticado
+  E um cliente com um veículo cadastrado
+  E uma peça com 10 unidades em estoque
+  E um serviço preventivo de 120.00 que consome 1 unidade da peça de 65.00
+  Dado uma ordem de serviço aberta com o serviço
+  E que a ordem de serviço foi executada e aguarda pagamento
+  Quando o atendente gera o link de pagamento de novo
+  Então o link de pagamento continua o mesmo
+  E o orçamento fica com o status "PENDENTE"
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 54.25 s -- in br.com.fiap.oficina.bdd.RunCucumberTest
 [INFO] 
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  47.536 s
-[INFO] Finished at: 2026-11-11T04:04:53-03:00
+[INFO] Total time:  55.252 s
+[INFO] Finished at: 2026-11-11T04:32:48-03:00
 [INFO] ------------------------------------------------------------------------
