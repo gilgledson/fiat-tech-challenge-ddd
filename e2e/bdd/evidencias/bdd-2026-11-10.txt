@@ -1,0 +1,62 @@
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running br.com.fiap.oficina.bdd.RunCucumberTest
+
+Cenário: A OS percorre diagnóstico, orçamento, execução e pagamento        # features/ordem_de_servico.feature:14
+  Dado um atendente autenticado
+  E um cliente com um veículo cadastrado
+  E uma peça com 10 unidades em estoque
+  E um serviço preventivo de 120.00 que consome 1 unidade da peça de 65.00
+  Dado uma ordem de serviço aberta com o serviço
+  E que a peça tem 1 unidade reservada
+  Quando o mecânico inicia o diagnóstico
+  Então a ordem de serviço fica com o status "EM_DIAGNOSTICO"
+  Quando o mecânico conclui o diagnóstico
+  Então o Billing gera um orçamento de 185.00 para a ordem de serviço
+  Quando o cliente aceita o orçamento
+  Então a ordem de serviço fica com o status "APROVADA"
+  Quando o mecânico executa o serviço e conclui a execução
+  Então a ordem de serviço fica com o status "AGUARDANDO_PAGAMENTO"
+  E a peça fica com 9 unidades em estoque e 0 reservadas
+  Quando o pagamento do orçamento é confirmado
+  Então a ordem de serviço fica com o status "PAGA"
+  E o orçamento fica com o status "PAGO"
+
+Cenário: Falha na execução desfaz a reserva de estoque e o orçamento                    # features/ordem_de_servico.feature:30
+  Dado um atendente autenticado
+  E um cliente com um veículo cadastrado
+  E uma peça com 10 unidades em estoque
+  E um serviço preventivo de 120.00 que consome 1 unidade da peça de 65.00
+  Dado uma ordem de serviço aberta com o serviço
+  E que a peça tem 1 unidade reservada
+  E que o diagnóstico foi concluído e o orçamento foi gerado
+  Quando a oficina reporta a falha "Peça indisponível no fornecedor"
+  Então a execução fica na fase "FALHOU" com o motivo "Peça indisponível no fornecedor"
+  E a ordem de serviço fica com o status "CANCELADA"
+  E a peça fica com 10 unidades em estoque e 0 reservadas
+  E o orçamento fica com o status "CANCELADA"
+
+Cenário: Cliente rejeita o orçamento e a OS é encerrada sem execução       # features/ordem_de_servico.feature:40
+  Dado um atendente autenticado
+  E um cliente com um veículo cadastrado
+  E uma peça com 10 unidades em estoque
+  E um serviço preventivo de 120.00 que consome 1 unidade da peça de 65.00
+  Dado uma ordem de serviço aberta com o serviço
+  E que o diagnóstico foi concluído e o orçamento foi gerado
+  Quando o cliente rejeita o orçamento
+  Então o orçamento fica com o status "CANCELADA"
+  E a ordem de serviço fica com o status "REJEITADA"
+  E a execução fica na fase "CANCELADA"
+  E a peça fica com 10 unidades em estoque e 0 reservadas
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.91 s -- in br.com.fiap.oficina.bdd.RunCucumberTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  21.476 s
+[INFO] Finished at: 2026-11-10T22:32:25-03:00
+[INFO] ------------------------------------------------------------------------

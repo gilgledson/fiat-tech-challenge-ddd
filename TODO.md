@@ -15,6 +15,9 @@ Este repositório virou o **OS Service**; os outros dois serviços estão em
 - [x] Fluxo de ponta a ponta validado com Docker (Postgres, MongoDB e RabbitMQ
       reais) e Newman: 82 verificações passando, incluindo um caminho de
       compensação da Saga. Ver [e2e/README.md](e2e/README.md).
+- [x] BDD com Cucumber em [e2e/bdd](e2e/bdd): fluxo completo da OS, falha na
+      execução com compensação e rejeição do orçamento. Roda contra o ambiente
+      Docker; ainda não roda no pipeline.
 - [x] Collection do Postman atualizada para as rotas novas e os três serviços.
 - [x] SonarCloud no pipeline dos três serviços, opcional: só roda com o
       `SONAR_TOKEN` configurado. Sem ele, rodar o Sonar localmente e anexar o
@@ -23,7 +26,6 @@ Este repositório virou o **OS Service**; os outros dois serviços estão em
 ## Falta
 
 - [ ] **Mercado Pago** no Billing Service (hoje o pagamento é confirmado manualmente).
-- [ ] **BDD**: um fluxo completo da OS com Cucumber, incluindo um caminho de falha.
 - [ ] **Secrets e variables** nos três repositórios: SonarCloud, Docker Hub, Azure,
       New Relic, RabbitMQ e os bancos do Billing e do Execution.
 - [ ] **Proteção da `main`** nos três repositórios (PR obrigatório e checagem do pipeline).
