@@ -64,7 +64,10 @@ jobs:
         git config --global user.email 'github-actions@github.com'
         git add .github/badges/jacoco.svg
         git commit -m "chore: Atualizando badge de cobertura de testes [skip ci]" || echo "Nenhuma mudança na cobertura"
-        git push
+        # Com a main protegida (só aceita mudança por PR), o push direto do
+        # pipeline é recusado. O badge deixa de ser atualizado, mas isso não
+        # pode derrubar o job nem bloquear o deploy.
+        git push || echo "::warning::Badge de cobertura não enviado: a main é protegida e só aceita mudanças por PR."
 
   build-and-deploy:
     needs: test-and-coverage

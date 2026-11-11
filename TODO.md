@@ -19,6 +19,8 @@ Este repositório virou o **OS Service**; os outros dois serviços estão em
       execução com compensação, rejeição do orçamento e pagamento pelo
       Mercado Pago (aprovado, recusado e notificação forjada). Roda contra o ambiente
       Docker; ainda não roda no pipeline.
+- [x] `main` protegida nos três repositórios: só aceita mudança por PR, com o
+      check de build e testes passando, inclusive para administradores.
 - [x] Collection do Postman atualizada para as rotas novas e os três serviços.
 - [x] SonarCloud no pipeline dos três serviços, opcional: só roda com o
       `SONAR_TOKEN` configurado. Sem ele, rodar o Sonar localmente e anexar o
@@ -32,7 +34,6 @@ Este repositório virou o **OS Service**; os outros dois serviços estão em
       access token e a chave do webhook como secrets e pagar uma OS de verdade.
 - [ ] **Secrets e variables** nos três repositórios: SonarCloud, Docker Hub, Azure,
       New Relic, RabbitMQ e os bancos do Billing e do Execution.
-- [ ] **Proteção da `main`** nos três repositórios (PR obrigatório e checagem do pipeline).
 - [ ] **Provisionar** o database `billing` no Postgres e um MongoDB para o Execution.
 - [ ] **Migrar dados**: orçamentos, funcionários e tempos de execução que estão no
       banco deste serviço. Só depois remover as tabelas `ORCAMENTO` e
