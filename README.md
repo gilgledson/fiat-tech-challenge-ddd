@@ -680,6 +680,27 @@ O projeto conta com testes **unitários puros** (sem dependência do container Q
 
 ---
 
+### 🥒 Testes de aceitação (BDD) com Cucumber
+
+O fluxo da OS pelos três microsserviços está descrito em Gherkin, em português, em
+[ordem_de_servico.feature](e2e/bdd/src/test/resources/features/ordem_de_servico.feature):
+
+| Cenário | O que confere |
+|---|---|
+| A OS percorre diagnóstico, orçamento, execução e pagamento | Caminho feliz da Saga, da abertura até a OS paga, com baixa do estoque |
+| Falha na execução desfaz a reserva de estoque e o orçamento | Compensação: OS cancelada, estoque liberado e orçamento cancelado |
+| Cliente rejeita o orçamento e a OS é encerrada sem execução | Compensação: orçamento cancelado, OS rejeitada, execução cancelada e estoque liberado |
+
+Os cenários rodam contra o ambiente integrado em Docker (ver [e2e/README.md](e2e/README.md)):
+
+```bash
+./mvnw -f e2e/bdd/pom.xml test
+```
+
+Última execução: [e2e/bdd/evidencias/](e2e/bdd/evidencias) (3 cenários, nenhuma falha).
+
+---
+
 ### 🔄 Testes de Integração (E2E) com Newman
 
 Para validar o fluxo completo da OS passando pelos três microsserviços, utilizamos o **Newman**, que é o executor de coleções do Postman via linha de comando.
