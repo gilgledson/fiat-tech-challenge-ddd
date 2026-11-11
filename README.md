@@ -682,7 +682,9 @@ O projeto conta com testes **unitários puros** (sem dependência do container Q
 
 ### 🔄 Testes de Integração (E2E) com Newman
 
-Para validar o fluxo completo do Monolito Modular (Identidade -> Atendimento -> Catálogo -> Operacional), utilizamos o **Newman**, que é o executor de coleções do Postman via linha de comando.
+Para validar o fluxo completo da OS passando pelos três microsserviços, utilizamos o **Newman**, que é o executor de coleções do Postman via linha de comando.
+
+> **Fase 4:** a collection exige os três serviços no ar. O passo a passo para subir o ambiente integrado com Docker e rodar a collection está em [e2e/README.md](e2e/README.md). Última execução: [newman/](newman) (82 verificações, nenhuma falha).
 
 #### 📦 Instalação do Newman
 

@@ -12,14 +12,16 @@ Este repositório virou o **OS Service**; os outros dois serviços estão em
 - [x] Mensageria com RabbitMQ e Saga coreografada, com compensações.
 - [x] Comunicação síncrona só do Billing para o OS Service (`/api/integracao`).
 - [x] Testes unitários e cobertura acima de 80% nos três serviços.
+- [x] Fluxo de ponta a ponta validado com Docker (Postgres, MongoDB e RabbitMQ
+      reais) e Newman: 82 verificações passando, incluindo um caminho de
+      compensação da Saga. Ver [e2e/README.md](e2e/README.md).
+- [x] Collection do Postman atualizada para as rotas novas e os três serviços.
 - [x] SonarCloud no pipeline dos três serviços, opcional: só roda com o
       `SONAR_TOKEN` configurado. Sem ele, rodar o Sonar localmente e anexar o
       relatório como evidência.
 
 ## Falta
 
-- [ ] **Rodar o fluxo de ponta a ponta** com Postgres, MongoDB e RabbitMQ reais.
-      Até aqui a validação é de compilação e testes unitários.
 - [ ] **Mercado Pago** no Billing Service (hoje o pagamento é confirmado manualmente).
 - [ ] **BDD**: um fluxo completo da OS com Cucumber, incluindo um caminho de falha.
 - [ ] **Secrets e variables** nos três repositórios: SonarCloud, Docker Hub, Azure,
@@ -31,8 +33,11 @@ Este repositório virou o **OS Service**; os outros dois serviços estão em
       `FUNCIONARIOS` e as views de relatório.
 - [ ] **Function de login por CPF**: ela consulta o Postgres direto, o que fere a
       regra de não acessar o banco de outro serviço. Passar a chamar o OS Service.
-- [ ] **Collection do Postman / Newman**: atualizar para as rotas novas
-      (`/api/execucoes/...`) e para os três serviços.
+- [ ] **Pasta "Fase 3" da collection**: depende da Azure Function de CPF e não
+      foi executada no ambiente integrado.
+- [ ] **Concorrência na OS**: o OS Service não tem controle de versão na OS. Um
+      evento da Saga e uma requisição HTTP alterando a mesma OS ao mesmo tempo
+      podem se sobrescrever.
 - [ ] **Outbox do OS Service**: gravar o evento na mesma transação da OS (hoje é
       logo depois; ver "Limitação conhecida" no README).
 - [ ] **Rastreamento distribuído**: propagar o `correlationId` nos eventos que

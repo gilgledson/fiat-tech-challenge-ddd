@@ -1,0 +1,130 @@
+# Ambiente integrado da Fase 4: os três microsserviços, seus bancos, o RabbitMQ
+# e um gateway local que imita as rotas do Traefik de produção. Serve para
+# rodar a collection do Postman (Newman) de ponta a ponta.
+#
+# Pressupõe os três repositórios lado a lado na mesma pasta:
+#   fiat-tech-challenge-ddd/  oficina-billing-service/  oficina-execution-service/
+#
+# Antes de subir, gere o pacote de cada serviço (./mvnw clean package -DskipTests).
+# Uso: ver e2e/README.md
+name: oficina-e2e
+
+services:
+  os-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=oficina
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d oficina" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  billing-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=billing
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d billing" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  execution-db:
+    image: mongo:7
+    healthcheck:
+      test: [ "CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Painel: http://localhost:15672 (oficina/oficina)
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=oficina
+      - RABBITMQ_DEFAULT_PASS=oficina
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  os-service:
+    build:
+      context: ..
+      dockerfile: src/main/docker/Dockerfile.jvm
+    environment:
+      - QUARKUS_PROFILE=dev
+      - DB_URL_RW=jdbc:postgresql://os-db:5432/oficina
+      - DB_URL_RO=jdbc:postgresql://os-db:5432/oficina
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=oficina
+      - RABBITMQ_PASSWORD=oficina
+      # Entrega dos eventos mais frequente que em produção, para o teste não esperar.
+      - OFICINA_OUTBOX_INTERVALO=1s
+      - NEW_RELIC_AGENT_ENABLED=false
+    depends_on:
+      os-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  billing-service:
+    build:
+      context: ../../oficina-billing-service
+      dockerfile: src/main/docker/Dockerfile.jvm
+    environment:
+      - DB_URL=jdbc:postgresql://billing-db:5432/billing
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=oficina
+      - RABBITMQ_PASSWORD=oficina
+      - OS_SERVICE_URL=http://os-service:8080
+      - STORAGE_TYPE=local
+      - OFICINA_OUTBOX_INTERVALO=1s
+      - NEW_RELIC_AGENT_ENABLED=false
+    depends_on:
+      billing-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  execution-service:
+    build:
+      context: ../../oficina-execution-service
+      dockerfile: src/main/docker/Dockerfile.jvm
+    environment:
+      - MONGODB_URL=mongodb://execution-db:27017
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=oficina
+      - RABBITMQ_PASSWORD=oficina
+      - OFICINA_OUTBOX_INTERVALO=1s
+      - NEW_RELIC_AGENT_ENABLED=false
+    depends_on:
+      execution-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Entrada única, como o API Gateway (Traefik) em produção: cada prefixo vai
+  # para o serviço dono da rota.
+  gateway:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./gateway.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - os-service
+      - billing-service
+      - execution-service
