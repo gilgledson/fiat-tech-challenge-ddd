@@ -140,15 +140,10 @@ jobs:
           --from-literal=new-relic-license-key="$NEW_RELIC_LICENSE_KEY" \
           --dry-run=client -o yaml > k8s/app/secret.yaml
 
-    - name: 8. Deploy do API Gateway (Traefik) no Kubernetes (AKS)
-      uses: Azure/k8s-deploy@c8cfec839dc09896b3b8cc40cd13d04792680771 # v5
-      with:
-        manifests: |
-          k8s/gateway/namespace.yaml
-          k8s/gateway/rbac.yaml
-          k8s/gateway/ingressclass.yaml
-          k8s/gateway/deployment.yaml
-          k8s/gateway/service.yaml
+    # O API Gateway (Traefik), com o HTTPS e o certificado do Let's Encrypt,
+    # é aplicado pelo repositório de infraestrutura
+    # (fiat-tech-challenge-infra-kubernetes). Este pipeline só aplica o
+    # Ingress do OS Service, no passo seguinte.
 
     # O RabbitMQ compartilhado pelos três microsserviços é aplicado pelo
     # repositório de infraestrutura (fiat-tech-challenge-infra-kubernetes),
