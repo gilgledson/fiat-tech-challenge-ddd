@@ -150,12 +150,9 @@ jobs:
           k8s/gateway/deployment.yaml
           k8s/gateway/service.yaml
 
-    # Broker compartilhado pelos três microsserviços. Usa as credenciais do
-    # Secret oficina-db-app, aplicado no passo seguinte junto com a aplicação.
-    - name: 8.5. Deploy do RabbitMQ (mensageria da Saga) no Kubernetes (AKS)
-      run: |
-        kubectl apply -f k8s/app/secret.yaml
-        kubectl apply -f k8s/messaging/rabbitmq.yaml
+    # O RabbitMQ compartilhado pelos três microsserviços é aplicado pelo
+    # repositório de infraestrutura (fiat-tech-challenge-infra-kubernetes),
+    # não por este pipeline.
 
     - name: 9. Deploy no Kubernetes (AKS)
       uses: Azure/k8s-deploy@c8cfec839dc09896b3b8cc40cd13d04792680771 # v5
