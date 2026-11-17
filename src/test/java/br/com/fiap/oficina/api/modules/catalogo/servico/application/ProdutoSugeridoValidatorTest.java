@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -34,8 +35,8 @@ class ProdutoSugeridoValidatorTest {
     @Test
     @DisplayName("Deve validar lista vazia ou nula com sucesso")
     void deveValidarListaVazia() {
-        validator.validar(null);
-        validator.validar(List.of());
+        assertDoesNotThrow(() -> validator.validar(null));
+        assertDoesNotThrow(() -> validator.validar(List.of()));
     }
 
     @Test
@@ -47,7 +48,7 @@ class ProdutoSugeridoValidatorTest {
         when(mockProduto.getDeletadoEm()).thenReturn(Optional.empty());
         when(produtoRepository.buscarPorIds(anyList())).thenReturn(List.of(mockProduto));
 
-        validator.validar(List.of(new ProdutoSugerido(id, BigDecimal.ONE)));
+        assertDoesNotThrow(() -> validator.validar(List.of(new ProdutoSugerido(id, BigDecimal.ONE))));
     }
 
     @Test

@@ -8,12 +8,16 @@ on:
   pull_request:
     branches: [ "main" ]
     
+# Por padrão os jobs só leem o repositório; quem precisa de mais declara no job.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+
 jobs:
   test-and-coverage:
     runs-on: ubuntu-latest
+    # Escrita só neste job, que tenta enviar o badge de cobertura.
+    permissions:
+      contents: write
     env:
       # No nível do job para poder ser usado no "if" da etapa do SonarCloud
       # (o contexto "secrets" não é aceito em condições).

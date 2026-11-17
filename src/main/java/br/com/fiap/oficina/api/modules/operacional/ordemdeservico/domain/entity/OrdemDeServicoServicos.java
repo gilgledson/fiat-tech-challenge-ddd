@@ -3,6 +3,7 @@ package br.com.fiap.oficina.api.modules.operacional.ordemdeservico.domain.entity
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.Duration;
+import java.time.ZoneId;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import br.com.fiap.oficina.api.modules.catalogo.servico.domain.entity.TipoServico;
@@ -13,6 +14,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OrdemDeServicoServicos {
+    private static final ZoneId FUSO = ZoneId.of("America/Sao_Paulo");
+
     private UUID id;
     private UUID ordemDeServicoId;
     private UUID servicoId;
@@ -79,7 +82,9 @@ public class OrdemDeServicoServicos {
         if (dataInicioExecucao == null || dataFimExecucao == null) {
             return null;
         }
-        Duration duration = Duration.between(dataInicioExecucao, dataFimExecucao);
+        // Com fuso, para a duração não sair errada se o intervalo cruzar uma
+        // mudança de horário.
+        Duration duration = Duration.between(dataInicioExecucao.atZone(FUSO), dataFimExecucao.atZone(FUSO));
         long hours = duration.toHours();
         long minutes = duration.toMinutesPart();
         return String.format("%02dh %02dm", hours, minutes);
