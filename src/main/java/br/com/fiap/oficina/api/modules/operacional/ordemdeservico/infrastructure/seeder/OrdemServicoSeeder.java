@@ -21,6 +21,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrdemServicoSeeder implements Seeder {
 
+    /** Um gerador só, reaproveitado: criar um a cada execução empobrece a aleatoriedade. */
+    private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
+
     @ConfigProperty(name = "quarkus.profile")
     private String ambiente;
 
@@ -55,7 +58,7 @@ public class OrdemServicoSeeder implements Seeder {
                 return;
             }
 
-            java.security.SecureRandom random = new java.security.SecureRandom();
+            java.security.SecureRandom random = RANDOM;
             
             // Gera 50 ordens de serviço distribuídas nos últimos 90 dias
             for (int i = 0; i < 50; i++) {

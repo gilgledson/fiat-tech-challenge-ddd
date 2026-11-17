@@ -12,13 +12,21 @@ import java.util.UUID;
 public class PanacheUsuarioRepositoryImpl implements UsuarioRepository, PanacheRepositoryBase<UsuarioJpaEntity, UUID> {
     @Override
     public void salvar(Usuario usuario) {
-        UsuarioJpaEntity usuarioJpa = new UsuarioJpaEntity();
-        usuarioJpa.setId(usuario.getId());
+        // Atualiza a entidade gerenciada, se o usuário já existe, ou persiste
+        // uma nova. Evita o merge(), cuja instância devolvida era descartada.
+        UsuarioJpaEntity usuarioJpa = findByIdOptional(usuario.getId()).orElse(null);
+        boolean novo = usuarioJpa == null;
+        if (novo) {
+            usuarioJpa = new UsuarioJpaEntity();
+            usuarioJpa.setId(usuario.getId());
+        }
         usuarioJpa.setAtivo(usuario.isAtivo());
         usuarioJpa.setEmail(usuario.getEmail());
         usuarioJpa.setSenhaHash(usuario.getSenhaHash());
         usuarioJpa.setPerfil(usuario.getPerfil());
-        getEntityManager().merge(usuarioJpa);
+        if (novo) {
+            persist(usuarioJpa);
+        }
     }
 
     @Override
